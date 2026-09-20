@@ -1,5 +1,11 @@
 # Data
 
-This directory contains data documentation and inspection notebooks for Topic 22.
+Primary dataset: MovieLens-1M
 
-Large raw and processed datasets should remain outside Git. Record each dataset's source, version, license, retrieval date, and preprocessing steps before using it in experiments.
+Raw data storage:
+
+Team Google Drive / 04_Data / 02_Raw_Data / MovieLens-1M
+
+Raw datasets are not committed to GitHub.
+
+Scripts and notebooks required to inspect and preprocess the data are version-controlled in this repository.
