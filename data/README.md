@@ -6,6 +6,4 @@ Raw data storage:
 
 Team Google Drive / 04_Data / 02_Raw_Data / MovieLens-1M
 
-Raw datasets are not committed to GitHub.
-
-Scripts and notebooks required to inspect and preprocess the data are version-controlled in this repository.
+Raw datasets and inspection outputs are stored in the team Google Drive. Code required to reproduce the inspection is version-controlled in this repository.
