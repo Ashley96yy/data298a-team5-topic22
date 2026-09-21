@@ -1,1 +1,4 @@
-# Project dependencies will be added after the Topic 22 environment is finalized.
+# Python 3.11.13 (pinned in .python-version)
+numpy==2.2.6
+pandas==2.3.2
+torch==2.8.0
