@@ -25,3 +25,8 @@ results/*
 .DS_Store
 .idea/
 .vscode/
+
+# Keep only the Issue 1 verification report.
+!results/issue1_smoke/
+results/issue1_smoke/*
+!results/issue1_smoke/integration_report.json

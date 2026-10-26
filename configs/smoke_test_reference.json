@@ -1,0 +1,25 @@
+{
+  "source_url": "https://drive.google.com/file/d/1mTR98uA0EU-9E8f2MkTYj0_xLjp9C7Bn/view",
+  "sha256": "3b2aaa5c856f4e006b27c5d6549c351a1e7f550bef9a348e6e18eaf9db23f58c",
+  "purpose": "Existing teammate smoke-test settings; not approved full-training defaults",
+  "model": "TinySASRec",
+  "hidden_size": 64,
+  "dropout": 0.1,
+  "num_heads": 4,
+  "num_layers": 2,
+  "batch_size": 128,
+  "epochs": 2,
+  "learning_rate": 0.001,
+  "weight_decay": 1e-05,
+  "optimizer": "AdamW",
+  "seed": 42,
+  "train_example_limit": 4096,
+  "validation_user_limit": 128,
+  "sampled_validation": true,
+  "early_stopping_patience": null,
+  "saved_training_losses": [
+    29.7737,
+    23.2916
+  ],
+  "execution_note": "Outputs inspected from Drive notebook, not rerun locally"
+}
