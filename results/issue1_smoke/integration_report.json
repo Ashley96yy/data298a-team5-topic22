@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "purpose": "integration_smoke_test_not_final_baseline",
+  "settings": {
+    "hidden_size": 64,
+    "dropout": 0.2,
+    "learning_rate": 0.001,
+    "num_heads": 4,
+    "num_layers": 2,
+    "weight_decay": 1e-05,
+    "seed": 42,
+    "epochs": 2,
+    "batch_size": 16,
+    "device": "cpu"
+  },
+  "train_users": 256,
+  "validation_users": 128,
+  "dataset_users": 56017,
+  "catalog_items": 25903,
+  "split": "val",
+  "protocol": "full",
+  "epoch_losses": [
+    34.61359099791841,
+    28.821975615515154
+  ],
+  "validation_metrics": {
+    "Recall@5": 0.0,
+    "HitRate@5": 0.0,
+    "NDCG@5": 0.0,
+    "Recall@10": 0.0,
+    "HitRate@10": 0.0,
+    "NDCG@10": 0.0,
+    "Recall@20": 0.0,
+    "HitRate@20": 0.0,
+    "NDCG@20": 0.0,
+    "MRR": 0.00030213636433648226,
+    "Coverage@5": 0.002200517314596765,
+    "Coverage@10": 0.003551712156893024,
+    "Coverage@20": 0.005443384936107787
+  },
+  "test_evaluated": false,
+  "seconds": 1.4086870420142077,
+  "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+  "verified_files": {
+    "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+    "rec_eval.py": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+    "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+    "eval/eval_protocol.json": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+    "eval/neg_val.npy": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+    "eval/neg_test.npy": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+    "eval/eval_cases.parquet": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+    "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+    "groups/user_groups.parquet": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584"
+  },
+  "versions": {
+    "python": "3.11.14",
+    "torch": "2.8.0",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2"
+  }
+}
