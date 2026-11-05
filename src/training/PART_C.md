@@ -1,7 +1,7 @@
 # Part C training loop
 
 This is the training component, not a new model or a grid-search runner. It
-connects Part B batches, the current provisional model adapter, Part D settings,
+connects Part B batches, the repository SASRec adapter, Part D settings,
 and the frozen shared evaluator. It does not select the final Model 0 design,
 fill unconfirmed settings, modify frozen data, or evaluate the test split.
 
@@ -42,7 +42,7 @@ deterministic-tie evaluator is only a test fixture; it does not replace
 checks that its validation score is reproduced. None of its metrics are research
 results or approved full-training defaults.
 
-## One provisional real-data run
+## One real-data run
 
 Before running, the team must fill the null settings in a separate approved copy
 of `configs/config.json`. Do not replace the data-preparation config in Drive.
@@ -56,7 +56,6 @@ After settings and implementation review, a development command is:
 python -B -m src.training.train --config configs/team_confirmed.json \
   --grid-index 0 --seed 42 --optimizer Adam --device cpu \
   --limit-train-users 256 --limit-val-users 128 \
-  --allow-unapproved-model --allow-legacy-tie-metrics \
   --output-dir results/part_c_development_seed42
 ```
 
@@ -66,16 +65,31 @@ Adam above is an explicit development choice, not an assumption that it has been
 approved over AdamW. The user limits are for connectivity only; omitted limits
 use all users. Use `--device cuda` only in a compatible GPU environment.
 
-Two explicit acknowledgments prevent accidental claims of final results:
+No manual model or tie-policy acknowledgment is required. Runs have the purpose
+`model0_single_config_training`; source hashes identify the model implementation
+used. This label describes the run and does not certify reproduction of the
+SASRec paper. Required training settings must still be supplied explicitly.
 
-1. The existing model is a TinySASRec adaptation, not a validated reproduction
-   of the SASRec paper. Team adoption of Model 0 is still pending.
-2. The frozen evaluator uses an unresolved average-rank tie policy. Agreement
-   between two copies of that evaluator is not proof of metric correctness.
-   Part C rejects NaN/Inf scores, ranks below 1, and metrics outside [0, 1], but
-   does NOT silently change this shared protocol. Real-data runs remain labelled
-   `provisional_development_not_final_baseline`. Resolve and version the shared
-   tie policy before final experiments, then update this guard with its owner.
+### Accepted frozen tie convention
+
+The team has chosen to retain the frozen `rec_eval.py` average-rank convention:
+`rank = 1 + number of higher scores + number of other equal scores / 2`, then
+compute Recall, NDCG and MRR using that rank. This is a documented convention,
+NOT the expectation of those metrics over random permutations of tied items.
+Record this distinction in Workbook 2 Section 4.4 and use the same frozen
+evaluator for all models and seeds.
+
+Both `--allow-legacy-tie-metrics` and `--allow-unapproved-model` have been removed.
+Older Part E/F commands must omit these options.
+New run metadata records the accepted `tie_policy` and sets
+`legacy_tie_policy_unresolved` to false. This records the team's choice, not an
+algorithmic correction or independent confirmation of reported tie-frequency
+measurements. The evaluator, its generator, and its manifest remain unchanged.
+
+NaN/Inf score checks, rank/metric bounds, validation-only selection and required
+configuration/data checks are unchanged. Existing run files are not relabelled; do not mix
+old and new run provenance across seeds. Finalize the training/model/evaluation
+versions before launching runs intended for a combined results table.
 
 The source manifest hashes are checked before importing `rec_eval.py`. Only use
 reviewed, trusted source files and manifests. This checks consistency with the

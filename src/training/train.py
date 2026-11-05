@@ -16,6 +16,13 @@ from src.training.integration_check import digest, load_verified_data
 from src.training.trainer import (TrainingSettings, fit, load_best,
                                   make_shared_validator, seed_everything)
 
+TIE_POLICY = {
+    'name': 'average_rank_then_metrics',
+    'status': 'team_accepted_frozen_convention',
+    'definition': 'rank = 1 + num_greater + num_equal_others / 2; metrics use that rank',
+    'limitation': 'Not the expected metrics over random orderings of tied items',
+}
+
 
 def resolve_config(path, grid_index, seed):
     """Accept either Part D's grid config or one dict from expand_grid()."""
@@ -118,8 +125,6 @@ def main():
     parser.add_argument('--lr-step-size', type=int)
     parser.add_argument('--lr-gamma', type=float)
     parser.add_argument('--synthetic-smoke', action='store_true')
-    parser.add_argument('--allow-unapproved-model', action='store_true')
-    parser.add_argument('--allow-legacy-tie-metrics', action='store_true')
     args = parser.parse_args()
     if args.synthetic_smoke:
         if args.resume:
@@ -128,12 +133,6 @@ def main():
         return
     try:
         config = resolve_config(args.config, args.grid_index, args.seed)
-        if not args.allow_unapproved_model:
-            raise ValueError('Model 0 adoption is pending; explicit --allow-unapproved-model '
-                             'is required for provisional development runs')
-        if not args.allow_legacy_tie_metrics:
-            raise ValueError('Shared evaluator tie handling needs review. For development only, '
-                             'explicitly acknowledge --allow-legacy-tie-metrics; not final results')
         if args.optimizer is None:
             raise ValueError('Choose --optimizer explicitly; Adam and AdamW are not interchangeable')
         if args.eval_batch_size < 1 or any(v is not None and v < 1 for v in
@@ -157,9 +156,10 @@ def main():
                                    sliding_window=False, pin_memory=args.device == 'cuda')
         validate = make_shared_validator(evaluator, data, device=args.device,
                                           batch_size=args.eval_batch_size, users=users)
-        metadata = {'purpose': 'provisional_development_not_final_baseline',
+        metadata = {'purpose': 'model0_single_config_training',
                     'selection_split': 'val', 'selection_metric': 'NDCG@10', 'sampled': False,
-                    'legacy_tie_policy_unresolved': True, 'test_evaluated': False,
+                    'legacy_tie_policy_unresolved': False, 'tie_policy': TIE_POLICY.copy(),
+                    'test_evaluated': False,
                     'model_hyperparameters': hyper,
                     'model_layers': training['num_layers'], 'model_heads': training['num_heads'],
                     'max_seq_len': data['max_seq_len'], 'batch_size': training['batch_size'],

@@ -19,7 +19,7 @@ from src.data.sequence_dataset import (build_eval_arrays, build_train_arrays,
                                        make_dataloaders)
 from src.models.sasrec import SASRec
 from src.training.config import expand_grid, load_config
-from src.training.train import resolve_config
+from src.training.train import TIE_POLICY, resolve_config
 from src.training.trainer import (TrainingSettings, checked_metrics, fit, load_best,
                                   make_shared_validator, seed_everything, train_epoch)
 
@@ -239,6 +239,15 @@ class TrainingTests(unittest.TestCase):
 
 
 class RunConfigTests(unittest.TestCase):
+    def test_manual_acknowledgments_are_removed(self):
+        run = subprocess.run([sys.executable, '-B', '-m', 'src.training.train', '--help'],
+                             cwd=ROOT, text=True, capture_output=True, timeout=30)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertNotIn('--allow-legacy-tie-metrics', run.stdout)
+        self.assertNotIn('--allow-unapproved-model', run.stdout)
+        self.assertEqual(TIE_POLICY['status'], 'team_accepted_frozen_convention')
+        self.assertIn('Not the expected metrics', TIE_POLICY['limitation'])
+
     def test_unconfirmed_team_config_cannot_run(self):
         with self.assertRaisesRegex(ValueError, 'Unconfirmed'):
             resolve_config(ROOT / 'configs/config.json', 0, 42)
@@ -302,21 +311,34 @@ class RunConfigTests(unittest.TestCase):
                                       weight_decay=0., early_stopping_patience=1, seeds=[42])
             config_path = root / 'fixture_config.json'
             config_path.write_text(json.dumps(config))
-            output = root / 'training_output'
-            run = subprocess.run([
+            command = [
                 sys.executable, '-B', '-m', 'src.training.train', '--config', str(config_path),
                 '--grid-index', '0', '--seed', '42', '--optimizer', 'Adam',
-                '--allow-unapproved-model', '--allow-legacy-tie-metrics',
-                '--output-dir', str(output),
-            ], cwd=ROOT, env={**os.environ, 'OMP_NUM_THREADS': '2', 'MKL_NUM_THREADS': '2'},
-                text=True, capture_output=True, timeout=60)
+            ]
+            environment = {**os.environ, 'OMP_NUM_THREADS': '2', 'MKL_NUM_THREADS': '2'}
+            # The complete training path runs without manual acknowledgment flags.
+            output = root / 'without_approval_flags'
+            run = subprocess.run(command + ['--output-dir', str(output)], cwd=ROOT,
+                                 env=environment, text=True, capture_output=True, timeout=60)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
             report = json.loads((output / 'summary.json').read_text())
             self.assertEqual(report['epochs_completed'], 1)
             self.assertFalse(report['test_evaluated'])
             self.assertEqual(len(report['metadata']['verified_files']), 9)
             self.assertEqual(report['metadata']['selection_split'], 'val')
-            self.assertTrue(report['metadata']['legacy_tie_policy_unresolved'])
+            self.assertFalse(report['metadata']['legacy_tie_policy_unresolved'])
+            self.assertEqual(report['metadata']['tie_policy'], TIE_POLICY)
+            self.assertEqual(report['metadata']['purpose'], 'model0_single_config_training')
+            # Removed options are rejected, rather than retained as hidden aliases.
+            for flag in ('--allow-unapproved-model', '--allow-legacy-tie-metrics'):
+                with self.subTest(removed_option=flag):
+                    blocked = root / flag.removeprefix('--')
+                    run = subprocess.run(command + [flag, '--output-dir', str(blocked)], cwd=ROOT,
+                                         env=environment, text=True, capture_output=True, timeout=60)
+                    self.assertEqual(run.returncode, 2)
+                    self.assertIn('unrecognized arguments: ' + flag, run.stderr)
+                    self.assertFalse(blocked.exists())
+            self.assertEqual((processed / 'rec_eval.py').read_text(), source)
 
 
 if __name__ == '__main__':
