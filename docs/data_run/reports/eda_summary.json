@@ -1,0 +1,60 @@
+{
+  "raw_stats": {
+    "users": 729576,
+    "items": 207649,
+    "interactions": 6624441,
+    "density_pct": 0.00437,
+    "mean_per_user": 9.08,
+    "median_per_user": 7.0,
+    "mean_per_item": 31.9,
+    "median_per_item": 12.0
+  },
+  "quality": {
+    "missing_values": {
+      "user_id": 0,
+      "parent_asin": 0,
+      "rating": 0,
+      "timestamp": 0
+    },
+    "exact_duplicate_rows": 0,
+    "repeat_user_item_pairs": 0,
+    "rows_sharing_timestamp_with_another_row_of_same_user": 147,
+    "ratings_outside_1_5": 0,
+    "timestamps_before_1996": 0,
+    "users_with_timestamp_ties_pct": 0.01
+  },
+  "metadata_coverage": {
+    "has_metadata_record": 1.0,
+    "has_title": 1.0,
+    "has_store_brand": 0.9351,
+    "has_description": 0.483,
+    "has_features": 0.826,
+    "has_categories": 1.0,
+    "has_price": 0.5823
+  },
+  "items_without_title_pct": 0.0,
+  "interactions_on_items_without_title_pct": 0.0,
+  "top20pct_items_interaction_share": 0.7108,
+  "time_span": [
+    "2000-12-20 01:09:42+00:00",
+    "2023-09-12 15:08:21.839000+00:00"
+  ],
+  "subset_choice": {
+    "kind": "category",
+    "value": "Skin Care",
+    "seed": 42,
+    "expected_after_kcore": {
+      "users": 56017,
+      "items": 25903,
+      "interactions": 501399
+    },
+    "mean_seq_len": 8.95,
+    "reason": "Sub-category within the user and item targets with the longest average sequence: a coherent catalog gives sharper item semantics for Model 1 while keeping enough users for Models 2 and 4.",
+    "targets": {
+      "min_users": 20000,
+      "max_users": 150000,
+      "min_items": 3000,
+      "max_items": 50000
+    }
+  }
+}

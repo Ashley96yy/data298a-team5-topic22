@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "every user has exactly one val and one test interaction": true,
+    "every user has >= 3 training interactions": true,
+    "chronology: max(train_ts) <= val_ts <= test_ts for all users": true,
+    "val item never in that user's training sequence": true,
+    "test item never in that user's training sequence or val": true,
+    "item ids within 1..N_ITEMS (0 reserved for padding)": true,
+    "train + val + test == all interactions": true,
+    "item popularity computed from training split only": true,
+    "sampled negatives never include a history item or a target": true,
+    "cold items absent from cold-variant training sequences": true,
+    "cold items absent from cold-variant validation targets": true,
+    "item groups use training counts only": true
+  },
+  "all_passed": true
+}

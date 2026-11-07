@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "users": 56017,
+  "items": 25903,
+  "interactions": 501399,
+  "checks": [
+    "columns",
+    "nulls",
+    "ratings",
+    "IDs",
+    "duplicates",
+    "chronology",
+    "sequence lengths",
+    "federated clients"
+  ]
+}
