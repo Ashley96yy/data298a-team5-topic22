@@ -117,6 +117,13 @@ def configuration_mismatches(training, metadata, expected):
              'early_stopping_patience': (training.get('patience'),
                                          settings['early_stopping_patience']),
              'max_seq_len': (metadata.get('max_seq_len'), expected['data']['max_seq_len'])}
+    # Older development configs did not declare these settings. Enforce them
+    # whenever the team configuration does, including explicit scheduler absence.
+    if 'optimizer' in settings:
+        pairs['optimizer'] = (training.get('optimizer'), settings['optimizer'])
+    if settings.get('scheduler') == 'none':
+        for name in ('lr_step_size', 'lr_gamma'):
+            pairs[name] = (training.get(name, '<missing>'), None)
     found = [f'{name}: run {run!r}, config {wanted!r}'
              for name, (run, wanted) in pairs.items() if run != wanted]
     if training.get('seed') not in settings['seeds']:

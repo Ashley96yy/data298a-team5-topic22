@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "scope": "full_grid_and_winner_repeats_validation_only",
+  "test_evaluated": false,
+  "model_hyperparameters": {
+    "hidden_size": 128,
+    "dropout": 0.5,
+    "learning_rate": 0.0005
+  },
+  "runs": [
+    {
+      "seed": 42,
+      "run_dir": "/content/drive/MyDrive/298A/part_d_grid_results/grid_full_20261107T200443Z_69f3bc0e/run_07_seed_42",
+      "best_epoch": 7,
+      "saved_validation_NDCG@10": 0.04558158609645662,
+      "recomputed_validation_NDCG@10": 0.04558158609645662,
+      "checkpoint_sha256": "54ca6cba54f956af7b6189c5c0b98cf30d55e6412f412f7b92b184d89cbd89e9"
+    },
+    {
+      "seed": 43,
+      "run_dir": "/content/drive/MyDrive/298A/part_d_grid_results/grid_full_20261107T200443Z_69f3bc0e/winner_repeats/seed_43",
+      "best_epoch": 9,
+      "saved_validation_NDCG@10": 0.045258997680611215,
+      "recomputed_validation_NDCG@10": 0.045258997680611215,
+      "checkpoint_sha256": "73cd025c83a1e4f43c4570b6afbbc8700f9f593379ec67e0205ae502b7cce794"
+    },
+    {
+      "seed": 44,
+      "run_dir": "/content/drive/MyDrive/298A/part_d_grid_results/grid_full_20261107T200443Z_69f3bc0e/winner_repeats/seed_44",
+      "best_epoch": 8,
+      "saved_validation_NDCG@10": 0.04537543727097575,
+      "recomputed_validation_NDCG@10": 0.04537543727097575,
+      "checkpoint_sha256": "f502f90470eb9a09b241bb2b924b92f335fd82b5c8215e73361ece695d61fddd"
+    }
+  ],
+  "validation_NDCG@10_mean": 0.045405340349347866,
+  "validation_NDCG@10_sample_std": 0.0001633599310770804,
+  "note": "Seed 42 selected the winner; this validation aggregate is not a final test estimate."
+}

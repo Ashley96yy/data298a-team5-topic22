@@ -64,7 +64,8 @@ def write_cold_files(directory, frame, cold_items, info):
 
 INFO = {'n_cold_items': 2, 'n_cold_test_cases': 1, 'n_users_losing_val_case': 1}
 FILLED = {'batch_size': 128, 'epochs': 200, 'num_layers': 2, 'num_heads': 1, 'weight_decay': 0.0,
-          'early_stopping_patience': 10, 'seeds': [42, 43, 44]}
+          'early_stopping_patience': 10, 'seeds': [42, 43, 44],
+          'optimizer': 'Adam', 'scheduler': 'none'}
 
 
 def team_config(directory, training=FILLED):
@@ -80,7 +81,8 @@ def recorded_run(expected, seed=42, **changes):
     """(training, metadata, summary) as Part C records them for a run of `expected`."""
     settings, hyper = expected['training'], expected['model_hyperparameters']
     training = {'epochs': settings['epochs'], 'patience': settings['early_stopping_patience'],
-                'optimizer': 'Adam', 'learning_rate': hyper['learning_rate'],
+                'optimizer': 'Adam', 'lr_step_size': None, 'lr_gamma': None,
+                'learning_rate': hyper['learning_rate'],
                 'weight_decay': settings['weight_decay'], 'seed': seed, 'device': 'cuda'}
     metadata = {'model_hyperparameters': dict(hyper), 'batch_size': settings['batch_size'],
                 'model_layers': settings['num_layers'], 'model_heads': settings['num_heads'],
@@ -210,7 +212,8 @@ class ConfigurationCheckTests(unittest.TestCase):
         self.assertEqual(configuration_mismatches(training, metadata, expected), [])
         changes = {'batch_size': 256, 'model_heads': 4, 'model_layers': 3, 'epochs': 50,
                    'patience': 3, 'weight_decay': 0.01, 'learning_rate': 0.0005,
-                   'max_seq_len': 100, 'seed': 7}
+                   'max_seq_len': 100, 'seed': 7, 'optimizer': 'AdamW',
+                   'lr_step_size': 5, 'lr_gamma': 0.5}
         for key, value in changes.items():
             run = recorded_run(expected, **{key: value})
             found = configuration_mismatches(run[0], run[1], expected)
@@ -218,6 +221,41 @@ class ConfigurationCheckTests(unittest.TestCase):
         other = recorded_run(expected, model_hyperparameters={
             'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.001})
         self.assertIn('model_hyperparameters', configuration_mismatches(*other[:2], expected)[0])
+
+    def test_missing_optimizer_and_scheduler_records_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            expected = expected_configuration(team_config(directory), 0)
+        for key in ('optimizer', 'lr_step_size', 'lr_gamma'):
+            with self.subTest(key=key):
+                training, metadata, _ = recorded_run(expected)
+                del training[key]
+                self.assertTrue(any(key in x for x in
+                                    configuration_mismatches(training, metadata, expected)))
+
+    @unittest.skipUnless(HAS_TORCH, 'PyTorch is not installed')
+    def test_shared_handoff_rejects_identical_off_policy_runs(self):
+        from src.evaluation.multi_seed import check_runs
+        with tempfile.TemporaryDirectory() as directory:
+            expected = expected_configuration(team_config(directory), 0)
+            for changes in ({}, {'optimizer': 'AdamW'}, {'lr_step_size': 5},
+                            {'lr_gamma': 0.5}, {'lr_step_size': 5, 'lr_gamma': 0.5}):
+                with self.subTest(changes=changes):
+                    paths = []
+                    for seed in (42, 43, 44):
+                        training, metadata, summary = recorded_run(expected, seed, **changes)
+                        metadata.update(manifest_sha256='manifest', validation_users=10)
+                        path = Path(directory) / str(seed)
+                        path.mkdir(exist_ok=True)
+                        (path / 'run_config.json').write_text(json.dumps(
+                            {'training': training, 'metadata': metadata}))
+                        (path / 'summary.json').write_text(json.dumps(summary))
+                        paths.append(path)
+                    args = (paths, {'n_users': 10}, {'f': 'h'}, 'manifest', False, expected)
+                    if changes:
+                        with self.assertRaisesRegex(ValueError, 'team configuration'):
+                            check_runs(*args)
+                    else:
+                        self.assertEqual(len(check_runs(*args)), 3)
 
     def test_partial_reasons_cover_training_and_validation(self):
         self.assertEqual(partial_reasons({'train_users': 10, 'validation_users': 8}, 10, 8), [])
