@@ -1,0 +1,5 @@
+stage,users,items,interactions,density_%,avg_seq_len,median_seq_len,max_seq_len,avg_item_pop,median_item_pop,mean_rating,start,end
+raw 5-core (official),729576,207649,6624441,0.0044,9.08,7.0,2351,31.9,12.0,4.234,2000-12-20,2023-09-12
+after cleaning,729576,207640,6624230,0.0044,9.08,7.0,2351,31.9,12.0,4.234,2000-12-20,2023-09-12
+subset: Skin Care,489260,45322,1428191,0.0064,2.92,2.0,925,31.51,12.0,4.322,2002-06-12,2023-09-12
+"final (5-core, re-indexed)",56017,25903,501399,0.0346,8.95,6.0,911,19.36,11.0,4.323,2002-06-12,2023-09-11

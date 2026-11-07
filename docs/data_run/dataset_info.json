@@ -1,0 +1,33 @@
+{
+  "dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+  "n_users": 56017,
+  "n_items": 25903,
+  "n_interactions": 501399,
+  "padding_idx": 0,
+  "item_idx_range": [
+    1,
+    25903
+  ],
+  "max_seq_len": 50,
+  "kcore": 5,
+  "split": "chronological leave-one-out (last = test, second-last = val)",
+  "subset": {
+    "kind": "category",
+    "value": "Skin Care",
+    "seed": 42,
+    "expected_after_kcore": {
+      "users": 56017,
+      "items": 25903,
+      "interactions": 501399
+    },
+    "mean_seq_len": 8.95,
+    "reason": "Sub-category within the user and item targets with the longest average sequence: a coherent catalog gives sharper item semantics for Model 1 while keeping enough users for Models 2 and 4.",
+    "targets": {
+      "min_users": 20000,
+      "max_users": 150000,
+      "min_items": 3000,
+      "max_items": 50000
+    }
+  },
+  "seed": 42
+}

@@ -1,0 +1,26 @@
+{
+  "items": 25903,
+  "empty_item_text": 0,
+  "very_short_item_text_lt_8_words": 0,
+  "items_sharing_identical_text": 236,
+  "item_text_words": {
+    "count": 25903.0,
+    "mean": 131.7,
+    "std": 64.0,
+    "min": 11.0,
+    "50%": 128.0,
+    "90%": 238.0,
+    "max": 257.0
+  },
+  "item_text_with_reviews_words": {
+    "count": 25903.0,
+    "mean": 279.8,
+    "std": 76.4,
+    "min": 18.0,
+    "50%": 285.0,
+    "90%": 387.0,
+    "max": 444.0
+  },
+  "items_with_review_snippets_pct": 99.76,
+  "review_text_from_train_only": true
+}
