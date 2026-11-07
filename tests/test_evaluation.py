@@ -177,8 +177,13 @@ class ColdVariantTests(unittest.TestCase):
 
 class ConfigurationCheckTests(unittest.TestCase):
     def test_empty_settings_and_missing_grid_index_are_refused(self):
-        with self.assertRaises(ValueError):
-            expected_configuration(ROOT / 'configs/config.json', 0)  # repo template: nulls
+        with tempfile.TemporaryDirectory() as incomplete_dir:
+            incomplete = json.loads((ROOT / 'configs/config.json').read_text())
+            incomplete['training']['epochs'] = None
+            path = Path(incomplete_dir) / 'incomplete.json'
+            path.write_text(json.dumps(incomplete))
+            with self.assertRaises(ValueError):
+                expected_configuration(path, 0)
         with tempfile.TemporaryDirectory() as directory:
             path = team_config(directory)
             with self.assertRaises(ValueError):
