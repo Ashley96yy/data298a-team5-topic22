@@ -19,6 +19,11 @@ class SASRec(nn.Module):
                     dropout=dropout, activation='gelu', batch_first=True)
         self.encoder = nn.TransformerEncoder(layer, num_layers, enable_nested_tensor=False)
         self.norm = nn.LayerNorm(hidden_size)
+        # Small initial embeddings: with tied output weights, N(0,1) starts the loss far above chance.
+        for embedding in (self.item_embedding, self.position_embedding):
+            nn.init.normal_(embedding.weight, mean=0.0, std=0.02)
+        with torch.no_grad():
+            self.item_embedding.weight[0].zero_()
 
     def hidden(self, tokens):
         batch, length = tokens.shape
