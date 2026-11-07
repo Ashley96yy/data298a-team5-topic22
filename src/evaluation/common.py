@@ -12,6 +12,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.training.config import GRID, expand_grid, validate_config
+
 # Same nine files as integration_check.REQUIRED, plus what Parts E and F read.
 EVALUATOR_FILES = ['dataset_info.json', 'rec_eval.py', 'sequences.parquet',
                    'eval/eval_protocol.json', 'eval/neg_val.npy', 'eval/neg_test.npy',
@@ -77,6 +79,59 @@ def load_run(run_dir):
         raise ValueError(f'{run_dir} did not complete')
     run_config = json.loads((run_dir / 'run_config.json').read_text())
     return run_config['training'], run_config['metadata'], summary
+
+
+def expected_configuration(config_path, grid_index=None):
+    """The team-confirmed settings every final run must have used.
+
+    Mirrors src.training.train.resolve_config, which cannot be imported without PyTorch:
+    a grid config needs --grid-index, an expanded config (one dict from expand_grid) does not.
+    Empty (null) settings are rejected.
+    """
+    config = json.loads(Path(config_path).read_text())
+    if 'search' in config:
+        validate_config(config, require_ready=True)
+        runs = expand_grid(config)
+        if grid_index is None or not 0 <= grid_index < len(runs):
+            raise ValueError(f'Select the configuration with --grid-index 0..{len(runs) - 1}')
+        return runs[grid_index]
+    if grid_index is not None:
+        raise ValueError('An expanded configuration does not take --grid-index')
+    validate_config({**config, 'search': GRID}, require_ready=True)
+    parameters = config.get('model_hyperparameters', {})
+    if set(parameters) != set(GRID) or any(parameters[k] not in GRID[k] for k in GRID):
+        raise ValueError('Invalid expanded model_hyperparameters')
+    return config
+
+
+def configuration_mismatches(training, metadata, expected):
+    """Every difference between one run's recorded settings and the expected configuration."""
+    settings, hyper = expected['training'], expected['model_hyperparameters']
+    pairs = {'model_hyperparameters': (metadata.get('model_hyperparameters'), hyper),
+             'learning_rate': (training.get('learning_rate'), hyper['learning_rate']),
+             'batch_size': (metadata.get('batch_size'), settings['batch_size']),
+             'epochs': (training.get('epochs'), settings['epochs']),
+             'num_layers': (metadata.get('model_layers'), settings['num_layers']),
+             'num_heads': (metadata.get('model_heads'), settings['num_heads']),
+             'weight_decay': (training.get('weight_decay'), settings['weight_decay']),
+             'early_stopping_patience': (training.get('patience'),
+                                         settings['early_stopping_patience']),
+             'max_seq_len': (metadata.get('max_seq_len'), expected['data']['max_seq_len'])}
+    found = [f'{name}: run {run!r}, config {wanted!r}'
+             for name, (run, wanted) in pairs.items() if run != wanted]
+    if training.get('seed') not in settings['seeds']:
+        found.append(f"seed {training.get('seed')!r} is not in the config seeds {settings['seeds']}")
+    return found
+
+
+def partial_reasons(metadata, n_train_users, n_validation_users):
+    """Why a run counts as partial: trained or validated on fewer users than the full split."""
+    reasons = []
+    if metadata['train_users'] != n_train_users:
+        reasons.append(f"trained on {metadata['train_users']:,} of {n_train_users:,} users")
+    if metadata['validation_users'] != n_validation_users:
+        reasons.append(f"validated on {metadata['validation_users']:,} of {n_validation_users:,} users")
+    return reasons
 
 
 def write_new(path, text):

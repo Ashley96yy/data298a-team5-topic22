@@ -15,8 +15,10 @@ import json
 from pathlib import Path
 
 from src.evaluation import cold_start_data as cold
-from src.evaluation.common import (CATEGORY_FILE, COLD_FILES, digest, item_categories, json_ready,
-                                   load_evaluator, load_run, verify_files, write_new)
+from src.evaluation.common import (CATEGORY_FILE, COLD_FILES, configuration_mismatches, digest,
+                                   expected_configuration, item_categories, json_ready,
+                                   load_evaluator, load_run, partial_reasons, verify_files,
+                                   write_new)
 from src.evaluation.seed_stats import aggregate_metrics, markdown_table, single_run
 
 TABLE = ['Recall@10', 'NDCG@10', 'MRR', 'median_rank', 'mean_relative_rank']
@@ -87,16 +89,32 @@ def train_variant(args):
     from src.training.train import code_provenance
     from src.training.trainer import TrainingSettings, fit, make_shared_validator, seed_everything
 
+    limits = [flag for flag, value in (('--limit-train-users', args.limit_train_users),
+                                       ('--limit-val-users', args.limit_val_users)) if value]
+    if limits and not args.allow_partial_runs:
+        raise ValueError(f'{", ".join(limits)} trains or validates on a user subset; '
+                         'add --allow-partial-runs for development runs')
     training, reference, _ = load_run(args.reference_run)
     if reference.get('variant') == 'cold_start':
         raise ValueError('--reference-run must be a main-split Model 0 run')
     seed = reference_seed = training['seed']
     if args.seed is not None:
         seed = args.seed
+    # The cold model copies the reference run's settings, so the reference must be the
+    # team configuration, and the new seed must be one of its seeds.
+    mismatches = configuration_mismatches({**training, 'seed': seed}, reference,
+                                          expected_configuration(args.config, args.grid_index))
+    if mismatches:
+        raise ValueError('Reference run or seed does not match the team configuration: '
+                         + '; '.join(mismatches))
     settings = TrainingSettings(**{**training, 'seed': seed, 'device': args.device})
     config = load_config(args.config)
     processed = Path(config['data']['processed_dir'])
     evaluator, data, hashes = load_verified_data(processed, config)
+    partial = partial_reasons(reference, data['n_users'], data['n_users'])
+    if partial and not args.allow_partial_runs:
+        raise ValueError(f'Reference run is partial ({"; ".join(partial)}); '
+                         'only --allow-partial-runs accepts it')
     if (reference['manifest_sha256'] != digest(processed / 'manifest.json')
             or reference['verified_files'] != hashes):
         raise ValueError('Reference run was trained on different frozen data')
@@ -120,6 +138,7 @@ def train_variant(args):
                                               'sliding_window', 'manifest_sha256', 'verified_files')},
                 'purpose': 'cold_start_variant_' + reference['purpose'], 'variant': 'cold_start',
                 'legacy_tie_policy_unresolved': reference.get('legacy_tie_policy_unresolved'),
+                'tie_policy': reference.get('tie_policy'),
                 'reference_run': str(args.reference_run), 'reference_seed': reference_seed,
                 'reference_run_config_sha256': digest(Path(args.reference_run) / 'run_config.json'),
                 'cold_files': cold_hashes, 'test_evaluated': False,
@@ -177,6 +196,29 @@ def evaluate_variant(run_dir, run, evaluator, data, variant, item_cat, device):
     return record
 
 
+def check_cold_runs(run_dirs, runs, hashes, cold_hashes, n_train_users, n_validation_users,
+                    allow_partial, expected):
+    """Refuse cold-variant runs that are partial, off-config, or on different frozen data."""
+    seeds = [training['seed'] for training, _, _ in runs]
+    if len(set(seeds)) != len(seeds):
+        raise ValueError(f'Duplicate seeds: {seeds}')
+    for run_dir, (training, metadata, _) in zip(run_dirs, runs):
+        if metadata.get('variant') != 'cold_start':
+            raise ValueError(f'{run_dir} is not a cold-variant run (use `train` first)')
+        if metadata['verified_files'] != hashes or metadata['cold_files'] != {
+                k: cold_hashes[k] for k in COLD_FILES}:
+            raise ValueError(f'{run_dir} was trained on different frozen data')
+        partial = partial_reasons(metadata, n_train_users, n_validation_users)
+        if partial and not allow_partial:
+            raise ValueError(f'{run_dir} is partial ({"; ".join(partial)}); '
+                             'only --allow-partial-runs accepts it')
+        mismatches = configuration_mismatches(training, metadata, expected)
+        if mismatches:
+            raise ValueError(f'{run_dir} does not match the team configuration: '
+                             + '; '.join(mismatches))
+    return seeds
+
+
 def run_evaluate(args):
     from src.training.config import load_config
     from src.training.integration_check import load_verified_data
@@ -187,19 +229,12 @@ def run_evaluate(args):
     cold_hashes = verify_files(processed, [*COLD_FILES, CATEGORY_FILE])
     if Path(args.output_dir).exists():
         raise FileExistsError('Output directory exists; choose a new one')
-    runs = [load_run(d) for d in args.run_dirs]
-    seeds = [training['seed'] for training, _, _ in runs]
-    if len(set(seeds)) != len(seeds):
-        raise ValueError(f'Duplicate seeds: {seeds}')
-    for run_dir, (_, metadata, _) in zip(args.run_dirs, runs):
-        if metadata.get('variant') != 'cold_start':
-            raise ValueError(f'{run_dir} is not a cold-variant run (use `train` first)')
-        if metadata['verified_files'] != hashes or metadata['cold_files'] != {
-                k: cold_hashes[k] for k in COLD_FILES}:
-            raise ValueError(f'{run_dir} was trained on different frozen data')
-        if metadata['train_users'] != data['n_users'] and not args.allow_partial_runs:
-            raise ValueError(f'{run_dir} used a user limit; only --allow-partial-runs accepts it')
+    expected = expected_configuration(args.config, args.grid_index)
     variant = cold.load_cold_variant(processed, data)
+    runs = [load_run(d) for d in args.run_dirs]
+    seeds = check_cold_runs(args.run_dirs, runs, hashes, cold_hashes, data['n_users'],
+                            len(cold.validation_users(variant['frame'])),
+                            args.allow_partial_runs, expected)
     item_cat = item_categories(processed, data)
     records = [evaluate_variant(d, run, evaluator, data, variant, item_cat, args.device)
                for d, run in zip(args.run_dirs, runs)]
@@ -233,18 +268,25 @@ def main():
     train.add_argument('--reference-run', required=True,
                        help='Main-split run directory whose settings are reused unchanged')
     train.add_argument('--seed', type=int, help='Defaults to the reference run seed')
-    train.add_argument('--config', default='configs/config.json')
+    train.add_argument('--config', default='configs/config.json',
+                       help='Team configuration the reference run must match')
+    train.add_argument('--grid-index', type=int, help='Selected grid configuration (grid configs)')
     train.add_argument('--output-dir', required=True)
     train.add_argument('--device', choices=['cpu', 'cuda', 'mps'], default='cpu')
     train.add_argument('--limit-train-users', type=int, help='Development only')
     train.add_argument('--limit-val-users', type=int, help='Development only')
+    train.add_argument('--allow-partial-runs', action='store_true',
+                       help='Allow user limits and a partial reference run (development only)')
     score = commands.add_parser('evaluate', help='Score cold and warm cases, aggregate seeds')
     score.add_argument('--run-dirs', nargs='+', required=True)
-    score.add_argument('--config', default='configs/config.json')
+    score.add_argument('--config', default='configs/config.json',
+                       help='Team configuration every run must match')
+    score.add_argument('--grid-index', type=int, help='Selected grid configuration (grid configs)')
     score.add_argument('--output-dir', required=True)
     score.add_argument('--label', default='Model 0 (SASRec)')
     score.add_argument('--device', choices=['cpu', 'cuda', 'mps'], default='cpu')
-    score.add_argument('--allow-partial-runs', action='store_true')
+    score.add_argument('--allow-partial-runs', action='store_true',
+                       help='Accept development runs trained or validated on a user subset')
     args = parser.parse_args()
     try:
         {'reference': run_reference, 'train': train_variant, 'evaluate': run_evaluate}[args.command](args)

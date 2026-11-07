@@ -13,6 +13,9 @@ import numpy as np
 import pandas as pd
 
 from src.evaluation import cold_start_data as cold
+from src.evaluation.cold_start import check_cold_runs
+from src.evaluation.common import (configuration_mismatches, expected_configuration,
+                                   partial_reasons)
 from src.evaluation.seed_stats import (aggregate_groups, aggregate_metrics, markdown_table,
                                        summarize)
 
@@ -60,6 +63,37 @@ def write_cold_files(directory, frame, cold_items, info):
 
 
 INFO = {'n_cold_items': 2, 'n_cold_test_cases': 1, 'n_users_losing_val_case': 1}
+FILLED = {'batch_size': 128, 'epochs': 200, 'num_layers': 2, 'num_heads': 1, 'weight_decay': 0.0,
+          'early_stopping_patience': 10, 'seeds': [42, 43, 44]}
+
+
+def team_config(directory, training=FILLED):
+    """The repo config with its training settings replaced, written to a temp file."""
+    config = json.loads((ROOT / 'configs/config.json').read_text())
+    config['training'] = dict(training)
+    path = Path(directory) / 'team_config.json'
+    path.write_text(json.dumps(config))
+    return path
+
+
+def recorded_run(expected, seed=42, **changes):
+    """(training, metadata, summary) as Part C records them for a run of `expected`."""
+    settings, hyper = expected['training'], expected['model_hyperparameters']
+    training = {'epochs': settings['epochs'], 'patience': settings['early_stopping_patience'],
+                'optimizer': 'Adam', 'learning_rate': hyper['learning_rate'],
+                'weight_decay': settings['weight_decay'], 'seed': seed, 'device': 'cuda'}
+    metadata = {'model_hyperparameters': dict(hyper), 'batch_size': settings['batch_size'],
+                'model_layers': settings['num_layers'], 'model_heads': settings['num_heads'],
+                'max_seq_len': expected['data']['max_seq_len'], 'train_users': 10,
+                'validation_users': 8, 'variant': 'cold_start', 'verified_files': {'f': 'h'},
+                'cold_files': {name: 'c' for name in COLD_NAMES}}
+    for key, value in changes.items():
+        (training if key in training else metadata)[key] = value
+    return training, metadata, {'status': 'PASS'}
+
+
+COLD_NAMES = ['cold_start/cold_items.npy', 'cold_start/cold_sequences.parquet',
+              'cold_start/cold_start_info.json']
 
 
 class SeedStatsTests(unittest.TestCase):
@@ -141,6 +175,86 @@ class ColdVariantTests(unittest.TestCase):
         self.assertEqual(scores[0, 3], 2)
 
 
+class ConfigurationCheckTests(unittest.TestCase):
+    def test_empty_settings_and_missing_grid_index_are_refused(self):
+        with self.assertRaises(ValueError):
+            expected_configuration(ROOT / 'configs/config.json', 0)  # repo template: nulls
+        with tempfile.TemporaryDirectory() as directory:
+            path = team_config(directory)
+            with self.assertRaises(ValueError):
+                expected_configuration(path)
+            with self.assertRaises(ValueError):
+                expected_configuration(path, 8)
+            expected = expected_configuration(path, 5)
+        self.assertEqual(expected['model_hyperparameters'],
+                         {'hidden_size': 128, 'dropout': 0.2, 'learning_rate': 0.0005})
+
+    def test_expanded_config_takes_no_grid_index(self):
+        with tempfile.TemporaryDirectory() as directory:
+            expanded = expected_configuration(team_config(directory), 0)
+            path = Path(directory) / 'expanded.json'
+            path.write_text(json.dumps(expanded))
+            self.assertEqual(expected_configuration(path), expanded)
+            with self.assertRaises(ValueError):
+                expected_configuration(path, 0)
+
+    def test_every_setting_and_the_seed_are_compared(self):
+        with tempfile.TemporaryDirectory() as directory:
+            expected = expected_configuration(team_config(directory), 0)
+        training, metadata, _ = recorded_run(expected)
+        self.assertEqual(configuration_mismatches(training, metadata, expected), [])
+        changes = {'batch_size': 256, 'model_heads': 4, 'model_layers': 3, 'epochs': 50,
+                   'patience': 3, 'weight_decay': 0.01, 'learning_rate': 0.0005,
+                   'max_seq_len': 100, 'seed': 7}
+        for key, value in changes.items():
+            run = recorded_run(expected, **{key: value})
+            found = configuration_mismatches(run[0], run[1], expected)
+            self.assertEqual(len(found), 1, key)
+        other = recorded_run(expected, model_hyperparameters={
+            'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.001})
+        self.assertIn('model_hyperparameters', configuration_mismatches(*other[:2], expected)[0])
+
+    def test_partial_reasons_cover_training_and_validation(self):
+        self.assertEqual(partial_reasons({'train_users': 10, 'validation_users': 8}, 10, 8), [])
+        reasons = partial_reasons({'train_users': 10, 'validation_users': 2}, 10, 8)
+        self.assertEqual(len(reasons), 1)
+        self.assertIn('validated on 2 of 8', reasons[0])
+        self.assertEqual(len(partial_reasons({'train_users': 3, 'validation_users': 2}, 10, 8)), 2)
+
+
+class ColdRunCheckTests(unittest.TestCase):
+    def setUp(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.expected = expected_configuration(team_config(directory), 0)
+        self.cold_hashes = {name: 'c' for name in COLD_NAMES}
+
+    def check(self, runs, allow_partial=False):
+        return check_cold_runs([f'run{i}' for i in range(len(runs))], runs, {'f': 'h'},
+                               self.cold_hashes, 10, 8, allow_partial, self.expected)
+
+    def test_full_runs_on_the_team_configuration_pass(self):
+        runs = [recorded_run(self.expected, seed) for seed in (42, 43)]
+        self.assertEqual(self.check(runs), [42, 43])
+
+    def test_partial_validation_needs_explicit_permission(self):
+        runs = [recorded_run(self.expected, validation_users=2)]
+        with self.assertRaisesRegex(ValueError, 'validated on 2 of 8'):
+            self.check(runs)
+        self.assertEqual(self.check(runs, allow_partial=True), [42])
+
+    def test_off_configuration_runs_are_refused_even_when_partial_is_allowed(self):
+        with self.assertRaisesRegex(ValueError, 'batch_size'):
+            self.check([recorded_run(self.expected, batch_size=64)], allow_partial=True)
+
+    def test_duplicate_seeds_main_runs_and_other_data_are_refused(self):
+        with self.assertRaises(ValueError):
+            self.check([recorded_run(self.expected), recorded_run(self.expected)])
+        with self.assertRaises(ValueError):
+            self.check([recorded_run(self.expected, variant=None)])
+        with self.assertRaises(ValueError):
+            self.check([recorded_run(self.expected, verified_files={'f': 'other'})])
+
+
 @unittest.skipUnless(REC_EVAL.exists(), 'frozen rec_eval.py not in data/processed')
 class ColdEvaluationTests(unittest.TestCase):
     def test_removed_items_masked_and_ranks_counted(self):
@@ -182,7 +296,7 @@ class MultiSeedTests(unittest.TestCase):
                                        seed=seed, pin_memory=False)
             metadata = {'purpose': 'unit_test', 'model_hyperparameters': {
                             'hidden_size': 8, 'dropout': 0.2, 'learning_rate': 0.001},
-                        'model_layers': 1, 'model_heads': 2, 'max_seq_len': 5,
+                        'model_layers': 1, 'model_heads': 2, 'max_seq_len': 5, 'batch_size': 2,
                         'eval_batch_size': 2, 'train_users': 4, 'validation_users': 4,
                         'manifest_sha256': 'm', 'verified_files': {'f': 'h'}, 'commit': str(seed)}
             torch.manual_seed(seed)
@@ -227,6 +341,37 @@ class MultiSeedTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             multi_seed.check_runs(self.runs[:1], {**self.data, 'n_users': 5}, {'f': 'h'}, 'm',
                                   allow_partial=False)
+
+    def test_partial_validation_is_refused_unless_allowed(self):
+        from src.evaluation import multi_seed
+
+        config = json.loads((self.runs[0] / 'run_config.json').read_text())
+        config['metadata']['validation_users'] = 2
+        (self.runs[0] / 'run_config.json').write_text(json.dumps(config))
+        with self.assertRaisesRegex(ValueError, 'validated on 2 of 4'):
+            multi_seed.check_runs(self.runs[:1], self.data, {'f': 'h'}, 'm', allow_partial=False)
+        multi_seed.check_runs(self.runs[:1], self.data, {'f': 'h'}, 'm', allow_partial=True)
+
+    def test_runs_must_match_the_team_configuration(self):
+        from src.evaluation import multi_seed
+
+        expected = {'data': {'max_seq_len': 5},
+                    'model_hyperparameters': {'hidden_size': 8, 'dropout': 0.2,
+                                              'learning_rate': 0.001},
+                    'training': {'batch_size': 2, 'epochs': 2, 'num_layers': 1, 'num_heads': 2,
+                                 'weight_decay': 0.0, 'early_stopping_patience': 5,
+                                 'seeds': [42, 43]}}
+        multi_seed.check_runs(self.runs, self.data, {'f': 'h'}, 'm', False, expected)
+        for change in ({'batch_size': 4}, {'seeds': [42]}):
+            off = {**expected, 'training': {**expected['training'], **change}}
+            with self.assertRaisesRegex(ValueError, 'team configuration'):
+                multi_seed.check_runs(self.runs, self.data, {'f': 'h'}, 'm', False, off)
+
+    def test_train_refuses_user_limits_without_permission(self):
+        from src.evaluation import multi_seed
+
+        with self.assertRaisesRegex(ValueError, 'allow-partial-runs'):
+            multi_seed.train_seeds(self.temp.name, [42], ['--limit-val-users', '100'])
 
 
 if __name__ == '__main__':

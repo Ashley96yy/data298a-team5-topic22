@@ -1,8 +1,9 @@
 """Part E: repeat ONE selected configuration over several seeds, then score test once per seed.
 
 `train` runs Part C (src.training.train) unchanged, one subprocess per seed.
-`evaluate` reloads each best.pt, checks it reproduces its own validation score,
-then calls the frozen rec_eval.py on test: full catalog (main protocol), 100
+`evaluate` first checks every run matches the team configuration and used all
+users. It then reloads each best.pt, checks it reproduces its own validation
+score, and calls the frozen rec_eval.py on test: full catalog (main protocol), 100
 sampled negatives (secondary), user/item group breakdown and category diversity.
 Each run's test result is written once next to its checkpoint; rerunning
 `evaluate` reuses it instead of scoring the test split again.
@@ -19,8 +20,9 @@ import numpy as np
 import pandas as pd
 import torch
 
-from src.evaluation.common import (CATEGORY_FILE, digest, item_categories, json_ready,
-                                   load_run, verify_files, write_new)
+from src.evaluation.common import (CATEGORY_FILE, configuration_mismatches, digest,
+                                   expected_configuration, item_categories, json_ready, load_run,
+                                   partial_reasons, verify_files, write_new)
 from src.evaluation.seed_stats import aggregate_groups, aggregate_metrics, markdown_table, mean_std
 from src.models.sasrec import SASRec
 from src.training.config import load_config
@@ -33,10 +35,14 @@ VALIDATION_TOLERANCE = 1e-4
 GROUP_METRICS = ['Recall@10', 'NDCG@10', 'MRR']
 
 
-def train_seeds(runs_dir, seeds, forwarded):
+def train_seeds(runs_dir, seeds, forwarded, allow_partial=False):
     """Call Part C once per seed. Completed seeds are skipped, failed ones are reported."""
     if any(flag in forwarded for flag in ('--seed', '--output-dir', '--resume')):
         raise ValueError('--seed, --output-dir and --resume are set per seed by this runner')
+    limits = [flag for flag in forwarded if flag.startswith('--limit-')]
+    if limits and not allow_partial:
+        raise ValueError(f'{", ".join(limits)} trains or validates on a user subset; '
+                         'add --allow-partial-runs for development runs')
     runs_dir = Path(runs_dir)
     for seed in seeds:
         output = runs_dir / f'seed_{seed}'
@@ -81,7 +87,11 @@ def comparable(training, metadata):
             {k: v for k, v in metadata.items() if k != 'commit'})
 
 
-def check_runs(run_dirs, data, hashes, manifest_sha256, allow_partial):
+def check_runs(run_dirs, data, hashes, manifest_sha256, allow_partial, expected=None):
+    """Refuse to aggregate runs that are not the same experiment on the full data.
+
+    expected: the team configuration (expected_configuration); every run must match it.
+    """
     runs = [load_run(d) for d in run_dirs]
     seeds = [training['seed'] for training, _, _ in runs]
     if len(set(seeds)) != len(seeds):
@@ -92,9 +102,15 @@ def check_runs(run_dirs, data, hashes, manifest_sha256, allow_partial):
             raise ValueError(f'{run_dir} differs from {run_dirs[0]} in more than seed/device')
         if metadata['manifest_sha256'] != manifest_sha256 or metadata['verified_files'] != hashes:
             raise ValueError(f'{run_dir} was trained on different frozen data')
-        full = metadata['train_users'] == data['n_users'] == metadata['validation_users']
-        if not (full or allow_partial):
-            raise ValueError(f'{run_dir} used a user limit; only --allow-partial-runs accepts it')
+        partial = partial_reasons(metadata, data['n_users'], data['n_users'])
+        if partial and not allow_partial:
+            raise ValueError(f'{run_dir} is partial ({"; ".join(partial)}); '
+                             'only --allow-partial-runs accepts it')
+        if expected is not None:
+            mismatches = configuration_mismatches(training, metadata, expected)
+            if mismatches:
+                raise ValueError(f'{run_dir} does not match the team configuration: '
+                                 + '; '.join(mismatches))
     return runs
 
 
@@ -132,6 +148,7 @@ def evaluate_run(run_dir, run, evaluator, data, item_cat, device, batch_size):
     record = {'seed': training['seed'], 'run_dir': str(run_dir), 'checkpoint_sha256': checkpoint_sha256,
               'best_epoch': summary['best_epoch'], 'purpose': metadata['purpose'],
               'legacy_tie_policy_unresolved': metadata.get('legacy_tie_policy_unresolved'),
+              'tie_policy': metadata.get('tie_policy'),
               'validation_check': {'saved_NDCG@10': summary['best_validation_NDCG@10'],
                                    'recomputed_NDCG@10': val['metrics']['NDCG@10'], 'gap': gap},
               'n_test_cases': test['n_cases'], 'test_full': full_metrics,
@@ -184,8 +201,9 @@ def evaluate(args):
     verify_files(processed, [CATEGORY_FILE])
     if Path(args.output_dir).exists():
         raise FileExistsError('Output directory exists; choose a new one')
+    expected = expected_configuration(args.config, args.grid_index)
     runs = check_runs(args.run_dirs, data, hashes, digest(processed / 'manifest.json'),
-                      args.allow_partial_runs)
+                      args.allow_partial_runs, expected)
     item_cat = item_categories(processed, data)
     records = [evaluate_run(d, run, evaluator, data, item_cat, args.device, args.eval_batch_size)
                for d, run in zip(args.run_dirs, runs)]
@@ -202,10 +220,14 @@ def main():
                                 'are forwarded to it unchanged')
     train.add_argument('--runs-dir', required=True, help='Each seed writes RUNS_DIR/seed_<seed>')
     train.add_argument('--seeds', type=int, nargs='+', required=True)
+    train.add_argument('--allow-partial-runs', action='store_true',
+                       help='Allow forwarded --limit-* flags (development runs only)')
     score = commands.add_parser('evaluate', allow_abbrev=False,
                                 help='Score each run on test once, then aggregate')
     score.add_argument('--run-dirs', nargs='+', required=True)
-    score.add_argument('--config', default='configs/config.json')
+    score.add_argument('--config', default='configs/config.json',
+                       help='Team configuration every run must match')
+    score.add_argument('--grid-index', type=int, help='Selected grid configuration (grid configs)')
     score.add_argument('--output-dir', required=True)
     score.add_argument('--label', default='Model 0 (SASRec)')
     score.add_argument('--device', choices=['cpu', 'cuda', 'mps'], default='cpu')
@@ -215,7 +237,7 @@ def main():
     args, forwarded = parser.parse_known_args()
     try:
         if args.command == 'train':
-            train_seeds(args.runs_dir, args.seeds, forwarded)
+            train_seeds(args.runs_dir, args.seeds, forwarded, args.allow_partial_runs)
         else:
             if forwarded:
                 parser.error(f'Unknown arguments: {forwarded}')

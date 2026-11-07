@@ -14,7 +14,8 @@ frozen data or edits `rec_eval.py`.
   (Model 0 on the cold variant) and `evaluate` (cold and warm cases, over seeds).
 - `cold_start_data.py`: loads and checks the notebook 05 cold variant. Pure NumPy/pandas.
 - `seed_stats.py`: mean and sample standard deviation (ddof=1) across seeds.
-- `common.py`: manifest checks, category labels, run loading, write-once files.
+- `common.py`: manifest checks, configuration and partial-run checks, category
+  labels, run loading, write-once files.
 - `tests/test_evaluation.py`: synthetic fixtures. Model tests need PyTorch and
   `data/processed/rec_eval.py`; without them they are skipped, not passed.
 
@@ -27,19 +28,21 @@ frozen data or edits `rec_eval.py`.
    ```sh
    python -B -m src.evaluation.multi_seed train --runs-dir results/model0_seeds \
      --seeds 42 43 44 --config configs/team_confirmed.json --grid-index <best> \
-     --optimizer <Adam|AdamW> --device cuda \
-     --allow-unapproved-model --allow-legacy-tie-metrics
+     --optimizer <Adam|AdamW> --device cuda
    ```
 
    Seeds with a `summary.json` are skipped. A folder without one (failed or
    interrupted) stops the runner; resume it with `src.training.train --resume`
    into a new folder and pass that folder to `evaluate`.
-   The seeds must be listed in the config's `training.seeds`.
+   The seeds must be listed in the config's `training.seeds`. Forwarded
+   `--limit-train-users` / `--limit-val-users` are refused unless
+   `--allow-partial-runs` is given (development only).
 
 3. Score test and aggregate:
 
    ```sh
    python -B -m src.evaluation.multi_seed evaluate --device cuda \
+     --config configs/team_confirmed.json --grid-index <best> \
      --run-dirs results/model0_seeds/seed_42 results/model0_seeds/seed_43 \
                 results/model0_seeds/seed_44 \
      --output-dir results/model0_test_3seeds
@@ -48,9 +51,17 @@ frozen data or edits `rec_eval.py`.
    An existing grid-search run can replace `seed_42` if it was trained by
    `src.training.train` with the same settings and source files.
 
-`evaluate` refuses runs that differ in anything except seed and device (Git
-commit excepted, source hashes still compared), runs on other frozen data, and
-runs trained or validated on a user subset (unless `--allow-partial-runs`).
+Before scoring test, `evaluate` refuses:
+
+- Configuration consistency: any run whose recorded settings differ from the team
+  config and selected grid configuration (hyperparameters, batch size, epochs,
+  layers, heads, weight decay, patience, sequence length), or whose seed is not
+  in the config's seeds. A config with empty settings is refused outright.
+  Runs must also match each other in everything except seed and device (Git
+  commit excepted, source hashes still compared).
+- Partial validation: any run trained or validated on fewer than all 56,017
+  users, unless `--allow-partial-runs` (development only; never for results).
+- Runs on other frozen data (manifest and file hashes).
 
 Each run folder gets `test_evaluation.json` and `test_ranks.npz` (per-user rank
 and top-20, for later significance tests and the failure study). They are
@@ -70,13 +81,20 @@ settings of a main run, without retuning.
 ```sh
 python -B -m src.evaluation.cold_start reference --output-dir results/cold_reference
 python -B -m src.evaluation.cold_start train --device cuda \
+  --config configs/team_confirmed.json --grid-index <best> \
   --reference-run results/model0_seeds/seed_42 --output-dir results/cold_model0_seed42
 python -B -m src.evaluation.cold_start evaluate --device cuda \
+  --config configs/team_confirmed.json --grid-index <best> \
   --run-dirs results/cold_model0_seed42 results/cold_model0_seed43 results/cold_model0_seed44 \
   --output-dir results/cold_start_3seeds
 ```
 
-Use `--seed 43` and `--seed 44` with `train` for the other seeds.
+Use `--seed 43` and `--seed 44` with `train` for the other seeds. `train` refuses
+a reference run that does not match the team configuration, a seed not in the
+config, a partial reference run, and `--limit-*` flags (the last two unless
+`--allow-partial-runs`). `evaluate` applies the same configuration check and
+refuses runs trained on fewer than all users or validated on fewer than the
+55,174 cold-variant validation users.
 
 - Cold cases: the 1,142 users whose test item is a new product. Warm cases:
   the other 54,875 users, scored by the same cold-variant model, as the control.
