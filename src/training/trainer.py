@@ -168,18 +168,35 @@ def make_shared_validator(evaluator, data, *, device='cpu', batch_size=128, user
     return validate
 
 
-def fit(model, train_loader, validate, settings, output_dir, *, metadata, resume_from=None):
+def fit(model, train_loader, validate, settings, output_dir, *, metadata, resume_from=None,
+        epoch_fn=None, selection_start_epoch=1):
     """Train one run. Resume is epoch-boundary, num_workers=0 only, into a NEW directory.
 
     Epoch budget may be extended on resume; other settings and metadata must match.
+    Optional epoch_fn(epoch, model, loader, optimizer, device, grad_clip_norm)
+    replaces train_epoch and returns (loss, n_targets); epoch is 1-based.
+    Validation is logged every epoch, but best-checkpoint selection and patience
+    start only at selection_start_epoch. No best.pt exists before that epoch.
+    Hook identity and selection start are saved as trainer_options. Put hook parameters,
+    source/data hashes (including frozen targets) in metadata for resume checks;
+    the callable/closure itself is not serialized and must be supplied on resume.
     Only load checkpoints produced by this project from a trusted location.
     """
+    if (type(selection_start_epoch) is not int
+            or not 1 <= selection_start_epoch <= settings.epochs):
+        raise ValueError('selection_start_epoch must be an integer in [1, epochs]')
+    if epoch_fn is not None and not callable(epoch_fn):
+        raise ValueError('epoch_fn must be callable or None')
     if train_loader.num_workers != 0:
         raise ValueError('Use num_workers=0 for reproducible epoch-boundary resume')
     output = Path(output_dir)
     if output.exists():
         raise FileExistsError('Run directory already exists; choose a new output directory')
     config = asdict(settings)
+    hook_name = (getattr(epoch_fn, '__module__', type(epoch_fn).__module__) + '.'
+                 + getattr(epoch_fn, '__qualname__', type(epoch_fn).__qualname__)
+                 if epoch_fn is not None else None)
+    trainer_options = {'selection_start_epoch': selection_start_epoch, 'epoch_fn': hook_name}
     # Require serializable provenance before creating any run artifacts.
     json.dumps(metadata, allow_nan=False)
     model.to(settings.device)
@@ -194,6 +211,11 @@ def fit(model, train_loader, validate, settings, output_dir, *, metadata, resume
         checkpoint = torch.load(resume_from, map_location=settings.device, weights_only=True)
         if checkpoint['schema_version'] != 1 or checkpoint['metadata'] != metadata:
             raise ValueError('Checkpoint provenance/model/data mismatch')
+        # Older schema-1 checkpoints use the default Model 0 training path.
+        saved_options = checkpoint.get('trainer_options', {'epoch_fn': None,
+                                                           'selection_start_epoch': 1})
+        if saved_options != trainer_options:
+            raise ValueError('Checkpoint trainer_options mismatch')
         for key, value in config.items():
             if key not in ('epochs', 'device') and checkpoint['settings'][key] != value:
                 raise ValueError(f'Checkpoint setting mismatch: {key}')
@@ -213,27 +235,37 @@ def fit(model, train_loader, validate, settings, output_dir, *, metadata, resume
         seed_everything(settings.seed)
     # Atomic ownership: two jobs must never both write the same run directory.
     output.mkdir(parents=True, exist_ok=False)
-    _json(output / 'run_config.json', {'training': config, 'metadata': metadata,
+    _json(output / 'run_config.json', {'training': config, 'trainer_options': trainer_options,
+                                     'metadata': metadata,
                                      'resume_from': str(resume_from) if resume_from else None})
     try:
         for epoch in range(start_epoch + 1, settings.epochs + 1):
             begin = time.perf_counter()
             learning_rate = optimizer.param_groups[0]['lr']
-            loss, count = train_epoch(model, train_loader, optimizer, settings.device,
-                                       settings.grad_clip_norm)
+            if epoch_fn is None:
+                loss, count = train_epoch(model, train_loader, optimizer, settings.device,
+                                          settings.grad_clip_norm)
+            else:
+                loss, count = epoch_fn(epoch, model, train_loader, optimizer,
+                                       settings.device, settings.grad_clip_norm)
+                loss = float(loss)
+                if not math.isfinite(loss) or type(count) is not int or count < 1:
+                    raise ValueError('epoch_fn must return a finite loss and positive integer n_targets')
             train_seconds = time.perf_counter() - begin
             model.eval()
             with torch.no_grad():
                 metrics = checked_metrics(validate(model))
-            improved = metrics['NDCG@10'] > best_score
+            eligible = epoch >= selection_start_epoch
+            improved = eligible and metrics['NDCG@10'] > best_score
             if improved:
                 best_score, best_epoch = metrics['NDCG@10'], epoch
                 best_state = deepcopy(model.state_dict())
             # min_delta controls stopping only, not which checkpoint is best.
-            if metrics['NDCG@10'] > stopping_score + settings.min_delta:
-                stopping_score, bad_epochs = metrics['NDCG@10'], 0
-            else:
-                bad_epochs += 1
+            if eligible:
+                if metrics['NDCG@10'] > stopping_score + settings.min_delta:
+                    stopping_score, bad_epochs = metrics['NDCG@10'], 0
+                else:
+                    bad_epochs += 1
             if scheduler is not None:
                 scheduler.step()
             history.append({'epoch': epoch, 'train_loss': loss, 'train_targets': count,
@@ -249,12 +281,13 @@ def fit(model, train_loader, validate, settings, output_dir, *, metadata, resume
             checkpoint = {'schema_version': 1, 'epoch': epoch, 'model': model.state_dict(),
                           'optimizer': optimizer.state_dict(),
                           'scheduler': scheduler.state_dict() if scheduler is not None else None,
-                          'rng': _rng_state(train_loader), 'settings': config, 'metadata': metadata,
+                          'rng': _rng_state(train_loader), 'settings': config,
+                          'trainer_options': trainer_options, 'metadata': metadata,
                           'history': history, 'bad_epochs': bad_epochs, 'best_score': best_score,
                           'stopping_score': stopping_score,
                           'best_epoch': best_epoch, 'best_model': best_state}
             _atomic_write(output / 'last.pt', lambda p: torch.save(checkpoint, p))
-            if improved or not (output / 'best.pt').exists():
+            if best_state is not None and (improved or not (output / 'best.pt').exists()):
                 _atomic_write(output / 'best.pt', lambda p: torch.save(
                     {'schema_version': 1, 'model': best_state, 'epoch': best_epoch,
                      'validation_NDCG@10': best_score, 'metadata': metadata}, p))
