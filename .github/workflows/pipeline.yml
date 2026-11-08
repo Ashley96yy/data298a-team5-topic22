@@ -1,0 +1,58 @@
+name: data-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_reviews:
+        description: Skip review text download (pipeline refresh, not the frozen experiment)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  data-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      MPLBACKEND: Agg
+      OMP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11.13'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - name: Install notebook environment
+        run: |
+          python -m pip install -r pipeline/requirements.txt
+          python -m ipykernel install --user --name python3
+      - name: Run data preparation
+        env:
+          SKIP_REVIEWS: ${{ inputs.skip_reviews }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pipeline_runs
+          run_dir="pipeline_runs/$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          args=()
+          if [[ "$SKIP_REVIEWS" == "true" ]]; then args+=(--skip-reviews); fi
+          python pipeline/run_pipeline.py \
+            --base "$RUNNER_TEMP/pipeline_data" --out "$run_dir" \
+            --markdown "$GITHUB_STEP_SUMMARY" "${args[@]}" 2>&1 | tee "$run_dir.log"
+      - name: Save run record and execution log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: data-pipeline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: pipeline_runs/
+          if-no-files-found: warn
+          retention-days: 7
