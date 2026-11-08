@@ -1,0 +1,32 @@
+{
+  "purpose": "model0_grid_search",
+  "user_limited": false,
+  "tie_policy": {
+    "name": "average_rank_then_metrics",
+    "status": "team_accepted_frozen_convention",
+    "definition": "rank = 1 + num_greater + num_equal_others / 2; metrics use that rank",
+    "limitation": "Not the expected metrics over random orderings of tied items"
+  },
+  "selection_split": "val",
+  "selection_metric": "NDCG@10",
+  "sampled": false,
+  "seed": 42,
+  "seed_policy": "one_explicit_tuning_seed",
+  "optimizer": "Adam",
+  "device": "cuda",
+  "eval_batch_size": 128,
+  "discard_last_checkpoint": false,
+  "limit_train_users": null,
+  "limit_val_users": null,
+  "tie_break": "first_configuration_in_config_order",
+  "test_evaluated": false,
+  "runner_sha256": "fffa4d42bec9d261be2152fbb9aee6f0d59f4a462cf53d9d171bf4e9de0d37d7",
+  "configuration_count": 8,
+  "status": "PASS",
+  "completed_runs": 8,
+  "best_grid_index": 7,
+  "best_validation_NDCG@10": 0.04558158609645662,
+  "best_epoch": 7,
+  "source_checkpoint": "run_07_seed_42/best.pt",
+  "checkpoint_sha256": "54ca6cba54f956af7b6189c5c0b98cf30d55e6412f412f7b92b184d89cbd89e9"
+}

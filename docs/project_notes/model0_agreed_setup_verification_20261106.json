@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-06",
+  "status": "PASS",
+  "purpose": "agreed_setup_smoke_not_final_results",
+  "tests_passed": 61,
+  "grid_runs_completed": 8,
+  "train_users": 128,
+  "validation_users": 128,
+  "epochs": 2,
+  "first_epoch_losses": [
+    10.183287620544434,
+    10.183287620544434,
+    10.185330390930176,
+    10.185330390930176,
+    10.198138236999512,
+    10.198138236999512,
+    10.192276000976562,
+    10.192276000976562
+  ],
+  "reloaded_validation_NDCG@10": 0.0,
+  "test_evaluated": false,
+  "notebook_sources_match": [
+    "src/data/sequence_dataset.py",
+    "src/models/sasrec.py",
+    "src/training/config.py",
+    "src/training/integration_check.py",
+    "src/training/trainer.py",
+    "src/training/train.py",
+    "src/training/grid_search.py",
+    "src/training/checkpoints.py",
+    "src/training/preflight.py"
+  ],
+  "smoke_full_settings_checked": true,
+  "full_experiment_executed": false
+}
