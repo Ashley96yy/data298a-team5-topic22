@@ -201,13 +201,20 @@ def train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, target
 
 
 def make_epoch_fn(targets, schedule):
-    """Adapter for the trainer: (epoch, model, loader, optimizer, device, grad_clip_norm) -> (loss, n_targets).
+    """Adapter for the trainer's epoch hook: (epoch, model, loader, optimizer, device, grad_clip_norm) -> (loss, n_targets).
 
     The returned loss is the recommendation loss only, so epoch histories stay comparable with Model 0.
-    Requires the trainer's optional epoch hook (see docs/model1_spec.md).
+    The distillation loss and the stage are not part of the trainer's history, so they are kept in `epoch_fn.log`
+    (one dict per epoch: epoch, alpha, recommendation_loss, distill_loss); write it next to the run folder after fit().
     """
+    log = []
+
     def epoch_fn(epoch, model, loader, optimizer, device, grad_clip_norm):
-        loss, n, _ = train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, targets,
-                                         schedule.alpha_for_epoch(epoch), schedule.use_beta)
+        alpha = schedule.alpha_for_epoch(epoch)
+        loss, n, distill = train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, targets, alpha,
+                                               schedule.use_beta)
+        log.append({'epoch': epoch, 'alpha': alpha, 'recommendation_loss': loss, 'distill_loss': distill})
         return loss, n
+
+    epoch_fn.log = log
     return epoch_fn

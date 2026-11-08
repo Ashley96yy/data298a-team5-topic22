@@ -165,6 +165,12 @@ class EpochTests(unittest.TestCase):
         loss2, n2 = fn(2, self.model, self.loader, opt, 'cpu', 1.0)       # stage 2: recommendation loss only
         self.assertEqual(n1, n2)
         self.assertTrue(isinstance(loss1, float) and isinstance(loss2, float))
+        log = fn.log
+        self.assertEqual([row['epoch'] for row in log], [1, 2])
+        self.assertEqual([row['alpha'] for row in log], [0.6, 0.0])
+        self.assertGreater(log[0]['distill_loss'], 0.0)                      # stage 1 measured the distillation term
+        self.assertEqual(log[1]['distill_loss'], 0.0)                        # stage 2 does not use it
+        self.assertEqual(log[0]['recommendation_loss'], loss1)
 
 
 if __name__ == '__main__':
