@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 
 from src.data.profile_file import write_profile_file, read_profile_file
-from src.training.train_model1 import (build_targets, make_schedule, synthetic_model1_smoke, targets_sha256)
+from src.training.train_model1 import (build_targets, check_optimizer, make_schedule, synthetic_model1_smoke,
+                                      targets_sha256)
 
 
 class ScheduleTests(unittest.TestCase):
@@ -16,6 +17,14 @@ class ScheduleTests(unittest.TestCase):
         for bad in (0, 10, 11, -1):
             with self.assertRaises(ValueError):
                 make_schedule(0.6, bad, 10)
+
+
+class OptimizerGuardTests(unittest.TestCase):
+    def test_cli_optimizer_must_match_the_configured_one(self):
+        check_optimizer({'optimizer': 'Adam'}, 'Adam')
+        check_optimizer({}, 'AdamW')                                 # older configs do not declare an optimizer
+        with self.assertRaises(ValueError):
+            check_optimizer({'optimizer': 'Adam'}, 'AdamW')
 
 
 class TargetTests(unittest.TestCase):

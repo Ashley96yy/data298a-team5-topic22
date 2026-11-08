@@ -30,6 +30,12 @@ from src.training.trainer import TrainingSettings, fit, make_shared_validator, s
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def check_optimizer(training, optimizer):
+    """Same guard as src.training.train: the CLI optimizer must equal the configured one (older configs may omit it)."""
+    if training.get('optimizer', optimizer) != optimizer:
+        raise ValueError('CLI optimizer differs from configured optimizer')
+
+
 def make_schedule(alpha, stage1_epochs, epochs, use_beta=True):
     """Stage 1 must exist and must leave at least one epoch for stage 2 (otherwise nothing could be selected)."""
     if type(stage1_epochs) is not int or not 1 <= stage1_epochs < epochs:
@@ -155,6 +161,7 @@ def main():
             raise ValueError('Choose --optimizer explicitly; Adam and AdamW are not interchangeable')
         config = resolve_config(args.config, args.grid_index, args.seed)
         training, hyper = config['training'], config['model_hyperparameters']
+        check_optimizer(training, args.optimizer)
         schedule = make_schedule(args.alpha, args.stage1_epochs, training['epochs'], not args.no_beta)
         settings = TrainingSettings(
             epochs=training['epochs'], patience=training['early_stopping_patience'], optimizer=args.optimizer,
