@@ -28,7 +28,7 @@ The method we implement is the one in **Severin et al., "Pre-trained LLMs Meet S
 - Stage 1: `L = alpha * beta * L_distill + (1 - alpha) * L_model`, with `beta = detach(L_model / L_distill)` (per batch). Paper grid: `alpha` in {0.4, 0.6, 0.8}; beta on/off.
 - Stage 2: `L_model` only.
 - The paper spends about half the epochs in stage 1. **[decision]** We fix stage 1 to `E1` epochs (a grid value) and apply early stopping and checkpoint selection (validation NDCG@10) in stage 2 only; early stopping during stage 1 is meaningless because the loss changes at the switch.
-- Interface: uses `SASRec.hidden(tokens)`. Implemented in `src/models/distill.py` (tests in `tests/test_distill.py`). The trainer needs a small hook, described in section 9.
+- Interface: uses `SASRec.hidden(tokens)`. Implemented in `src/models/distill.py` (tests in `tests/test_distill.py` and `tests/test_model1_integration.py`), merged. The trainer hook (`epoch_fn`, `selection_start_epoch`) is merged too; see `docs/model1_training_hooks.md`.
 
 ## 3. Leakage rules (add as check 14 onward)
 1. Profiles use `train_items` only. Validation and test items never appear in a prompt. No profile is needed for validation or test: distillation happens in training only.
@@ -61,18 +61,20 @@ Reference points measured on this dataset (test, full ranking): popularity NDCG@
 | PCA vs UMAP, alpha grid, E1 | Ruchika | Nov 12 |
 | Trainer hook for the auxiliary loss | Ashley, Ruchika | Nov 9 |
 
-## 9. Implementation status (Nov 7, 2026)
-| Part | Status |
-|---|---|
-| Distillation module (pooling, loss, schedule, PCA targets, epoch loop, trainer adapter) | Implemented with 19 unit tests; pull request open |
-| Trainer hook in `fit()` | Requested from Ashley: optional `epoch_fn` (replaces `train_epoch`) and optional `selection_start_epoch` (default 1; stage-1 epochs cannot become the best checkpoint or count toward early stopping). Defaults keep Model 0 unchanged. Both values must be recorded in the saved run settings. |
-| Reduction of profile embeddings | PCA implemented. UMAP (the paper's choice) is not implemented and stays an ablation. |
-| LLM profile generation | Not started: teacher LLM and pilot pending (Disha) |
-| Item-text embeddings and fusion | Not started (Abhinita) |
-| Ablation runner and slice analysis | Not started (Ashley, Sneha) |
-
 ## 8. References (verified from the papers)
 - Severin et al., arXiv 2604.21536 (ECIR 2026 accepted version).
 - Han et al., "Distilling LLM Reasoning into Dense Encoders: Bridging the Accuracy-Efficiency Gap in Recommendation" (R2END), Findings of ACL 2026, pp. 22513-22531.
 - Hou et al., "Bridging Language and Items for Retrieval and Recommendation" (BLaIR), arXiv 2403.03952; ACL 2026 benchmark version "...: Benchmarking LLMs as Semantic Encoders".
 - Kang and McAuley, "Self-Attentive Sequential Recommendation", ICDM 2018 (arXiv 1808.09781).
+
+## 9. Implementation status (Nov 7, 2026)
+| Part | Status |
+|---|---|
+| Distillation module (pooling, loss, schedule, PCA targets, epoch loop, trainer adapter with per-epoch log) | Merged (commit `9e1039c`, PR #7), 19 unit tests |
+| Trainer hook in `fit()`: optional `epoch_fn` and `selection_start_epoch` | Merged (commit `c368050`, PR #11, Ashley). Defaults keep Model 0 unchanged; stage-1 epochs cannot become the best checkpoint or consume patience. |
+| Integration of the module with the real trainer | Merged (`tests/test_model1_integration.py`, 3 tests: stage 1 distils but never selects, stage 2 selects, a stage 1 longer than the epoch budget is rejected) |
+| Reduction of profile embeddings | PCA implemented. UMAP (the paper's choice) is not implemented and stays an ablation. |
+| LLM profile generation | Not started: teacher LLM and pilot pending (Disha) |
+| Item-text embeddings and fusion | Not started (Abhinita) |
+| Training entry point for Model 1 (loads data, SASRec, targets; records the schedule and target hashes in `metadata`) | Not started (Ruchika) |
+| Ablation runner and slice analysis | Not started (Ashley, Sneha) |
