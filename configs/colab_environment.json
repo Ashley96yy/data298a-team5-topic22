@@ -1,0 +1,12 @@
+{
+  "profile": "model0_colab_20261107",
+  "versions": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2",
+    "pyarrow": "21.0.0"
+  },
+  "require_cuda": true,
+  "note": "Version preflight target from the recorded full-grid runtime; not an installable lockfile or a guarantee of identical GPU results."
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "data": {
+    "processed_dir": "data/processed",
+    "expected_dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+    "expected_subset": "Skin Care",
+    "max_seq_len": 50
+  },
+  "training": {
+    "batch_size": 128,
+    "epochs": 2,
+    "num_layers": 2,
+    "num_heads": 1,
+    "weight_decay": 0.0,
+    "early_stopping_patience": 10,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "optimizer": "Adam",
+    "scheduler": "none"
+  },
+  "search": {
+    "hidden_size": [
+      64,
+      128
+    ],
+    "dropout": [
+      0.2,
+      0.5
+    ],
+    "learning_rate": [
+      0.001,
+      0.0005
+    ]
+  },
+  "evaluation": {
+    "selection_split": "val",
+    "selection_metric": "NDCG@10",
+    "sampled": false
+  },
+  "output_dir": "results/model0_agreed_smoke",
+  "experiment": {
+    "tuning_seed": 42,
+    "repeat_seeds": [
+      43,
+      44
+    ],
+    "initialization": {
+      "distribution": "normal",
+      "mean": 0.0,
+      "std": 0.02,
+      "padding_row_zero": true
+    },
+    "agreed_date": "2026-11-06",
+    "model_init_pr": 3
+  }
+}

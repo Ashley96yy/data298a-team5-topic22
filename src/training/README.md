@@ -1,5 +1,9 @@
 # Issue 1 — SASRec experiment setup
 
+Current status (2026-11-06): PRs #3/#4 merged, fixed training settings confirmed
+and recorded in configs/config.json. See GRID_SEARCH.md for current commands.
+The original smoke settings and results below are historical evidence only.
+
 This implementation adapts the team's Drive Notebook 08 TinySASRec for a bounded
 real-data integration check. It is not yet a validated reproduction of the original
 SASRec paper and does not run the full grid search (Issue 2).
@@ -54,8 +58,7 @@ Run commands from the repository root with Python 3.11.
    and whether test evaluation occurred (false). A low or zero NDCG is possible
    for this deliberately short run; it is not the final Model 0 result.
 
-6. Before full tuning, confirm the null settings in `configs/config.json` with
-   the team, then run:
+6. Validate the agreed settings in `configs/config.json`:
 
    ```sh
    .venv/bin/python -m src.training.config --require-ready
@@ -63,10 +66,9 @@ Run commands from the repository root with Python 3.11.
 
    This checks configuration completeness, not actual training execution. The
    data path is relative to the repository-root working directory. Do not replace
-   the data-preparation config.json in shared Drive. Decide whether reporting
-   seeds 42/43/44 applies to all eight configurations (24 jobs) or only repeats of
-   the selected configuration. Epoch budget and early-stopping policy also need
-   agreement. No full experiment has been launched with guessed settings.
+   the data-preparation config.json in shared Drive. The earlier decision was whether reporting
+   seeds 42/43/44 applies to all eight configurations or only winner repeats.
+   The team has now chosen seed 42 for tuning and 43/44 for winner repeats. No full experiment has been launched with guessed settings.
 
 ## Model and evaluator interface
 
@@ -90,14 +92,20 @@ padding index, manifest hashes, user counts/uniqueness, ID ranges, minimum histo
 no repeat/holdout overlap, total interaction count, and negative-array row counts.
 They do not independently reproduce every ETL or timestamp-leakage check.
 
-## Remaining work
+## Current status
 
-Issue 1's integration and config implementation can be reviewed locally. Full
-training settings and team adoption of this smoke-model adaptation remain open.
-Issue 2 will add grid execution, best-epoch selection, and checkpoint management.
-Changes are local, not pushed to GitHub or posted to Linear.
+Issue 1 setup is verified with the merged initialization fix and the agreed
+settings. The complete configuration is in configs/config.json. Current evidence
+is docs/project_notes/model0_agreed_setup_verification_20261106.json, with initial
+loss checks in docs/project_notes/model0_preflight_20261106.json. Grid execution
+and selected-checkpoint loading are implemented; see GRID_SEARCH.md. The full
+eight-configuration Colab run completed on 2026-11-07. Extracted evidence is in
+`docs/project_notes/model0_full_grid_20261107/`. The winner reached validation
+NDCG@10 0.0455816 (hidden 128, dropout 0.5, learning rate 0.0005). Repeat training
+and three-checkpoint verification returned successfully; their numeric summary
+still needs retrieval from Drive. Final test evaluation and comparison remain pending.
 
-## Completed local verification
+## Original integration evidence (historical)
 
 Six tests passed. The actual real-data integration report is at
 results/issue1_smoke/integration_report.json. All nine required artifact hashes

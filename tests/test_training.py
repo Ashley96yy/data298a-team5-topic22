@@ -249,8 +249,13 @@ class RunConfigTests(unittest.TestCase):
         self.assertIn('Not the expected metrics', TIE_POLICY['limitation'])
 
     def test_unconfirmed_team_config_cannot_run(self):
-        with self.assertRaisesRegex(ValueError, 'Unconfirmed'):
-            resolve_config(ROOT / 'configs/config.json', 0, 42)
+        config = load_config(ROOT / 'configs/config.json')
+        config['training']['epochs'] = None
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / 'incomplete.json'
+            path.write_text(json.dumps(config))
+            with self.assertRaisesRegex(ValueError, 'Unconfirmed'):
+                resolve_config(path, 0, 42)
 
     def test_resolves_one_grid_config_or_expanded_config(self):
         config = load_config(ROOT / 'configs/config.json')
