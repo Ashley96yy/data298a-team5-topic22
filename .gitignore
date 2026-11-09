@@ -18,6 +18,10 @@ env/
 data/raw/
 data/processed/
 results/*
+app/artifacts/
+app/model/
+pipeline_data/
+pipeline_runs/
 !results/README.md
 
 # Environment and editor files
