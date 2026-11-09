@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "scope": "downloaded checkpoint hashes, saved metadata and summary arithmetic only",
+  "validation_predictions_independently_recomputed": false,
+  "test_evaluated": false,
+  "summary_drive_url": "https://drive.google.com/file/d/1vK1Us7ppmrjh67B0gUcrVV72GWaZetXe/view",
+  "summary_sha256": "afec79c58df931c2e34309359dbda69eaf00454cfe7f67e306c0686bc67a337f",
+  "runs": [
+    {
+      "seed": 42,
+      "drive_folder_url": "https://drive.google.com/drive/folders/1GM5o-YVXlCHgSr5Tzc2aM2DK5eS6jz6T",
+      "checkpoint_sha256": "54ca6cba54f956af7b6189c5c0b98cf30d55e6412f412f7b92b184d89cbd89e9",
+      "run_config_sha256": "114fc6c6f6fb10002bcdbef9aab7ba8b203d5ce53b6339eb71e9af6a1b9be6cc",
+      "required_files_listed": [
+        "best.pt",
+        "last.pt",
+        "run_config.json",
+        "history.csv",
+        "summary.json"
+      ]
+    },
+    {
+      "seed": 43,
+      "drive_folder_url": "https://drive.google.com/drive/folders/1uJeqpBf9oNW6ATb6sVYKaccRryVS8tV5",
+      "checkpoint_sha256": "73cd025c83a1e4f43c4570b6afbbc8700f9f593379ec67e0205ae502b7cce794",
+      "run_config_sha256": "ea1a4117a40b9c931cd008eaa4b72f1fee2e8bdd4b1c88f3d5bdb38a9c58ada3",
+      "required_files_listed": [
+        "best.pt",
+        "last.pt",
+        "run_config.json",
+        "history.csv",
+        "summary.json"
+      ]
+    },
+    {
+      "seed": 44,
+      "drive_folder_url": "https://drive.google.com/drive/folders/1fI4JLTjvE5XrMFYG4dDzBIXC-_WeAJmG",
+      "checkpoint_sha256": "f502f90470eb9a09b241bb2b924b92f335fd82b5c8215e73361ece695d61fddd",
+      "run_config_sha256": "b8ac6aba77e3bfa7a2c895741a212961caeeb2e13a91fe5a8bc18c558093eee6",
+      "required_files_listed": [
+        "best.pt",
+        "last.pt",
+        "run_config.json",
+        "history.csv",
+        "summary.json"
+      ]
+    }
+  ],
+  "recipient_access_confirmed": false,
+  "checks": [
+    "All checkpoint hashes match the saved validation report",
+    "All run metadata passes shared optimizer/scheduler configuration checks",
+    "All run provenance matches except seed/device and allowed commit difference",
+    "Each run used 56017 training and validation users",
+    "Validation mean and sample standard deviation match the per-seed values"
+  ],
+  "local_tests": {
+    "count": 66,
+    "skipped": 0,
+    "python": "3.11.14",
+    "torch": "2.8.0"
+  }
+}

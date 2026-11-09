@@ -139,6 +139,10 @@ def main():
                                          (args.limit_train_users, args.limit_val_users)):
             raise ValueError('Batch size and optional user limits must be positive')
         training, hyper = config['training'], config['model_hyperparameters']
+        if training.get('optimizer', args.optimizer) != args.optimizer:
+            raise ValueError('CLI optimizer differs from configured optimizer')
+        if training.get('scheduler') == 'none' and (args.lr_step_size is not None or args.lr_gamma is not None):
+            raise ValueError('Configured scheduler=none forbids scheduler overrides')
         settings = TrainingSettings(
             epochs=training['epochs'], patience=training['early_stopping_patience'],
             optimizer=args.optimizer, learning_rate=hyper['learning_rate'],

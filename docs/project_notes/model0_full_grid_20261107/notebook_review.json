@@ -1,0 +1,32 @@
+{
+  "evidence_source": "Saved outputs in user-provided executed notebook; not an independent rerun",
+  "source_notebook": "10_sasrec_full_tuning_and_repeats_colab.ipynb",
+  "source_notebook_sha256": "820268b7bf3c1e0f9f802174549c6ef0602019a0e6fe4a8ee9f353eedd0cda9d",
+  "drive_run_dir": "/content/drive/MyDrive/298A/part_d_grid_results/grid_full_20261107T200443Z_69f3bc0e",
+  "full_grid_runs_passed": 8,
+  "grid_elapsed_seconds_sum": 2812.766168624,
+  "bundled_modules_matching_local_source": [
+    "src/data/sequence_dataset.py",
+    "src/models/sasrec.py",
+    "src/training/config.py",
+    "src/training/integration_check.py",
+    "src/training/trainer.py",
+    "src/training/train.py",
+    "src/training/grid_search.py",
+    "src/training/checkpoints.py",
+    "src/training/preflight.py",
+    "src/evaluation/common.py",
+    "src/evaluation/seed_stats.py",
+    "src/evaluation/multi_seed.py"
+  ],
+  "selected_checkpoint_verification_returncode": 0,
+  "repeat_training_seeds": [
+    43,
+    44
+  ],
+  "repeat_training_returncode": 0,
+  "three_seed_validation_verification_returncode": 0,
+  "repeat_scores_visible_in_notebook": false,
+  "remaining_evidence": "Retrieve issue3_1_validation_summary.json from the Drive run folder for per-seed values and aggregate.",
+  "test_evaluated": false
+}

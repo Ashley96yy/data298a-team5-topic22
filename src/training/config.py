@@ -45,6 +45,10 @@ def validate_config(config, require_ready=False):
     require(seeds is None or (isinstance(seeds, list) and len(seeds) > 0 and
             all(type(s) is int and 0 <= s < 2**32 for s in seeds) and len(set(seeds)) == len(seeds)),
             "seeds must be unique integers in [0, 2**32), or null")
+    if 'optimizer' in training:
+        require(training['optimizer'] in ('Adam', 'AdamW'), 'optimizer must be Adam or AdamW')
+    if 'scheduler' in training:
+        require(training['scheduler'] == 'none', 'Only scheduler=none is supported by this grid')
     heads = training["num_heads"]
     require(heads is None or all(size % heads == 0 for size in GRID["hidden_size"]),
             "num_heads must divide both 64 and 128")

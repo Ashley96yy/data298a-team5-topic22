@@ -1,0 +1,6 @@
+# Only what the demo app needs (no torch), so the hosted app installs quickly.
+numpy==2.2.6
+pandas==2.3.2
+pyarrow==21.0.0
+scipy==1.17.1
+streamlit==1.67.0

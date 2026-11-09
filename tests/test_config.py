@@ -8,13 +8,15 @@ class ConfigurationTests(unittest.TestCase):
         self.config = load_config(Path(__file__).resolve().parents[1] / 'configs/config.json')
 
     def test_grid_is_complete_and_independent(self):
+        original_epochs = self.config['training']['epochs']
         runs = expand_grid(self.config)
         self.assertEqual(len({tuple(r['model_hyperparameters'].values()) for r in runs}), 8)
         runs[0]['training']['epochs'] = 7
-        self.assertIsNone(runs[1]['training']['epochs'])
-        self.assertIsNone(self.config['training']['epochs'])
+        self.assertEqual(runs[1]['training']['epochs'], original_epochs)
+        self.assertEqual(self.config['training']['epochs'], original_epochs)
 
     def test_template_cannot_run(self):
+        self.config['training']['epochs'] = None
         with self.assertRaisesRegex(ValueError, 'Unconfirmed'):
             validate_config(self.config, require_ready=True)
 

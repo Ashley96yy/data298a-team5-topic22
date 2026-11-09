@@ -1,0 +1,3 @@
+# Optional SASRec inference; baseline-only deployments use requirements.txt.
+-r requirements.txt
+torch==2.8.0
