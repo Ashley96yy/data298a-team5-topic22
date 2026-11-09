@@ -4,6 +4,7 @@ Run locally from the repository root:   streamlit run app/Recommendations.py
 Recommendations are computed live from small artifacts built from the frozen dataset (see src/serving/recommend.py).
 """
 import sys
+import os
 from pathlib import Path
 
 import streamlit as st
@@ -17,7 +18,16 @@ st.set_page_config(page_title='Skin care recommender', layout='wide')
 
 @st.cache_resource
 def load_recommender():
-    return Recommender(ROOT / 'app' / 'artifacts')
+    artifacts = ROOT / 'app' / 'artifacts'
+    recommender = Recommender(artifacts)
+    checkpoint = os.environ.get('SASREC_CHECKPOINT')
+    checksum = os.environ.get('SASREC_CHECKPOINT_SHA256')
+    if bool(checkpoint) != bool(checksum):
+        raise ValueError('Set both SASREC_CHECKPOINT and SASREC_CHECKPOINT_SHA256')
+    if checkpoint:
+        from src.serving.sasrec import register_sasrec
+        register_sasrec(recommender, checkpoint, checksum, artifacts)
+    return recommender
 
 
 rec = load_recommender()
@@ -48,7 +58,8 @@ st.caption('Team 5, Topic 22: Personalization and Recommendation Under Privacy C
 with st.sidebar:
     st.header('Settings')
     method = st.radio('Recommender', rec.methods, index=rec.methods.index('markov'),
-                      help='popularity: most bought products. markov: what people most often buy right after your last product.')
+                      help='popularity: most bought products. markov: common next purchases. '
+                           'sasrec: a trained model using the order of your recent purchases.')
     k = st.slider('Number of recommendations', 3, 20, 10)
     st.button('Load a real example user', on_click=load_example)
     st.button('Clear my history', on_click=lambda: st.session_state.update(history=[]))

@@ -1,0 +1,10 @@
+# Notebook execution only: Model 0 training and Streamlit are separate environments.
+numpy==2.2.6
+pandas==2.3.2
+pyarrow==21.0.0
+matplotlib==3.11.2
+requests==2.34.2
+tqdm==4.70.1
+nbconvert==7.17.2
+nbformat==5.11.1
+ipykernel==7.4.0

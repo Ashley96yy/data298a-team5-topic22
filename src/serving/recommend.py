@@ -9,6 +9,8 @@ Today the scorers are the reference baselines (popularity, last-item Markov). A 
 through `Recommender.register(name, fn)` where fn(history_item_ids) -> scores of length n_items + 1.
 """
 from pathlib import Path
+import hashlib
+import json
 
 import numpy as np
 import pandas as pd
@@ -16,6 +18,15 @@ import scipy.sparse as sp
 
 TIE_BREAK = 1e-6
 ITEM_COLUMNS = ['item_idx', 'title', 'brand', 'cat_l2', 'price_num']
+ARTIFACT_FILES = ['items.parquet', 'popularity.npy', 'markov.npz', 'example_histories.parquet']
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda: stream.read(1 << 20), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def build_artifacts(processed_dir, out_dir, n_example_users=200, seed=42):
@@ -23,8 +34,19 @@ def build_artifacts(processed_dir, out_dir, n_example_users=200, seed=42):
     missing = [f for f in ('items.parquet', 'sequences.parquet') if not (processed / f).exists()]
     if missing:
         raise FileNotFoundError(f'{processed} is missing {missing}; copy them from the shared Drive folder processed/')
+    provenance = {'source_manifest_sha256': None, 'source_files': {}}
+    if (processed / 'manifest.json').exists():
+        manifest = json.loads((processed / 'manifest.json').read_text())
+        for name in ('items.parquet', 'sequences.parquet'):
+            actual = file_sha256(processed / name)
+            if actual != manifest['processed_files'][name]['sha256']:
+                raise ValueError(f'Frozen input checksum mismatch: {name}')
+            provenance['source_files'][name] = actual
+        provenance['source_manifest_sha256'] = file_sha256(processed / 'manifest.json')
     items = pd.read_parquet(processed / 'items.parquet')[ITEM_COLUMNS].sort_values('item_idx').reset_index(drop=True)
     seq = pd.read_parquet(processed / 'sequences.parquet').sort_values('user_idx').reset_index(drop=True)
+    if not len(items) or not np.array_equal(items.item_idx, np.arange(1, len(items) + 1)):
+        raise ValueError('Item IDs must cover 1..n_items exactly')
     out.mkdir(parents=True, exist_ok=True)                 # only after the inputs were read, so a failure leaves nothing behind
     n_items = int(items['item_idx'].max())
     pop = np.zeros(n_items + 1)
@@ -44,6 +66,10 @@ def build_artifacts(processed_dir, out_dir, n_example_users=200, seed=42):
     examples = seq.iloc[np.sort(pick)][['user_idx', 'train_items']].copy()
     examples['train_items'] = examples['train_items'].map(lambda t: [int(i) for i in t])
     examples.to_parquet(out / 'example_histories.parquet', index=False)
+    (out / 'artifact_manifest.json').write_text(json.dumps({
+        'schema_version': 1, 'n_items': n_items, **provenance,
+        'artifact_files': {name: file_sha256(out / name) for name in ARTIFACT_FILES},
+    }, indent=2) + '\n')
     return {'n_items': n_items, 'n_examples': len(examples), 'transitions': int(transitions.nnz)}
 
 

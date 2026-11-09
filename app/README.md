@@ -9,3 +9,8 @@ python -m src.serving.recommend --processed data/processed --out app/artifacts  
 streamlit run app/Recommendations.py
 python -m unittest tests.test_recommend tests.test_monitor tests.test_pipeline tests.test_app
 ```
+
+For optional trained SASRec inference, install `app/requirements-sasrec.txt` and
+set `SASREC_CHECKPOINT` plus `SASREC_CHECKPOINT_SHA256` before starting Streamlit.
+See `docs/demo.md` for frozen-artifact checks and the exact setup. Model weights
+and generated artifacts stay outside Git.
