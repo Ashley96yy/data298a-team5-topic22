@@ -16,8 +16,10 @@ python -m src.training.train_model1 --config configs/config.json --grid-index 7 
 - Stage 1 (`--stage1-epochs`, at least 1, at most epochs minus 1) distils; checkpoint selection and early stopping start after it.
 - The run metadata records the schedule, the profile file's SHA-256, the reduced targets' SHA-256 and the source hashes of
   `distill.py` and `train_model1.py`, next to the usual provenance. Resuming needs the same hook, the same targets and the same schedule.
-- `distill_log.csv` in the run folder has the stage, alpha, recommendation loss and distillation loss for every epoch
-  (`distill_log_resumed.csv` after a resume, covering the resumed epochs only).
+- `distill_log.csv` in the run folder has the alpha (stage), recommendation loss and distillation loss of every epoch. It is
+  written after every epoch, so a failed or interrupted run keeps the history of the epochs it finished. A resumed run starts
+  from the previous run's log up to the checkpoint epoch, so its `distill_log.csv` covers the whole run, as `history.csv`
+  does; resuming needs the previous run folder's `distill_log.csv` next to `last.pt`.
 - `--synthetic-smoke` checks the plumbing on a tiny synthetic fixture. Its output is never a result and must not be reported.
 
 ## Profile file (what the profile pipeline must produce)

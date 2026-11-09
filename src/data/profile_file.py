@@ -24,11 +24,29 @@ def file_sha256(path):
     return h.hexdigest()
 
 
+def _scalar_bool(value, name):
+    """Accept only a real scalar boolean: a Python bool, a NumPy bool, or a 0-d bool array.
+
+    Strings ('False', '0'), numbers (0, 1, 2) and non-scalar arrays are rejected BEFORE any conversion, because Python
+    truthiness would read 'False' and 2 as True. This validates the declaration, not the upstream contents.
+    """
+    if isinstance(value, np.ndarray):
+        if value.ndim != 0 or value.dtype != np.bool_:
+            raise ValueError(f'{name} must be a scalar boolean, not an array of dtype {value.dtype} and shape {value.shape}')
+        return bool(value)
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    raise ValueError(f'{name} must be a scalar boolean (True), got {type(value).__name__}: {value!r}')
+
+
 def write_profile_file(path, user_idx, embeddings, source, train_items_only):
+    train_only = _scalar_bool(train_items_only, 'train_items_only')
+    if not train_only:
+        raise ValueError('refusing to write a profile file that is not built from training items only')
     user_idx = np.asarray(user_idx, dtype=np.int64)
     embeddings = np.asarray(embeddings, dtype=np.float32)
     np.savez(path, user_idx=user_idx, embeddings=embeddings, source=np.array(source),
-             train_items_only=np.array(bool(train_items_only)))
+             train_items_only=np.array(True))
 
 
 def read_profile_file(path, *, allow_synthetic=False):
@@ -41,7 +59,11 @@ def read_profile_file(path, *, allow_synthetic=False):
         if missing:
             raise ValueError(f'profile file is missing {missing}')
         user_idx, embeddings = z['user_idx'], z['embeddings']
-        source, train_only = str(z['source']), bool(z['train_items_only'])
+        raw_source = z['source']
+        if raw_source.ndim != 0 or raw_source.dtype.kind != 'U':
+            raise ValueError('source must be a scalar string')
+        source = str(raw_source)
+        train_only = _scalar_bool(z['train_items_only'], 'train_items_only')       # strict: no truthiness
     if source not in SOURCES:
         raise ValueError(f'source must be one of {SOURCES}, got {source!r}')
     if source == 'synthetic' and not allow_synthetic:

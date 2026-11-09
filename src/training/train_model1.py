@@ -21,7 +21,7 @@ import torch
 
 from src.data.profile_file import read_profile_file, write_profile_file
 from src.data.sequence_dataset import make_dataloaders
-from src.models.distill import DistillSchedule, PCAReducer, ProfileTargets, make_epoch_fn
+from src.models.distill import DistillLog, DistillSchedule, PCAReducer, ProfileTargets, make_epoch_fn
 from src.models.sasrec import SASRec
 from src.training.integration_check import digest, load_verified_data
 from src.training.train import TIE_POLICY, code_provenance, resolve_config
@@ -79,18 +79,43 @@ def distill_metadata(profile, targets, schedule, n_components):
     }
 
 
+def previous_log_rows(resume_from):
+    """History to carry into a resumed run: the previous run's distillation log up to the checkpoint's epoch.
+
+    Rows after the checkpoint epoch belong to epochs that will be trained again, so they are dropped. A missing or
+    incomplete log is an error: a resumed run must not silently lose the auxiliary history of the finished epochs.
+    """
+    checkpoint = torch.load(resume_from, map_location='cpu', weights_only=True)
+    done = int(checkpoint['epoch'])
+    path = Path(resume_from).parent / 'distill_log.csv'
+    if not path.exists():
+        raise ValueError(f'Cannot resume: {path} is missing; it holds the distillation history of epochs 1 to {done}')
+    rows = [row for row in DistillLog.read(path) if row['epoch'] <= done]
+    if [row['epoch'] for row in rows] != list(range(1, done + 1)):
+        raise ValueError(f'Cannot resume: {path} does not cover epochs 1 to {done} exactly')
+    return rows
+
+
 def run_distilled(model, loaders, validate, settings, output_dir, metadata, targets, schedule, resume_from=None):
-    """Train with the distillation hook, then save the per-epoch stage log next to the run folder's files."""
-    hook = make_epoch_fn(targets, schedule)
-    summary = fit(model, loaders['train'], validate, settings, output_dir, metadata=metadata, resume_from=resume_from,
-                  epoch_fn=hook, selection_start_epoch=schedule.selection_starts_at())
-    name = 'distill_log_resumed.csv' if resume_from else 'distill_log.csv'      # after a resume the log covers only the resumed epochs
-    pd.DataFrame(hook.log).to_csv(Path(output_dir) / name, index=False)
-    return summary
+    """Train with the distillation hook. distill_log.csv is written after every epoch, so a failed or interrupted run keeps
+    the history of the epochs it finished. A resumed run starts from the previous log's rows up to the checkpoint epoch,
+    so its distill_log.csv covers the whole run (epochs 1 to the last one), as the trainer's history.csv does."""
+    initial = previous_log_rows(resume_from) if resume_from else []
+    log = DistillLog(Path(output_dir) / 'distill_log.csv', initial)
+    hook = make_epoch_fn(targets, schedule, log)
+    return fit(model, loaders['train'], validate, settings, output_dir, metadata=metadata, resume_from=resume_from,
+               epoch_fn=hook, selection_start_epoch=schedule.selection_starts_at())
 
 
-def synthetic_model1_smoke(output_dir):
-    """Plumbing check on a tiny synthetic fixture. Not Amazon data, not a research result."""
+def write_synthetic_profile(path, n_users=40):
+    write_profile_file(path, np.arange(n_users), np.random.default_rng(0).normal(size=(n_users, 24)), 'synthetic', True)
+
+
+def synthetic_model1_smoke(output_dir, *, fail_at_epoch=None, resume_from=None, profile_path=None):
+    """Plumbing check on a tiny synthetic fixture. Not Amazon data, not a research result.
+
+    fail_at_epoch injects a validation failure at that epoch (to test interrupted runs); resume_from resumes a previous
+    run into output_dir; profile_path reuses one profile file, so both runs record the same profile hash."""
     torch.set_num_threads(2)
     seed_everything(42)
     n_users, n_items, hidden = 40, 30, 16
@@ -102,8 +127,13 @@ def synthetic_model1_smoke(output_dir):
     loaders = make_dataloaders(sequences, max_len=50, batch_size=8, eval_batch_size=8, seed=42, pin_memory=False)
     model = SASRec(n_items, max_len=50, hidden_size=hidden, num_heads=2, num_layers=1, dropout=0.1)
 
+    calls = {'n': 0}
+
     @torch.no_grad()
     def validate(current):                                   # synthetic-only ranking, as in src.training.train.synthetic_smoke
+        calls['n'] += 1
+        if calls['n'] == fail_at_epoch:
+            raise RuntimeError('injected validation failure')
         ranks = []
         for batch in loaders['val']:
             scores = current.next_item_scores(batch['input_seq']).clone()
@@ -116,17 +146,20 @@ def synthetic_model1_smoke(output_dir):
         ranks = np.asarray(ranks, dtype=float)
         return {'NDCG@10': float(np.where(ranks <= 10, 1 / np.log2(ranks + 1), 0).mean())}
 
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / 'synthetic_profiles.npz'
-        write_profile_file(path, np.arange(n_users), np.random.default_rng(0).normal(size=(n_users, 24)),
-                           'synthetic', True)
-        profile = read_profile_file(path, allow_synthetic=True)
+    if profile_path is None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'synthetic_profiles.npz'
+            write_synthetic_profile(path, n_users)
+            profile = read_profile_file(path, allow_synthetic=True)
+    else:
+        profile = read_profile_file(profile_path, allow_synthetic=True)
     targets, _ = build_targets(profile, n_users, hidden)
     schedule = make_schedule(0.6, 2, 4)
     settings = TrainingSettings(epochs=4, patience=2, optimizer='Adam', learning_rate=0.001, weight_decay=0.0, seed=42)
     metadata = {'purpose': 'synthetic_smoke_only_not_Amazon_results', 'selection_split': 'val',
                 **distill_metadata(profile, targets, schedule, hidden)}
-    return run_distilled(model, loaders, validate, settings, output_dir, metadata, targets, schedule)
+    return run_distilled(model, loaders, validate, settings, output_dir, metadata, targets, schedule,
+                         resume_from=resume_from)
 
 
 def main():

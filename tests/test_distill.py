@@ -1,9 +1,11 @@
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 import torch
 
-from src.models.distill import (DistillSchedule, PCAReducer, ProfileTargets, combine_losses, distill_loss,
+from src.models.distill import (DistillLog, DistillSchedule, PCAReducer, ProfileTargets, combine_losses, distill_loss,
                                 make_epoch_fn, pooled_representation, train_epoch_distill)
 from src.models.sasrec import SASRec
 
@@ -157,6 +159,17 @@ class EpochTests(unittest.TestCase):
             train_epoch_distill(self.model, bad, torch.optim.SGD(self.model.parameters(), lr=0.1), 'cpu', 1.0,
                                 self.targets, alpha=0.5)
 
+    def test_epoch_fn_writes_each_epoch_to_disk_before_the_next_one_starts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = DistillLog(Path(tmp) / 'distill_log.csv')
+            fn = make_epoch_fn(self.targets, DistillSchedule(alpha=0.6, stage1_epochs=1), log)
+            opt = torch.optim.SGD(self.model.parameters(), lr=0.01)
+            fn(1, self.model, self.loader, opt, 'cpu', 1.0)
+            self.assertEqual([r['epoch'] for r in DistillLog.read(Path(tmp) / 'distill_log.csv')], [1])
+            fn(2, self.model, self.loader, opt, 'cpu', 1.0)
+            self.assertEqual([r['epoch'] for r in DistillLog.read(Path(tmp) / 'distill_log.csv')], [1, 2])
+            self.assertIs(fn.log, log.rows)
+
     def test_epoch_fn_follows_the_schedule(self):
         schedule = DistillSchedule(alpha=0.6, stage1_epochs=1)
         fn = make_epoch_fn(self.targets, schedule)
@@ -171,6 +184,44 @@ class EpochTests(unittest.TestCase):
         self.assertGreater(log[0]['distill_loss'], 0.0)                      # stage 1 measured the distillation term
         self.assertEqual(log[1]['distill_loss'], 0.0)                        # stage 2 does not use it
         self.assertEqual(log[0]['recommendation_loss'], loss1)
+
+
+class DistillLogTests(unittest.TestCase):
+    def row(self, epoch, alpha=0.6):
+        return {'epoch': epoch, 'alpha': alpha, 'recommendation_loss': 1.5 / epoch, 'distill_loss': 0.25 * epoch}
+
+    def test_every_append_is_on_disk_immediately_and_no_temporary_file_is_left(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'distill_log.csv'
+            log = DistillLog(path)
+            log.append(self.row(1))
+            self.assertEqual([r['epoch'] for r in DistillLog.read(path)], [1])
+            log.append(self.row(2, alpha=0.0))
+            rows = DistillLog.read(path)
+            self.assertEqual([r['epoch'] for r in rows], [1, 2])
+            self.assertEqual(rows[1]['alpha'], 0.0)
+            self.assertAlmostEqual(rows[0]['recommendation_loss'], 1.5)
+            self.assertEqual(sorted(p.name for p in Path(tmp).iterdir()), ['distill_log.csv'])
+
+    def test_initial_rows_are_written_with_the_first_append(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'distill_log.csv'
+            log = DistillLog(path, rows=[self.row(1)])
+            self.assertFalse(path.exists())                     # nothing is written before the run directory is needed
+            log.append(self.row(2))
+            self.assertEqual([r['epoch'] for r in DistillLog.read(path)], [1, 2])
+
+    def test_a_log_without_a_path_only_keeps_rows_in_memory(self):
+        log = DistillLog()
+        log.append(self.row(1))
+        self.assertEqual(len(log.rows), 1)
+
+    def test_read_rejects_a_csv_that_is_not_a_distillation_log(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'history.csv'
+            path.write_text('epoch,train_loss\n1,0.5\n')
+            with self.assertRaises(ValueError):
+                DistillLog.read(path)
 
 
 if __name__ == '__main__':

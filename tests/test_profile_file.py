@@ -30,10 +30,53 @@ class ProfileFileTests(unittest.TestCase):
         self.assertEqual(len(p['sha256']), 64)
         self.assertEqual(read_profile_file(self.path)['sha256'], p['sha256'])      # stable
 
+    def write_raw(self, **arrays):
+        """Write an NPZ directly (bypassing write_profile_file), the way another pipeline could."""
+        base = dict(user_idx=np.array([3, 1, 0, 2]), embeddings=self.emb.astype(np.float32),
+                    source=np.array('llm_profile'), train_items_only=np.array(True))
+        base.update(arrays)
+        np.savez(self.path, **base)
+
     def test_refuses_profiles_not_built_from_training_items(self):
-        self.write(train_items_only=False)
+        self.write_raw(train_items_only=np.array(False))
         with self.assertRaises(ValueError):
             read_profile_file(self.path)
+
+    def test_writer_accepts_only_a_real_scalar_boolean_true(self):
+        for ok in (True, np.True_, np.array(True)):
+            with self.subTest(ok=repr(ok)):
+                self.write(train_items_only=ok)
+                self.assertEqual(read_profile_file(self.path)['source'], 'llm_profile')
+        for bad in ('False', 'false', 'True', 'true', '0', '', 0, 1, 2, 1.0, None, [True], np.array([True]),
+                    np.array('True'), np.array(1)):
+            with self.subTest(bad=repr(bad)):
+                with self.assertRaises(ValueError):
+                    self.write(train_items_only=bad)
+
+    def test_writer_refuses_to_write_a_false_declaration(self):
+        for false in (False, np.False_, np.array(False)):
+            with self.subTest(false=repr(false)):
+                with self.assertRaises(ValueError):
+                    self.write(train_items_only=false)
+
+    def test_reader_rejects_mistyped_declarations_in_a_directly_written_npz(self):
+        for bad in (np.array('False'), np.array('false'), np.array('True'), np.array('0'), np.array(0), np.array(1),
+                    np.array(2), np.array(1.0), np.array([True, True]), np.array([True]), np.array([], dtype=bool)):
+            with self.subTest(bad=repr(bad)):
+                self.write_raw(train_items_only=bad)
+                with self.assertRaises(ValueError):
+                    read_profile_file(self.path)
+
+    def test_reader_accepts_a_directly_written_numpy_bool(self):
+        self.write_raw(train_items_only=np.array(np.True_))
+        self.assertEqual(read_profile_file(self.path)['source'], 'llm_profile')
+
+    def test_reader_rejects_a_non_scalar_or_non_string_source(self):
+        for bad in (np.array(['llm_profile']), np.array(3)):
+            with self.subTest(bad=repr(bad)):
+                self.write_raw(source=bad)
+                with self.assertRaises(ValueError):
+                    read_profile_file(self.path)
 
     def test_synthetic_needs_explicit_permission(self):
         self.write(source='synthetic')
