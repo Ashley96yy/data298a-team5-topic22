@@ -1,0 +1,102 @@
+{
+  "reference": {
+    "cold": {
+      "popularity": {
+        "n_cases": 1142,
+        "metrics": {
+          "Recall@5": 0.0,
+          "HitRate@5": 0.0,
+          "NDCG@5": 0.0,
+          "Recall@10": 0.0,
+          "HitRate@10": 0.0,
+          "NDCG@10": 0.0,
+          "Recall@20": 0.0,
+          "HitRate@20": 0.0,
+          "NDCG@20": 0.0,
+          "MRR": 3.965569643238579e-05,
+          "Coverage@5": 0.0003088445353820021,
+          "Coverage@10": 0.0005018723699957534,
+          "Coverage@20": 0.0009265336061460062,
+          "ILD@10": 0.2987740805604203
+        },
+        "median_rank": 25228.5,
+        "mean_relative_rank": 0.974249368276989
+      },
+      "chance": {
+        "Recall@5": 0.00019317269699397515,
+        "HitRate@5": 0.00019317269699397515,
+        "NDCG@5": 0.00011391235999408239,
+        "Recall@10": 0.0003863453939879503,
+        "HitRate@10": 0.0003863453939879503,
+        "NDCG@10": 0.00017553832225813726,
+        "Recall@20": 0.0007726907879759006,
+        "HitRate@20": 0.0007726907879759006,
+        "NDCG@20": 0.00027199752617951484,
+        "MRR": 0.0004148807764526269,
+        "median_rank": 12948.0,
+        "mean_relative_rank": 0.5000193172696994
+      }
+    },
+    "warm": {
+      "popularity": {
+        "n_cases": 54875,
+        "metrics": {
+          "Recall@5": 0.015362186788154897,
+          "HitRate@5": 0.015362186788154897,
+          "NDCG@5": 0.010051343624873692,
+          "Recall@10": 0.025621867881548976,
+          "HitRate@10": 0.025621867881548976,
+          "NDCG@10": 0.01338499287780308,
+          "Recall@20": 0.0384874715261959,
+          "HitRate@20": 0.0384874715261959,
+          "NDCG@20": 0.01659926655977284,
+          "MRR": 0.013258163192158853,
+          "Coverage@5": 0.00038605566922750263,
+          "Coverage@10": 0.0006176890707640042,
+          "Coverage@20": 0.001042350306914257,
+          "ILD@10": 0.29858041002277896
+        },
+        "median_rank": 2222.0,
+        "mean_relative_rank": 0.23752390501214282
+      },
+      "chance": {
+        "Recall@5": 0.00019308539500339868,
+        "HitRate@5": 0.00019308539500339868,
+        "NDCG@5": 0.00011386087872404004,
+        "Recall@10": 0.00038617079000679736,
+        "HitRate@10": 0.00038617079000679736,
+        "NDCG@10": 0.0001754589899032338,
+        "Recall@20": 0.0007723415800135947,
+        "HitRate@20": 0.0007723415800135947,
+        "NDCG@20": 0.00027187460029072795,
+        "MRR": 0.00041471077018106784,
+        "median_rank": 12949.5,
+        "mean_relative_rank": 0.5000193085395005
+      }
+    }
+  },
+  "cold_start_info": {
+    "n_cold_items": 1295,
+    "pool_size": 7771,
+    "pool_first_ts_cutoff": "2021-04-29 18:48:30.152599854+00:00",
+    "n_cold_test_cases": 1142,
+    "n_users_losing_val_case": 843,
+    "n_users_unusable_for_training": 0,
+    "train_interactions_removed": 13445
+  },
+  "verified_files": {
+    "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+    "rec_eval.py": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+    "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+    "eval/eval_protocol.json": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+    "eval/neg_val.npy": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+    "eval/neg_test.npy": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+    "eval/eval_cases.parquet": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+    "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+    "groups/user_groups.parquet": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584",
+    "cold_start/cold_items.npy": "ea134b727b62e4b492537010b14d36538cfbd7ed68613a27b2e290269341e7df",
+    "cold_start/cold_sequences.parquet": "2fdff9788a397f3d43447cb05c63f4c74a509f39345d18a2d93460f4c8e11ef0",
+    "cold_start/cold_start_info.json": "16a6d8de2b57f5b605f504e1ea905a8396a51591e6a858eed3ffc9354d3e80d1",
+    "item_text.parquet": "39dbd1ac817df3383def7c677fca830aaf36cfe470e1c0612c543486e6b8909d"
+  }
+}

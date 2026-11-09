@@ -1,0 +1,89 @@
+{
+  "training": {
+    "epochs": 200,
+    "patience": 10,
+    "optimizer": "Adam",
+    "learning_rate": 0.0005,
+    "weight_decay": 0.0,
+    "seed": 42,
+    "device": "cuda",
+    "min_delta": 0.0,
+    "grad_clip_norm": 1.0,
+    "lr_step_size": null,
+    "lr_gamma": null
+  },
+  "trainer_options": {
+    "selection_start_epoch": 1,
+    "epoch_fn": null
+  },
+  "metadata": {
+    "selection_split": "val",
+    "selection_metric": "NDCG@10",
+    "sampled": false,
+    "model_hyperparameters": {
+      "hidden_size": 128,
+      "dropout": 0.5,
+      "learning_rate": 0.0005
+    },
+    "model_layers": 2,
+    "model_heads": 1,
+    "max_seq_len": 50,
+    "batch_size": 128,
+    "eval_batch_size": 128,
+    "sliding_window": false,
+    "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "verified_files": {
+      "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "rec_eval.py": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+      "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+      "eval/eval_protocol.json": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+      "eval/neg_val.npy": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+      "eval/neg_test.npy": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+      "eval/eval_cases.parquet": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+      "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+      "groups/user_groups.parquet": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584"
+    },
+    "purpose": "cold_start_variant_model0_single_config_training",
+    "variant": "cold_start",
+    "legacy_tie_policy_unresolved": false,
+    "tie_policy": {
+      "name": "average_rank_then_metrics",
+      "status": "team_accepted_frozen_convention",
+      "definition": "rank = 1 + num_greater + num_equal_others / 2; metrics use that rank",
+      "limitation": "Not the expected metrics over random orderings of tied items"
+    },
+    "reference_run": "/content/drive/MyDrive/DATA 298A/model0_real_results/runs/seed_42",
+    "reference_seed": 42,
+    "reference_run_config_sha256": "114fc6c6f6fb10002bcdbef9aab7ba8b203d5ce53b6339eb71e9af6a1b9be6cc",
+    "cold_files": {
+      "cold_start/cold_items.npy": "ea134b727b62e4b492537010b14d36538cfbd7ed68613a27b2e290269341e7df",
+      "cold_start/cold_sequences.parquet": "2fdff9788a397f3d43447cb05c63f4c74a509f39345d18a2d93460f4c8e11ef0",
+      "cold_start/cold_start_info.json": "16a6d8de2b57f5b605f504e1ea905a8396a51591e6a858eed3ffc9354d3e80d1"
+    },
+    "test_evaluated": false,
+    "train_users": 56017,
+    "validation_users": 55174,
+    "cold_source_sha256": {
+      "src/evaluation/cold_start.py": "bda06a90f75b792ad16edaedd7c13693524c9294264650de40b608e8f5d97980",
+      "src/evaluation/cold_start_data.py": "e5a02afcca1fdf8c23a2e2f1c04968c9b39e7b74144f6ead7141d4b64cf4cc55",
+      "src/evaluation/common.py": "ff90a2012da86f1d5e6e1faa36ddfebe6b9066502768dddeeb4837d5df7b6b5c",
+      "src/evaluation/multi_seed.py": "069cfdb9b6fe30089ec2cb34e22b78ef84fde3e04d0e02a6e006637bb2bc862b"
+    },
+    "commit": null,
+    "source_sha256": {
+      "src/data/sequence_dataset.py": "f8fd332771dea78a997f0e7385bd69fa416a4f446278d942124f48d963e73757",
+      "src/models/sasrec.py": "ea84e7d84529fdb14a21fd280dae51b4994d48073998ab4f5ac3f13269ed153b",
+      "src/training/trainer.py": "0542ddecc593528f6248b5a6fe5e89e734517d6ee6e7f4370e127fbcd3e323f5",
+      "src/training/train.py": "31b78be698cc0f5d6dd40125b868d8040a96dd2a15ade2e682299f2e64ed7a75",
+      "src/training/config.py": "3a46cb93f04047a7f3670f7be99e655f126b81a3c73ea858e83c18051abc432e",
+      "src/training/integration_check.py": "e4b96a8c7f9fe5d6eb4acca62126c18c7d2f9b9613c03e9f9c9dfdbb7ec7e030"
+    },
+    "versions": {
+      "python": "3.13.16",
+      "torch": "2.14.1+cu130",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2"
+    }
+  },
+  "resume_from": null
+}
