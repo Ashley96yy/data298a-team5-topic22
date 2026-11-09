@@ -621,5 +621,43 @@
       ]
     }
   },
-  "tie_break_weight": 1e-06
+  "tie_break_weight": 1e-06,
+  "provenance": {
+    "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "verified_files": {
+      "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "rec_eval.py": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+      "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+      "eval/eval_protocol.json": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+      "eval/neg_val.npy": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+      "eval/neg_test.npy": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+      "eval/eval_cases.parquet": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+      "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+      "groups/user_groups.parquet": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584"
+    },
+    "dataset": {
+      "n_users": 56017,
+      "n_items": 25903,
+      "max_seq_len": 50,
+      "cases": {
+        "val": 56017,
+        "test": 56017
+      }
+    },
+    "code": {
+      "git_commit": "c1cd18b0a17bf00c8547f2ef7691605db64f3416",
+      "simple_py_sha256": "1e188f3778acdcf08ccb76604e41cfc1941e92cafdd85e1249573af780c34e91"
+    },
+    "environment": {
+      "python": "3.11.18",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2",
+      "scipy": "1.17.1"
+    },
+    "scorers": {
+      "popularity_term": "fixed additive: 1e-6 * popularity scaled to max 1, added to the co-occurrence scorers",
+      "itemknn": "cosine similarity, unpruned (no neighbour k), summed over the evaluator input window",
+      "input_window": "last max_seq_len items as supplied by the frozen evaluator"
+    }
+  }
 }
