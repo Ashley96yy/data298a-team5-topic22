@@ -69,7 +69,7 @@ The warm control matches the main test result, so the cold-variant models traine
 ## Commands
 
 Run from the repository root with the frozen data in `data/processed`. The Colab notebook that ran
-them is `notebooks/model_experiments/11_model0_test_and_cold_start_colab.ipynb`.
+them is `notebooks/model_experiments/12_model0_test_and_cold_start_colab.ipynb`.
 
 ```sh
 python -B -m src.evaluation.multi_seed evaluate --device cuda \
