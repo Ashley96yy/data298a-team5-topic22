@@ -1,0 +1,18 @@
+{
+  "kind": "category",
+  "value": "Skin Care",
+  "seed": 42,
+  "expected_after_kcore": {
+    "users": 56017,
+    "items": 25903,
+    "interactions": 501399
+  },
+  "mean_seq_len": 8.95,
+  "reason": "Sub-category within the user and item targets with the longest average sequence: a coherent catalog gives sharper item semantics for Model 1 while keeping enough users for Models 2 and 4.",
+  "targets": {
+    "min_users": 20000,
+    "max_users": 150000,
+    "min_items": 3000,
+    "max_items": 50000
+  }
+}

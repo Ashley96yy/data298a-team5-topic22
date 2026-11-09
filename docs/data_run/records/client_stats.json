@@ -1,0 +1,26 @@
+{
+  "n_clients": 56017,
+  "category_level_for_non_iid": "cat_l2",
+  "local_train_size": {
+    "count": 56017.0,
+    "mean": 6.95,
+    "std": 15.8,
+    "min": 3.0,
+    "10%": 3.0,
+    "50%": 4.0,
+    "90%": 10.0,
+    "max": 909.0
+  },
+  "local_size_gini": 0.4466,
+  "kl_to_global": {
+    "count": 56017.0,
+    "mean": 0.6129,
+    "std": 0.4428,
+    "min": 0.0114,
+    "10%": 0.21,
+    "50%": 0.5048,
+    "90%": 1.1206,
+    "max": 3.8359
+  },
+  "share_clients_single_category": 0.1796
+}

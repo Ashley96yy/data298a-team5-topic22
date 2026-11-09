@@ -1,0 +1,59 @@
+{
+  "steps": [
+    {
+      "step": "drop missing ids / rating / timestamp",
+      "rows_before": 6624441,
+      "rows_after": 6624441,
+      "removed": 0,
+      "note": ""
+    },
+    {
+      "step": "drop ratings outside 1-5",
+      "rows_before": 6624441,
+      "rows_after": 6624441,
+      "removed": 0,
+      "note": ""
+    },
+    {
+      "step": "drop timestamps outside 1996-2023",
+      "rows_before": 6624441,
+      "rows_after": 6624441,
+      "removed": 0,
+      "note": "detected unit = ms"
+    },
+    {
+      "step": "drop exact duplicate rows",
+      "rows_before": 6624441,
+      "rows_after": 6624441,
+      "removed": 0,
+      "note": ""
+    },
+    {
+      "step": "repeat purchases: keep earliest per user-item",
+      "rows_before": 6624441,
+      "rows_after": 6624441,
+      "removed": 0,
+      "note": ""
+    },
+    {
+      "step": "metadata: drop duplicate parent_asin",
+      "rows_before": 207649,
+      "rows_after": 207649,
+      "removed": 0,
+      "note": ""
+    },
+    {
+      "step": "drop interactions on items without title/metadata",
+      "rows_before": 6624441,
+      "rows_after": 6624230,
+      "removed": 211,
+      "note": "enabled"
+    }
+  ],
+  "final": {
+    "interactions": 6624230,
+    "users": 729576,
+    "items": 207640,
+    "metadata_rows": 207649
+  }
+}

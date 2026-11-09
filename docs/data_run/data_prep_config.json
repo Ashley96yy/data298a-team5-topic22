@@ -1,0 +1,56 @@
+{
+  "dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+  "urls": {
+    "ratings_5core": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/5core/rating_only/Beauty_and_Personal_Care.csv.gz",
+    "metadata": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories/meta_Beauty_and_Personal_Care.jsonl.gz",
+    "reviews": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/review_categories/Beauty_and_Personal_Care.jsonl.gz"
+  },
+  "expected_5core": {
+    "users": 729600,
+    "items": 207600,
+    "ratings": 6600000
+  },
+  "seed": 42,
+  "kcore": 5,
+  "max_seq_len": 50,
+  "repeat_policy": "keep_first",
+  "drop_items_without_title": true,
+  "subset_targets": {
+    "min_users": 20000,
+    "max_users": 150000,
+    "min_items": 3000,
+    "max_items": 50000
+  },
+  "subset_top_categories": 8,
+  "user_sample_sizes": [
+    50000,
+    100000,
+    150000
+  ],
+  "n_sampled_negatives": 100,
+  "user_length_bins": [
+    3,
+    5,
+    10
+  ],
+  "item_pop": {
+    "head_frac": 0.2,
+    "tail_frac": 0.5
+  },
+  "cold_start": {
+    "item_frac": 0.05,
+    "newest_pool_frac": 0.3
+  },
+  "text": {
+    "max_desc_words": 300,
+    "max_item_text_words": 256,
+    "n_review_snippets": 3,
+    "review_snippet_words": 60
+  },
+  "include_review_text": true,
+  "eval_ks": [
+    5,
+    10,
+    20
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "created_utc": "2026-10-18T03:19:49.529511+00:00",
+  "dataset_info": {
+    "dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+    "n_users": 56017,
+    "n_items": 25903,
+    "n_interactions": 501399,
+    "padding_idx": 0,
+    "item_idx_range": [
+      1,
+      25903
+    ],
+    "max_seq_len": 50,
+    "kcore": 5,
+    "split": "chronological leave-one-out (last = test, second-last = val)",
+    "subset": {
+      "kind": "category",
+      "value": "Skin Care",
+      "seed": 42,
+      "expected_after_kcore": {
+        "users": 56017,
+        "items": 25903,
+        "interactions": 501399
+      },
+      "mean_seq_len": 8.95,
+      "reason": "Sub-category within the user and item targets with the longest average sequence: a coherent catalog gives sharper item semantics for Model 1 while keeping enough users for Models 2 and 4.",
+      "targets": {
+        "min_users": 20000,
+        "max_users": 150000,
+        "min_items": 3000,
+        "max_items": 50000
+      }
+    },
+    "seed": 42
+  },
+  "config": {
+    "dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+    "urls": {
+      "ratings_5core": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/5core/rating_only/Beauty_and_Personal_Care.csv.gz",
+      "metadata": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories/meta_Beauty_and_Personal_Care.jsonl.gz",
+      "reviews": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/review_categories/Beauty_and_Personal_Care.jsonl.gz"
+    },
+    "expected_5core": {
+      "users": 729600,
+      "items": 207600,
+      "ratings": 6600000
+    },
+    "seed": 42,
+    "kcore": 5,
+    "max_seq_len": 50,
+    "repeat_policy": "keep_first",
+    "drop_items_without_title": true,
+    "subset_targets": {
+      "min_users": 20000,
+      "max_users": 150000,
+      "min_items": 3000,
+      "max_items": 50000
+    },
+    "subset_top_categories": 8,
+    "user_sample_sizes": [
+      50000,
+      100000,
+      150000
+    ],
+    "n_sampled_negatives": 100,
+    "user_length_bins": [
+      3,
+      5,
+      10
+    ],
+    "item_pop": {
+      "head_frac": 0.2,
+      "tail_frac": 0.5
+    },
+    "cold_start": {
+      "item_frac": 0.05,
+      "newest_pool_frac": 0.3
+    },
+    "text": {
+      "max_desc_words": 300,
+      "max_item_text_words": 256,
+      "n_review_snippets": 3,
+      "review_snippet_words": 60
+    },
+    "include_review_text": true,
+    "eval_ks": [
+      5,
+      10,
+      20
+    ]
+  },
+  "source_files": {
+    "ratings_5core": {
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/5core/rating_only/Beauty_and_Personal_Care.csv.gz",
+      "sha256": "9fc6ec128ade54b4adb7f79909fd765e320ae19b5e0f3eecddd9bdcef1da0d89",
+      "bytes": 112243398,
+      "rows": 6624441
+    },
+    "metadata": {
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories/meta_Beauty_and_Personal_Care.jsonl.gz",
+      "sha256": "9b5ff26c24368f8844637e01f6c3190e00933a776d36afb4ae00b5074b1375c0",
+      "bytes": 711243207,
+      "lines_scanned": 1028914,
+      "rows_kept": 207649
+    }
+  },
+  "processed_files": {
+    "clients/client_stats.json": {
+      "sha256": "cc0bce2cefba8465c796c3302dbe6bea94e955f488421d90d9b4a314d81bc655",
+      "bytes": 484
+    },
+    "clients/clients.parquet": {
+      "sha256": "0b37d0ee2fcbc212c1313ee206a64e1c54785432cfa65f94af6d3f03575a3099",
+      "bytes": 588882
+    },
+    "cold_start/cold_items.npy": {
+      "sha256": "ea134b727b62e4b492537010b14d36538cfbd7ed68613a27b2e290269341e7df",
+      "bytes": 5308
+    },
+    "cold_start/cold_sequences.parquet": {
+      "sha256": "2fdff9788a397f3d43447cb05c63f4c74a509f39345d18a2d93460f4c8e11ef0",
+      "bytes": 1552009
+    },
+    "cold_start/cold_start_info.json": {
+      "sha256": "16a6d8de2b57f5b605f504e1ea905a8396a51591e6a858eed3ffc9354d3e80d1",
+      "bytes": 252
+    },
+    "dataset_info.json": {
+      "sha256": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "bytes": 873
+    },
+    "eval/eval_cases.parquet": {
+      "sha256": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+      "bytes": 916125
+    },
+    "eval/eval_protocol.json": {
+      "sha256": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+      "bytes": 711
+    },
+    "eval/neg_test.npy": {
+      "sha256": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+      "bytes": 22406928
+    },
+    "eval/neg_val.npy": {
+      "sha256": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+      "bytes": 22406928
+    },
+    "groups/item_groups.parquet": {
+      "sha256": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+      "bytes": 189255
+    },
+    "groups/user_groups.parquet": {
+      "sha256": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584",
+      "bytes": 408058
+    },
+    "interaction_side_info.parquet": {
+      "sha256": "c57e8b6b642a931d9a6b544952304f57f5d0ab482e878ba2ec166b129fada986",
+      "bytes": 2080058
+    },
+    "interactions.parquet": {
+      "sha256": "298cab581ac90b44504d512b6c706f4616ea93affa8e601be58158a8252c4905",
+      "bytes": 8191118
+    },
+    "item_map.parquet": {
+      "sha256": "f4234bcbb482e9a3a621227cc2f78a45c6015654e7917e4eab4db4e4bcd2959f",
+      "bytes": 423500
+    },
+    "item_text.parquet": {
+      "sha256": "39dbd1ac817df3383def7c677fca830aaf36cfe470e1c0612c543486e6b8909d",
+      "bytes": 48307033
+    },
+    "items.parquet": {
+      "sha256": "dfe0f8baaba3b6f537eb72ea39fe36ba71cb4c27f5dcac91e68fb1d4158e742f",
+      "bytes": 29542812
+    },
+    "leakage_report.json": {
+      "sha256": "8a9d88de6d33dd8837927a2127b67a453a3fd5e93d83471d935072f98fbe8c0e",
+      "bytes": 808
+    },
+    "rec_eval.py": {
+      "sha256": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+      "bytes": 7180
+    },
+    "sequences.parquet": {
+      "sha256": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+      "bytes": 5612892
+    },
+    "train_reviews.parquet": {
+      "sha256": "a4656ff1e82d20e11313cfe7ceff7d6122ea63777ae1b38bbb6d2a89f9f0e9e1",
+      "bytes": 98661129
+    },
+    "user_map.parquet": {
+      "sha256": "1ce97379a0abaa6cc1a37c5c63c7a9ab020b13703da4916f587ff182e64f7697",
+      "bytes": 1883701
+    }
+  },
+  "versions": {
+    "python": "3.13.16",
+    "pandas": "2.2.3",
+    "numpy": "2.1.3"
+  }
+}

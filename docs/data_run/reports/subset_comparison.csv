@@ -1,0 +1,12 @@
+kind,value,kcore_iterations,users,items,interactions,density_pct,mean_per_user,median_per_user,mean_per_item,median_per_item,retained_pct_of_candidate,seconds,passes_users,passes_items,passes
+category,Hair Care,16,66435,30248,572312,0.02848,8.61,6.0,18.92,11.0,34.8,8.5,True,True,True
+category,Skin Care,15,56017,25903,501399,0.03456,8.95,6.0,19.36,11.0,35.1,8.3,True,True,True
+category,Makeup,12,33422,11020,277836,0.07544,8.31,6.0,25.21,11.0,30.0,5.4,True,True,True
+category,"Foot, Hand & Nail Care",12,43618,16756,385144,0.0527,8.83,6.0,22.99,11.0,42.4,8.3,True,True,True
+category,Tools & Accessories,20,11487,7074,97442,0.11992,8.48,6.0,13.77,9.0,14.4,7.0,False,True,False
+category,Shave & Hair Removal,14,12522,4631,95439,0.16458,7.62,6.0,20.61,10.0,25.1,7.0,False,True,False
+category,Personal Care,15,1545,1642,18393,0.72502,11.9,8.0,11.2,9.0,6.7,4.1,False,False,False
+category,Fragrance,13,5176,2000,37285,0.36017,7.2,6.0,18.64,10.0,16.3,4.0,False,False,False
+user_sample,50000,25,18341,11686,144835,0.06757,7.9,6.0,12.39,8.0,31.3,10.5,False,True,False
+user_sample,100000,19,59042,32508,491631,0.02561,8.33,6.0,15.12,8.0,53.7,9.9,True,True,True
+user_sample,150000,13,105690,53284,903220,0.01604,8.55,6.0,16.95,8.0,66.2,6.9,True,False,False

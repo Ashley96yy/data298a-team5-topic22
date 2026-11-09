@@ -1,0 +1,9 @@
+{
+  "n_cold_items": 1295,
+  "pool_size": 7771,
+  "pool_first_ts_cutoff": "2021-04-29 18:48:30.152599854+00:00",
+  "n_cold_test_cases": 1142,
+  "n_users_losing_val_case": 843,
+  "n_users_unusable_for_training": 0,
+  "train_interactions_removed": 13445
+}

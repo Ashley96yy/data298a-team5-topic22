@@ -1,0 +1,35 @@
+{
+  "main": "full_catalog_ranking",
+  "mask_history": true,
+  "history_definition": {
+    "val": "train_items",
+    "test": "train_items + [val_item]"
+  },
+  "secondary": "100_uniform_sampled_negatives",
+  "negatives_files": {
+    "val": "eval/neg_val.npy",
+    "test": "eval/neg_test.npy"
+  },
+  "negatives_row_order": "same as sequences.parquet (sorted by user_idx)",
+  "metrics": [
+    "Recall@K",
+    "NDCG@K",
+    "HitRate@K",
+    "MRR",
+    "Coverage@K",
+    "ILD@K (category)"
+  ],
+  "ks": [
+    5,
+    10,
+    20
+  ],
+  "max_seq_len": 50,
+  "padding_idx": 0,
+  "model_selection": "early stopping on validation NDCG@10; test evaluated once at the end",
+  "seeds_to_report": [
+    42,
+    43,
+    44
+  ]
+}
