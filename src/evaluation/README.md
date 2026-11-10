@@ -116,10 +116,12 @@ Reference run on the frozen data (no model, 2026-11-05):
 | Chance level, new products | 0.0004 | 0.0002 | 0.00041 | 12,948 | 0.500 |
 | Popularity, warm control | 0.0256 | 0.0134 | 0.01326 | 2,222 | 0.238 |
 
-Expect Model 0 to look like popularity on new products, not like chance. Full
+Model 0 behaves like popularity on new products, not like chance (relative rank
+0.940 over seeds 42, 43 and 44; `docs/project_notes/model0_test_20261108`). Full
 softmax training uses every catalog item as a negative, so the embeddings of
-products that never appear as a target are pushed down. That is the gap Model 1
-(item text embeddings) is meant to close.
+products that never appear as a target are pushed down. Profile distillation
+does not change this, because those ID embeddings are still never trained. The
+item-text embedding variant of Model 1 is the one meant to close the gap.
 
 ## Tests
 
