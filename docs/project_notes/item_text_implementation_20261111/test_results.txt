@@ -1,0 +1,279 @@
+test_adding_a_product_changes_the_recommendations (test_app.AppTests.test_adding_a_product_changes_the_recommendations) ... 2026-11-11 07:57:04.970 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_loading_a_real_example_user_fills_the_history (test_app.AppTests.test_loading_a_real_example_user_fills_the_history) ... 2026-11-11 07:57:05.311 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_starts_without_exceptions_and_shows_cold_start_recommendations (test_app.AppTests.test_starts_without_exceptions_and_shows_cold_start_recommendations) ... 2026-11-11 07:57:05.402 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_monitor_page_renders_real_numbers (test_app.MonitorPageTests.test_monitor_page_renders_real_numbers) ... 2026-11-11 07:57:05.478 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_live_model_is_selectable_and_serves_a_real_example (test_app_sasrec.SASRecPageTests.test_live_model_is_selectable_and_serves_a_real_example) ... 2026-11-11 07:57:05.810 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_restored_predictions_and_relocated_artifacts (test_checkpoints.SelectedCheckpointTests.test_restored_predictions_and_relocated_artifacts) ... epoch=1 loss=2.427460 val_NDCG@10=0.200000
+ok
+test_grid_is_complete_and_independent (test_config.ConfigurationTests.test_grid_is_complete_and_independent) ... ok
+test_ready_configuration (test_config.ConfigurationTests.test_ready_configuration) ... ok
+test_rejects_invalid_settings (test_config.ConfigurationTests.test_rejects_invalid_settings) ... ok
+test_template_cannot_run (test_config.ConfigurationTests.test_template_cannot_run) ... ok
+test_alpha_zero_matches_plain_recommendation_step (test_distill.EpochTests.test_alpha_zero_matches_plain_recommendation_step) ... ok
+test_distillation_moves_pooled_representation_toward_target (test_distill.EpochTests.test_distillation_moves_pooled_representation_toward_target) ... ok
+test_epoch_fn_follows_the_schedule (test_distill.EpochTests.test_epoch_fn_follows_the_schedule) ... ok
+test_rejects_misaligned_padding (test_distill.EpochTests.test_rejects_misaligned_padding) ... ok
+test_same_seed_same_losses (test_distill.EpochTests.test_same_seed_same_losses) ... ok
+test_alpha_zero_returns_model_loss_exactly (test_distill.LossTests.test_alpha_zero_returns_model_loss_exactly) ... ok
+test_beta_carries_no_gradient (test_distill.LossTests.test_beta_carries_no_gradient) ... ok
+test_beta_off_uses_unit_weight (test_distill.LossTests.test_beta_off_uses_unit_weight) ... ok
+test_distill_loss_uses_only_valid_rows (test_distill.LossTests.test_distill_loss_uses_only_valid_rows) ... ok
+test_distill_loss_with_no_valid_rows_is_zero (test_distill.LossTests.test_distill_loss_with_no_valid_rows_is_zero) ... ok
+test_rejects_bad_alpha (test_distill.LossTests.test_rejects_bad_alpha) ... ok
+test_all_padding_row_is_zero_not_nan (test_distill.PoolingTests.test_all_padding_row_is_zero_not_nan) ... ok
+test_padding_positions_are_excluded (test_distill.PoolingTests.test_padding_positions_are_excluded) ... ok
+test_stage_switch (test_distill.ScheduleTests.test_stage_switch) ... ok
+test_lookup_and_validity (test_distill.TargetTests.test_lookup_and_validity) ... ok
+test_pca_is_deterministic_standardised_and_train_fit_only (test_distill.TargetTests.test_pca_is_deterministic_standardised_and_train_fit_only) ... ok
+test_pca_rejects_nonfinite_input (test_distill.TargetTests.test_pca_rejects_nonfinite_input) ... ok
+test_pca_rejects_too_many_components (test_distill.TargetTests.test_pca_rejects_too_many_components) ... ok
+test_rejects_duplicates_nonfinite_and_out_of_range (test_distill.TargetTests.test_rejects_duplicates_nonfinite_and_out_of_range) ... ok
+test_declared_runtime_passes (test_environment_check.EnvironmentCheckTests.test_declared_runtime_passes) ... ok
+test_missing_cuda_and_incomplete_target_fail (test_environment_check.EnvironmentCheckTests.test_missing_cuda_and_incomplete_target_fail) ... ok
+test_version_drift_and_missing_packages_fail (test_environment_check.EnvironmentCheckTests.test_version_drift_and_missing_packages_fail) ... ok
+test_removed_items_masked_and_ranks_counted (test_evaluation.ColdEvaluationTests.test_removed_items_masked_and_ranks_counted) ... ok
+test_duplicate_seeds_main_runs_and_other_data_are_refused (test_evaluation.ColdRunCheckTests.test_duplicate_seeds_main_runs_and_other_data_are_refused) ... ok
+test_full_runs_on_the_team_configuration_pass (test_evaluation.ColdRunCheckTests.test_full_runs_on_the_team_configuration_pass) ... ok
+test_off_configuration_runs_are_refused_even_when_partial_is_allowed (test_evaluation.ColdRunCheckTests.test_off_configuration_runs_are_refused_even_when_partial_is_allowed) ... ok
+test_partial_validation_needs_explicit_permission (test_evaluation.ColdRunCheckTests.test_partial_validation_needs_explicit_permission) ... ok
+test_chance_matches_brute_force (test_evaluation.ColdVariantTests.test_chance_matches_brute_force) ... ok
+test_load_checks_and_removed_items (test_evaluation.ColdVariantTests.test_load_checks_and_removed_items) ... ok
+test_load_rejects_cold_item_left_in_training (test_evaluation.ColdVariantTests.test_load_rejects_cold_item_left_in_training) ... ok
+test_mask_items_hides_only_that_users_items (test_evaluation.ColdVariantTests.test_mask_items_hides_only_that_users_items) ... ok
+test_popularity_never_scores_cold_items (test_evaluation.ColdVariantTests.test_popularity_never_scores_cold_items) ... ok
+test_test_view_keeps_history_and_removes_placeholder (test_evaluation.ColdVariantTests.test_test_view_keeps_history_and_removes_placeholder) ... ok
+test_empty_settings_and_missing_grid_index_are_refused (test_evaluation.ConfigurationCheckTests.test_empty_settings_and_missing_grid_index_are_refused) ... ok
+test_every_setting_and_the_seed_are_compared (test_evaluation.ConfigurationCheckTests.test_every_setting_and_the_seed_are_compared) ... ok
+test_expanded_config_takes_no_grid_index (test_evaluation.ConfigurationCheckTests.test_expanded_config_takes_no_grid_index) ... ok
+test_missing_optimizer_and_scheduler_records_are_rejected (test_evaluation.ConfigurationCheckTests.test_missing_optimizer_and_scheduler_records_are_rejected) ... ok
+test_partial_reasons_cover_training_and_validation (test_evaluation.ConfigurationCheckTests.test_partial_reasons_cover_training_and_validation) ... ok
+test_shared_handoff_rejects_identical_off_policy_runs (test_evaluation.ConfigurationCheckTests.test_shared_handoff_rejects_identical_off_policy_runs) ... ok
+test_evaluate_once_then_aggregate (test_evaluation.MultiSeedTests.test_evaluate_once_then_aggregate) ... epoch=1 loss=2.420732 val_NDCG@10=0.369106
+epoch=2 loss=2.394017 val_NDCG@10=0.374825
+epoch=1 loss=2.389211 val_NDCG@10=0.696721
+epoch=2 loss=2.360685 val_NDCG@10=0.680047
+seed 42: test NDCG@10 = 0.6934
+seed 43: test NDCG@10 = 0.6045
+ok
+test_partial_validation_is_refused_unless_allowed (test_evaluation.MultiSeedTests.test_partial_validation_is_refused_unless_allowed) ... seed 42: reusing existing test evaluation
+# Unit model: test results over seeds 42, 43
+
+Mean ± sample standard deviation over 2 seeds, 4 test users. Selection used validation NDCG@10 only.
+
+| Model | Recall@10 | NDCG@10 | Recall@20 | NDCG@20 | MRR |
+|---|---|---|---|---|---|
+| Unit model, full catalog | 1.0000 ± 0.0000 | 0.6489 ± 0.0629 |  |  | 0.5396 ± 0.0854 |
+| Unit model, 100 sampled negatives | 1.0000 ± 0.0000 | 0.9288 ± 0.1006 |  |  | 0.9062 ± 0.1326 |
+
+| Model | Coverage@10 | Coverage@20 | ILD@10 |
+|---|---|---|---|
+| Unit model, full catalog | 1.1000 ± 0.0000 |  | 0.3000 ± 0.0000 |
+
+| Grouping | Group | Cases | Recall@10 | NDCG@10 | MRR |
+|---|---|---|---|---|---|
+| user_group | long | 2 | 1.0000 ± 0.0000 | 0.6121 ± 0.1150 | 0.4875 ± 0.1591 |
+| user_group | short | 2 | 1.0000 ± 0.0000 | 0.6858 ± 0.0108 | 0.5917 ± 0.0118 |
+| target_item_group | head | 2 | 1.0000 ± 0.0000 | 0.6858 ± 0.0108 | 0.5917 ± 0.0118 |
+| target_item_group | tail | 2 | 1.0000 ± 0.0000 | 0.6121 ± 0.1150 | 0.4875 ± 0.1591 |
+
+epoch=1 loss=2.420732 val_NDCG@10=0.369106
+epoch=2 loss=2.394017 val_NDCG@10=0.374825
+epoch=1 loss=2.389211 val_NDCG@10=0.696721
+epoch=2 loss=2.360685 val_NDCG@10=0.680047
+ok
+test_rejects_mixed_settings_and_partial_runs (test_evaluation.MultiSeedTests.test_rejects_mixed_settings_and_partial_runs) ... epoch=1 loss=2.420732 val_NDCG@10=0.369106
+epoch=2 loss=2.394017 val_NDCG@10=0.374825
+epoch=1 loss=2.389211 val_NDCG@10=0.696721
+epoch=2 loss=2.360685 val_NDCG@10=0.680047
+ok
+test_runs_must_match_the_team_configuration (test_evaluation.MultiSeedTests.test_runs_must_match_the_team_configuration) ... epoch=1 loss=2.420732 val_NDCG@10=0.369106
+epoch=2 loss=2.394017 val_NDCG@10=0.374825
+epoch=1 loss=2.389211 val_NDCG@10=0.696721
+epoch=2 loss=2.360685 val_NDCG@10=0.680047
+ok
+test_train_refuses_user_limits_without_permission (test_evaluation.MultiSeedTests.test_train_refuses_user_limits_without_permission) ... epoch=1 loss=2.420732 val_NDCG@10=0.369106
+epoch=2 loss=2.394017 val_NDCG@10=0.374825
+epoch=1 loss=2.389211 val_NDCG@10=0.696721
+epoch=2 loss=2.360685 val_NDCG@10=0.680047
+ok
+test_aggregate_requires_same_metrics (test_evaluation.SeedStatsTests.test_aggregate_requires_same_metrics) ... ok
+test_groups_must_cover_same_cases (test_evaluation.SeedStatsTests.test_groups_must_cover_same_cases) ... ok
+test_markdown_table (test_evaluation.SeedStatsTests.test_markdown_table) ... ok
+test_sample_std_and_single_run (test_evaluation.SeedStatsTests.test_sample_std_and_single_run) ... ok
+test_eight_runs_select_validation_winner_and_roundtrip_config (test_grid_search.GridSearchTests.test_eight_runs_select_validation_winner_and_roundtrip_config) ... Running configuration 1/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.001}
+Running configuration 2/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.0005}
+Running configuration 3/8: {'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.001}
+Running configuration 4/8: {'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.0005}
+Running configuration 5/8: {'hidden_size': 128, 'dropout': 0.2, 'learning_rate': 0.001}
+Running configuration 6/8: {'hidden_size': 128, 'dropout': 0.2, 'learning_rate': 0.0005}
+Running configuration 7/8: {'hidden_size': 128, 'dropout': 0.5, 'learning_rate': 0.001}
+Running configuration 8/8: {'hidden_size': 128, 'dropout': 0.5, 'learning_rate': 0.0005}
+ok
+test_failed_run_never_selects_partial_grid (test_grid_search.GridSearchTests.test_failed_run_never_selects_partial_grid) ... Running configuration 1/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.001}
+Running configuration 2/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.0005}
+Running configuration 3/8: {'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.001}
+ok
+test_guards_reject_before_creating_outputs (test_grid_search.GridSearchTests.test_guards_reject_before_creating_outputs) ... ok
+test_invalid_metrics_are_not_selected (test_grid_search.GridSearchTests.test_invalid_metrics_are_not_selected) ... Running configuration 1/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.001}
+ok
+test_optional_resume_cleanup_keeps_best_checkpoints (test_grid_search.GridSearchTests.test_optional_resume_cleanup_keeps_best_checkpoints) ... Running configuration 1/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.001}
+Running configuration 2/8: {'hidden_size': 64, 'dropout': 0.2, 'learning_rate': 0.0005}
+Running configuration 3/8: {'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.001}
+Running configuration 4/8: {'hidden_size': 64, 'dropout': 0.5, 'learning_rate': 0.0005}
+Running configuration 5/8: {'hidden_size': 128, 'dropout': 0.2, 'learning_rate': 0.001}
+Running configuration 6/8: {'hidden_size': 128, 'dropout': 0.2, 'learning_rate': 0.0005}
+Running configuration 7/8: {'hidden_size': 128, 'dropout': 0.5, 'learning_rate': 0.001}
+Running configuration 8/8: {'hidden_size': 128, 'dropout': 0.5, 'learning_rate': 0.0005}
+ok
+test_duplicate_missing_and_blank_items_rejected (test_item_text.EmbeddingTests.test_duplicate_missing_and_blank_items_rejected) ... ok
+test_frozen_input_sorted_and_encoded_by_id_not_file_position (test_item_text.EmbeddingTests.test_frozen_input_sorted_and_encoded_by_id_not_file_position) ... ok
+test_invalid_encoder_vectors_rejected (test_item_text.EmbeddingTests.test_invalid_encoder_vectors_rejected) ... ok
+test_mean_pooling_excludes_padding_and_cls_is_separate (test_item_text.EmbeddingTests.test_mean_pooling_excludes_padding_and_cls_is_separate) ... ok
+test_partial_embeddings_and_wrong_dataset_rejected (test_item_text.EmbeddingTests.test_partial_embeddings_and_wrong_dataset_rejected) ... ok
+test_tampered_embedding_rejected (test_item_text.EmbeddingTests.test_tampered_embedding_rejected) ... ok
+test_tampered_frozen_input_rejected (test_item_text.EmbeddingTests.test_tampered_frozen_input_rejected) ... ok
+test_unpinned_revision_rejected_before_network (test_item_text.EmbeddingTests.test_unpinned_revision_rejected_before_network) ... ok
+test_causal_padding_and_all_padding_remain_safe_with_text (test_item_text.FusionTests.test_causal_padding_and_all_padding_remain_safe_with_text) ... ok
+test_invalid_text_rejected (test_item_text.FusionTests.test_invalid_text_rejected) ... ok
+test_item_only_entrypoint_checks_sources_and_uses_validation (test_item_text.FusionTests.test_item_only_entrypoint_checks_sources_and_uses_validation) ... epoch=1 loss=2.488307 val_NDCG@10=0.200000
+epoch=2 loss=2.315572 val_NDCG@10=0.200000
+ok
+test_trainer_distillation_and_checkpoint_roundtrip (test_item_text.FusionTests.test_trainer_distillation_and_checkpoint_roundtrip) ... Saved and loaded TextSASRec checkpoint. No test evaluation performed.
+epoch=1 loss=2.215579 val_NDCG@10=0.990000
+epoch=2 loss=2.210531 val_NDCG@10=0.200000
+epoch=3 loss=2.189405 val_NDCG@10=0.300000
+ok
+test_zero_projection_starts_at_model0_and_then_learns (test_item_text.FusionTests.test_zero_projection_starts_at_model0_and_then_learns) ... ok
+test_recommendation_loss_is_what_the_trainer_logs (test_model1_integration.Model1IntegrationTests.test_recommendation_loss_is_what_the_trainer_logs) ... epoch=1 loss=2.189382 val_NDCG@10=0.100000
+epoch=2 loss=2.181372 val_NDCG@10=0.200000
+epoch=3 loss=2.177806 val_NDCG@10=0.300000
+ok
+test_stage1_is_distilled_but_never_selected_and_stage2_selects (test_model1_integration.Model1IntegrationTests.test_stage1_is_distilled_but_never_selected_and_stage2_selects) ... epoch=1 loss=2.189382 val_NDCG@10=0.990000
+epoch=2 loss=2.181372 val_NDCG@10=0.980000
+epoch=3 loss=2.185636 val_NDCG@10=0.200000
+epoch=4 loss=2.175014 val_NDCG@10=0.300000
+epoch=5 loss=2.165080 val_NDCG@10=0.400000
+ok
+test_stage1_longer_than_the_epoch_budget_is_rejected (test_model1_integration.Model1IntegrationTests.test_stage1_longer_than_the_epoch_budget_is_rejected) ... ok
+test_automated_status_overrides_the_headline (test_monitor.MonitorTests.test_automated_status_overrides_the_headline) ... ok
+test_falls_back_to_the_committed_manual_record (test_monitor.MonitorTests.test_falls_back_to_the_committed_manual_record) ... ok
+test_format_utc (test_monitor.MonitorTests.test_format_utc) ... ok
+test_missing_files_do_not_crash (test_monitor.MonitorTests.test_missing_files_do_not_crash) ... ok
+test_newest_automated_run_wins_even_if_it_failed (test_monitor.MonitorTests.test_newest_automated_run_wins_even_if_it_failed) ... ok
+test_no_run_gives_none (test_monitor.MonitorTests.test_no_run_gives_none) ... ok
+test_summary_counts_come_from_the_files (test_monitor.MonitorTests.test_summary_counts_come_from_the_files) ... ok
+test_tables (test_monitor.MonitorTests.test_tables) ... ok
+test_a_failing_notebook_stops_the_run_and_is_recorded (test_pipeline.PipelineTests.test_a_failing_notebook_stops_the_run_and_is_recorded) ... ok
+test_collect_record_reports_every_missing_file (test_pipeline.PipelineTests.test_collect_record_reports_every_missing_file) ... ok
+test_incomplete_record_is_a_failure_not_a_pass (test_pipeline.PipelineTests.test_incomplete_record_is_a_failure_not_a_pass) ... ok
+test_markdown_summary_lists_every_notebook (test_pipeline.PipelineTests.test_markdown_summary_lists_every_notebook) ... ok
+test_missing_config_after_notebook_01_fails_loudly_when_skipping_reviews (test_pipeline.PipelineTests.test_missing_config_after_notebook_01_fails_loudly_when_skipping_reviews) ... ok
+test_refuses_to_reuse_a_run_folder (test_pipeline.PipelineTests.test_refuses_to_reuse_a_run_folder) ... ok
+test_skip_reviews_patches_the_config_after_notebook_01 (test_pipeline.PipelineTests.test_skip_reviews_patches_the_config_after_notebook_01) ... ok
+test_success_runs_all_notebooks_in_order_and_writes_a_readable_record (test_pipeline.PipelineTests.test_success_runs_all_notebooks_in_order_and_writes_a_readable_record) ... ok
+test_seven_notebooks_execute_and_the_monitor_finds_the_record (test_pipeline_execution.NotebookExecutionTests.test_seven_notebooks_execute_and_the_monitor_finds_the_record) ... skipped 'needs pipeline/requirements.txt'
+test_artifacts_have_expected_counts (test_recommend.RecommenderTests.test_artifacts_have_expected_counts) ... ok
+test_empty_history_falls_back_to_popularity (test_recommend.RecommenderTests.test_empty_history_falls_back_to_popularity) ... ok
+test_history_items_are_never_recommended (test_recommend.RecommenderTests.test_history_items_are_never_recommended) ... ok
+test_k_is_capped_by_remaining_items (test_recommend.RecommenderTests.test_k_is_capped_by_remaining_items) ... ok
+test_markov_follows_most_frequent_successor (test_recommend.RecommenderTests.test_markov_follows_most_frequent_successor) ... ok
+test_missing_inputs_fail_clearly_and_leave_no_output_folder (test_recommend.RecommenderTests.test_missing_inputs_fail_clearly_and_leave_no_output_folder) ... ok
+test_registered_scorer_is_used (test_recommend.RecommenderTests.test_registered_scorer_is_used) ... ok
+test_rejects_bad_ids_and_methods (test_recommend.RecommenderTests.test_rejects_bad_ids_and_methods) ... ok
+test_search_matches_title_and_brand (test_recommend.RecommenderTests.test_search_matches_title_and_brand) ... ok
+test_future_tokens_do_not_change_past_representation (test_sasrec.ModelTests.test_future_tokens_do_not_change_past_representation) ... ok
+test_padding_has_finite_forward_and_gradients (test_sasrec.ModelTests.test_padding_has_finite_forward_and_gradients) ... ok
+test_initial_loss_is_near_chance (test_sasrec_init.InitTests.test_initial_loss_is_near_chance) ... ok
+test_padding_embedding_is_zero (test_sasrec_init.InitTests.test_padding_embedding_is_zero) ... ok
+test_all_padding_user_gives_finite_scores (test_sasrec_padding.PaddingAndConsistencyTests.test_all_padding_user_gives_finite_scores) ... ok
+test_left_padding_does_not_change_real_item_representations (test_sasrec_padding.PaddingAndConsistencyTests.test_left_padding_does_not_change_real_item_representations) ... ok
+test_next_item_scores_match_forward_last_position (test_sasrec_padding.PaddingAndConsistencyTests.test_next_item_scores_match_forward_last_position) ... ok
+test_padded_positions_are_exactly_zero (test_sasrec_padding.PaddingAndConsistencyTests.test_padded_positions_are_exactly_zero) ... ok
+test_training_logits_match_forward_on_nonpadding_targets (test_sasrec_padding.PaddingAndConsistencyTests.test_training_logits_match_forward_on_nonpadding_targets) ... ok
+test_builder_rejects_modified_frozen_input_before_writing_output (test_serving_sasrec.SASRecServingTests.test_builder_rejects_modified_frozen_input_before_writing_output) ... ok
+test_catalog_or_source_mismatch_is_rejected (test_serving_sasrec.SASRecServingTests.test_catalog_or_source_mismatch_is_rejected) ... ok
+test_changed_display_artifact_is_rejected (test_serving_sasrec.SASRecServingTests.test_changed_display_artifact_is_rejected) ... ok
+test_invalid_history_ids_and_nonfinite_weights_are_rejected (test_serving_sasrec.SASRecServingTests.test_invalid_history_ids_and_nonfinite_weights_are_rejected) ... ok
+test_left_padding_truncation_and_scores_match_training_model (test_serving_sasrec.SASRecServingTests.test_left_padding_truncation_and_scores_match_training_model) ... ok
+test_missing_frozen_manifest_is_rejected (test_serving_sasrec.SASRecServingTests.test_missing_frozen_manifest_is_rejected) ... ok
+test_registration_and_seen_item_masking (test_serving_sasrec.SASRecServingTests.test_registration_and_seen_item_masking) ... ok
+test_wrong_checkpoint_hash_is_rejected (test_serving_sasrec.SASRecServingTests.test_wrong_checkpoint_hash_is_rejected) ... ok
+test_adapter_arrays_match_teammate_notebook (test_training.DataAdapterTests.test_adapter_arrays_match_teammate_notebook) ... ok
+test_batch_contract (test_training.DataAdapterTests.test_batch_contract) ... ok
+test_cli_to_parquet_adapter_and_frozen_evaluator (test_training.RunConfigTests.test_cli_to_parquet_adapter_and_frozen_evaluator)
+All input records here are invented; execute the real CLI/shared code. ... ok
+test_manual_acknowledgments_are_removed (test_training.RunConfigTests.test_manual_acknowledgments_are_removed) ... ok
+test_resolves_one_grid_config_or_expanded_config (test_training.RunConfigTests.test_resolves_one_grid_config_or_expanded_config) ... ok
+test_unconfirmed_team_config_cannot_run (test_training.RunConfigTests.test_unconfirmed_team_config_cannot_run) ... ok
+test_best_checkpoint_and_early_stopping (test_training.TrainingTests.test_best_checkpoint_and_early_stopping) ... epoch=1 loss=2.420732 val_NDCG@10=0.400000
+epoch=2 loss=2.394017 val_NDCG@10=0.300000
+epoch=3 loss=2.387730 val_NDCG@10=0.200000
+ok
+test_empty_existing_directory_is_also_rejected (test_training.TrainingTests.test_empty_existing_directory_is_also_rejected) ... ok
+test_empty_targets_cannot_produce_a_pass (test_training.TrainingTests.test_empty_targets_cannot_produce_a_pass) ... ok
+test_epoch_resume_matches_uninterrupted_training (test_training.TrainingTests.test_epoch_resume_matches_uninterrupted_training) ... epoch=1 loss=2.420732 val_NDCG@10=0.500000
+epoch=2 loss=2.395563 val_NDCG@10=0.500000
+epoch=1 loss=2.420732 val_NDCG@10=0.500000
+epoch=2 loss=2.395563 val_NDCG@10=0.500000
+epoch=1 loss=2.420732 val_NDCG@10=0.500000
+epoch=2 loss=2.395563 val_NDCG@10=0.500000
+epoch=1 loss=2.420732 val_NDCG@10=0.500000
+epoch=2 loss=2.395563 val_NDCG@10=0.500000
+ok
+test_min_delta_does_not_discard_the_highest_scoring_checkpoint (test_training.TrainingTests.test_min_delta_does_not_discard_the_highest_scoring_checkpoint) ... epoch=1 loss=2.420732 val_NDCG@10=0.400000
+epoch=2 loss=2.394017 val_NDCG@10=0.410000
+epoch=3 loss=2.387730 val_NDCG@10=0.420000
+ok
+test_nonfinite_training_logits_are_rejected (test_training.TrainingTests.test_nonfinite_training_logits_are_rejected) ... ok
+test_refuses_to_overwrite_a_run (test_training.TrainingTests.test_refuses_to_overwrite_a_run) ... ok
+test_reject_invalid_metrics_and_records_failure (test_training.TrainingTests.test_reject_invalid_metrics_and_records_failure) ... ok
+test_rejects_bad_settings_and_missing_metric (test_training.TrainingTests.test_rejects_bad_settings_and_missing_metric) ... ok
+test_resume_rejects_changed_provenance (test_training.TrainingTests.test_resume_rejects_changed_provenance) ... epoch=1 loss=2.420732 val_NDCG@10=0.500000
+ok
+test_shared_validator_is_validation_only_and_rejects_nan (test_training.TrainingTests.test_shared_validator_is_validation_only_and_rejects_nan) ... ok
+test_training_uses_nonpadding_targets_and_updates_weights (test_training.TrainingTests.test_training_uses_nonpadding_targets_and_updates_weights) ... ok
+test_custom_epoch_replaces_default_and_receives_absolute_epoch (test_training_hooks.TrainingHookTests.test_custom_epoch_replaces_default_and_receives_absolute_epoch) ... epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.400000
+epoch=3 loss=2.168394 val_NDCG@10=0.400000
+ok
+test_default_and_plain_hook_have_identical_model0_updates (test_training_hooks.TrainingHookTests.test_default_and_plain_hook_have_identical_model0_updates) ... epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.300000
+epoch=3 loss=2.168394 val_NDCG@10=0.200000
+epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.300000
+epoch=3 loss=2.168394 val_NDCG@10=0.200000
+ok
+test_invalid_hook_arguments_fail_before_creating_run (test_training_hooks.TrainingHookTests.test_invalid_hook_arguments_fail_before_creating_run) ... ok
+test_invalid_hook_output_records_failure_without_best_checkpoint (test_training_hooks.TrainingHookTests.test_invalid_hook_output_records_failure_without_best_checkpoint) ... ok
+test_old_model0_checkpoint_can_resume_with_default_hook_settings (test_training_hooks.TrainingHookTests.test_old_model0_checkpoint_can_resume_with_default_hook_settings) ... epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.400000
+ok
+test_resume_from_stage1_matches_uninterrupted_run (test_training_hooks.TrainingHookTests.test_resume_from_stage1_matches_uninterrupted_run) ... epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.400000
+epoch=3 loss=2.175537 val_NDCG@10=0.400000
+epoch=4 loss=2.170296 val_NDCG@10=0.400000
+epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.400000
+epoch=3 loss=2.175537 val_NDCG@10=0.400000
+epoch=4 loss=2.170296 val_NDCG@10=0.400000
+ok
+test_resume_rejects_changed_hook_or_selection_start (test_training_hooks.TrainingHookTests.test_resume_rejects_changed_hook_or_selection_start) ... epoch=1 loss=2.189382 val_NDCG@10=0.400000
+epoch=2 loss=2.171904 val_NDCG@10=0.400000
+epoch=3 loss=2.168394 val_NDCG@10=0.400000
+ok
+test_stage1_neither_selects_checkpoint_nor_consumes_patience (test_training_hooks.TrainingHookTests.test_stage1_neither_selects_checkpoint_nor_consumes_patience) ... epoch=1 loss=2.189382 val_NDCG@10=0.990000
+epoch=2 loss=2.171904 val_NDCG@10=0.980000
+epoch=3 loss=2.168394 val_NDCG@10=0.400000
+epoch=4 loss=2.152741 val_NDCG@10=0.400000
+epoch=5 loss=2.140435 val_NDCG@10=0.400000
+ok
+
+----------------------------------------------------------------------
+Ran 148 tests in 8.654s
+
+OK (skipped=1)

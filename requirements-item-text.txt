@@ -1,0 +1,5 @@
+# Optional encoder dependencies. Model 0 requirements remain unchanged.
+-r requirements.txt
+transformers==4.57.1
+huggingface-hub==0.36.0
+safetensors==0.6.2

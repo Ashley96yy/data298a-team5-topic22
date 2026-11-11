@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-11",
+  "author": "Abhinita Sanabada",
+  "status": "PASS",
+  "scope": "implementation tests and 16-item encoding smoke; no full embedding/training experiment",
+  "new_tests": 13,
+  "full_suite": {
+    "total": 148,
+    "passed": 147,
+    "skipped": 1,
+    "skip_reason": "existing notebook-pipeline execution test requires pipeline/requirements.txt"
+  },
+  "python": "3.11.14",
+  "versions": {
+    "torch": "2.8.0",
+    "transformers": "4.57.1",
+    "huggingface-hub": "0.36.0",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2",
+    "pyarrow": "21.0.0"
+  },
+  "notebook_validation": "all code cells parsed; Colab authentication/GPU execution not run in this session",
+  "full_catalog_encoding_completed": false,
+  "research_training_completed": false,
+  "team_encoder_decisions_confirmed": false,
+  "new_test_names": [
+    "test_duplicate_missing_and_blank_items_rejected (test_item_text.EmbeddingTests.test_duplicate_missing_and_blank_items_rejected) ... ok",
+    "test_frozen_input_sorted_and_encoded_by_id_not_file_position (test_item_text.EmbeddingTests.test_frozen_input_sorted_and_encoded_by_id_not_file_position) ... ok",
+    "test_invalid_encoder_vectors_rejected (test_item_text.EmbeddingTests.test_invalid_encoder_vectors_rejected) ... ok",
+    "test_mean_pooling_excludes_padding_and_cls_is_separate (test_item_text.EmbeddingTests.test_mean_pooling_excludes_padding_and_cls_is_separate) ... ok",
+    "test_partial_embeddings_and_wrong_dataset_rejected (test_item_text.EmbeddingTests.test_partial_embeddings_and_wrong_dataset_rejected) ... ok",
+    "test_tampered_embedding_rejected (test_item_text.EmbeddingTests.test_tampered_embedding_rejected) ... ok",
+    "test_tampered_frozen_input_rejected (test_item_text.EmbeddingTests.test_tampered_frozen_input_rejected) ... ok",
+    "test_unpinned_revision_rejected_before_network (test_item_text.EmbeddingTests.test_unpinned_revision_rejected_before_network) ... ok",
+    "test_causal_padding_and_all_padding_remain_safe_with_text (test_item_text.FusionTests.test_causal_padding_and_all_padding_remain_safe_with_text) ... ok",
+    "test_invalid_text_rejected (test_item_text.FusionTests.test_invalid_text_rejected) ... ok",
+    "test_item_only_entrypoint_checks_sources_and_uses_validation (test_item_text.FusionTests.test_item_only_entrypoint_checks_sources_and_uses_validation) ... epoch=1 loss=2.488307 val_NDCG@10=0.200000",
+    "test_trainer_distillation_and_checkpoint_roundtrip (test_item_text.FusionTests.test_trainer_distillation_and_checkpoint_roundtrip) ... Saved and loaded TextSASRec checkpoint. No test evaluation performed.",
+    "test_zero_projection_starts_at_model0_and_then_learns (test_item_text.FusionTests.test_zero_projection_starts_at_model0_and_then_learns) ... ok"
+  ]
+}
