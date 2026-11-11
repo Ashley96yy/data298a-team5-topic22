@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "scope": "local CPU serving and Streamlit AppTest; not a hosted deployment or benchmark rerun",
+  "date": "2026-11-10",
+  "code_commit": "a866337",
+  "author": "Abhinita Sanabada",
+  "tests": {
+    "count": 30,
+    "skipped": 0,
+    "modules": [
+      "tests.test_recommend",
+      "tests.test_monitor",
+      "tests.test_app",
+      "tests.test_serving_sasrec",
+      "tests.test_app_sasrec"
+    ],
+    "real_seed42_checkpoint_ui": true
+  },
+  "versions": {
+    "python": "3.11.14",
+    "torch": "2.8.0",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2",
+    "pyarrow": "21.0.0",
+    "scipy": "1.17.1",
+    "streamlit": "1.67.0"
+  },
+  "checkpoint_sha256": "54ca6cba54f956af7b6189c5c0b98cf30d55e6412f412f7b92b184d89cbd89e9",
+  "artifacts": {
+    "schema_version": 1,
+    "n_items": 25903,
+    "source_manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "source_files": {
+      "items.parquet": "dfe0f8baaba3b6f537eb72ea39fe36ba71cb4c27f5dcac91e68fb1d4158e742f",
+      "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a"
+    },
+    "artifact_files": {
+      "items.parquet": "24dc51deb534f986fd1b403baab23dc22f45e148601c90a683e2242ccf4c58b3",
+      "popularity.npy": "358f1944b4d4f63063ac97648879ad7db5a239e265f4b95a027776a4fa18d78d",
+      "markov.npz": "11f603e36d32eacd701c94c63608bfb7af1f3c67b4cce56b605e6f0ccfc822a4",
+      "example_histories.parquet": "ce4f49c6f8a141bc1aba65319128ec34d0266b17469b93d67dd994fdfbb62fa5"
+    }
+  },
+  "n_example_users": 200,
+  "n_markov_transitions": 316168,
+  "pip_check": "No broken requirements found",
+  "hosted_deployment_completed": false,
+  "remaining_decisions": [
+    "Hosting account and host",
+    "Public/private access and dataset/artifact permission confirmation",
+    "Host-specific transfer of ignored artifacts and checkpoint",
+    "Live hosted URL and end-to-end acceptance test"
+  ]
+}
