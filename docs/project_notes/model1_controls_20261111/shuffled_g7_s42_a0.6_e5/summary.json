@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "epochs_completed": 21,
+  "best_epoch": 11,
+  "best_validation_NDCG@10": 0.045449116466214697,
+  "early_stopped": true,
+  "test_evaluated": false,
+  "checkpoint": "best.pt",
+  "metadata": {
+    "purpose": "model1_profile_distillation",
+    "selection_split": "val",
+    "selection_metric": "NDCG@10",
+    "sampled": false,
+    "tie_policy": {
+      "name": "average_rank_then_metrics",
+      "status": "team_accepted_frozen_convention",
+      "definition": "rank = 1 + num_greater + num_equal_others / 2; metrics use that rank",
+      "limitation": "Not the expected metrics over random orderings of tied items"
+    },
+    "test_evaluated": false,
+    "model_hyperparameters": {
+      "hidden_size": 128,
+      "dropout": 0.5,
+      "learning_rate": 0.0005
+    },
+    "model_layers": 2,
+    "model_heads": 1,
+    "max_seq_len": 50,
+    "batch_size": 128,
+    "train_users": 56017,
+    "validation_users": 56017,
+    "eval_batch_size": 128,
+    "sliding_window": false,
+    "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "verified_files": {
+      "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "rec_eval.py": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c",
+      "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+      "eval/eval_protocol.json": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf",
+      "eval/neg_val.npy": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e",
+      "eval/neg_test.npy": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d",
+      "eval/eval_cases.parquet": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e",
+      "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa",
+      "groups/user_groups.parquet": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584"
+    },
+    "distill_schedule": {
+      "alpha": 0.6,
+      "stage1_epochs": 5,
+      "use_beta": true
+    },
+    "profile_file_sha256": "739feea8e43f17f0ea890886255c20abaf5958b2615915528c8e11bcefcb1da9",
+    "profile_source": "shuffled_control",
+    "profile_rows": 56017,
+    "users_with_target": 56017,
+    "reduction": {
+      "method": "pca_standardised",
+      "n_components": 128,
+      "fit_on": "training users only"
+    },
+    "reduced_targets_sha256": "7bbd62a84a7d717d5f80b314c7a9a8291de9d9f891ad88a760aef1fbb95465b2",
+    "distill_source_sha256": "77bf39ab346a062bde19178aabf178e6d7879e6ea2f1cefecc5c51d823b9cd64",
+    "train_model1_sha256": "8fceae049ce435912b7e7deebcdca3244cf0993fec8a0e3ae60f6064378b1fec",
+    "commit": "0ec1a67128ef6e901aa6fb2e3397971aa90092b7",
+    "source_sha256": {
+      "src/data/sequence_dataset.py": "f8fd332771dea78a997f0e7385bd69fa416a4f446278d942124f48d963e73757",
+      "src/models/sasrec.py": "ea84e7d84529fdb14a21fd280dae51b4994d48073998ab4f5ac3f13269ed153b",
+      "src/training/trainer.py": "0542ddecc593528f6248b5a6fe5e89e734517d6ee6e7f4370e127fbcd3e323f5",
+      "src/training/train.py": "31b78be698cc0f5d6dd40125b868d8040a96dd2a15ade2e682299f2e64ed7a75",
+      "src/training/config.py": "3a46cb93f04047a7f3670f7be99e655f126b81a3c73ea858e83c18051abc432e",
+      "src/training/integration_check.py": "e4b96a8c7f9fe5d6eb4acca62126c18c7d2f9b9613c03e9f9c9dfdbb7ec7e030"
+    },
+    "versions": {
+      "python": "3.11.18",
+      "torch": "2.8.0",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2"
+    }
+  }
+}
