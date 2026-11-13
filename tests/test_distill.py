@@ -3,10 +3,12 @@ import unittest
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 
-from src.models.distill import (DistillLog, DistillSchedule, PCAReducer, ProfileTargets, combine_losses, distill_loss,
-                                make_epoch_fn, pooled_representation, train_epoch_distill)
+from src.data.sequence_dataset import make_dataloaders
+from src.models.distill import (DistillLog, DistillSchedule, PCAReducer, ProfileTargets, batch_coverage, combine_losses, distill_loss,
+                                effective_alpha, make_epoch_fn, pooled_representation, train_epoch_distill)
 from src.models.sasrec import SASRec
 
 
@@ -222,6 +224,50 @@ class DistillLogTests(unittest.TestCase):
             path.write_text('epoch,train_loss\n1,0.5\n')
             with self.assertRaises(ValueError):
                 DistillLog.read(path)
+
+
+class PartialCoverageTests(unittest.TestCase):
+    """Users without a profile must not be distorted by the few users that have one."""
+
+    def setUp(self):
+        self.torch = torch
+
+    def run_epoch(self, valid_users, alpha, n_users=8):
+        torch.manual_seed(0)
+        model = SASRec(8, max_len=4, hidden_size=8, num_heads=2, num_layers=1, dropout=0.0)
+        sequences = pd.DataFrame({'user_idx': list(range(n_users)),
+                                  'train_items': [[1 + (u % 6), 2 + (u % 5), 3] for u in range(n_users)],
+                                  'val_item': [4] * n_users, 'test_item': [5] * n_users})
+        loader = make_dataloaders(sequences, max_len=4, batch_size=n_users, seed=0, pin_memory=False)['train']
+        mask = np.zeros(n_users, dtype=bool)
+        mask[list(valid_users)] = True
+        values = np.random.default_rng(1).normal(size=(n_users, 8)).astype(np.float32)
+        targets = ProfileTargets.from_arrays(n_users, [u for u in range(n_users) if mask[u]], values[mask]) if mask.any() \
+            else ProfileTargets(n_users, 8)
+        opt = torch.optim.SGD(model.parameters(), lr=0.1)
+        train_epoch_distill(model, loader, opt, 'cpu', 1.0, targets, alpha)
+        return {k: v.clone() for k, v in model.state_dict().items()}
+
+    def test_batch_coverage_is_the_share_of_users_with_a_target(self):
+        self.assertEqual(batch_coverage(torch.tensor([True, False, False, True])), 0.5)
+        self.assertEqual(batch_coverage(torch.tensor([True, True])), 1.0)
+        self.assertEqual(batch_coverage(torch.tensor([False, False])), 0.0)
+
+    def test_a_batch_without_any_covered_user_is_exactly_the_plain_recommendation_update(self):
+        plain = self.run_epoch([], alpha=0.0)
+        none_covered = self.run_epoch([], alpha=0.6)
+        for key in plain:
+            self.assertTrue(torch.equal(plain[key], none_covered[key]), key)
+
+    def test_effective_alpha_scales_with_coverage_and_is_unchanged_at_full_coverage(self):
+        self.assertEqual(effective_alpha(0.6, torch.tensor([True, True, True])), 0.6)
+        self.assertAlmostEqual(effective_alpha(0.6, torch.tensor([True, False, False, False])), 0.15)
+        self.assertEqual(effective_alpha(0.6, torch.tensor([False, False])), 0.0)
+
+    def test_a_single_covered_user_still_changes_the_update(self):
+        plain = self.run_epoch([], alpha=0.0)
+        few = self.run_epoch([0], alpha=0.6)
+        self.assertGreater(sum(float((few[k] - plain[k]).abs().sum()) for k in plain), 0.0)
 
 
 if __name__ == '__main__':

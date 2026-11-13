@@ -123,6 +123,16 @@ def distill_loss(pooled, target, valid):
     return F.mse_loss(pooled[valid], target[valid])
 
 
+def batch_coverage(valid):
+    """Share of the users in a batch that have a profile target (0.0 to 1.0)."""
+    return float(valid.float().mean())
+
+
+def effective_alpha(alpha, valid):
+    """alpha scaled by the batch coverage: 0 when no user in the batch has a profile, alpha when all of them do."""
+    return alpha * batch_coverage(valid)
+
+
 def combine_losses(l_model, l_distill, alpha, use_beta=True, eps=1e-12):
     """L = alpha * beta * L_distill + (1 - alpha) * L_model, with beta = detach(L_model / L_distill).
 
@@ -185,7 +195,10 @@ def train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, target
         if alpha > 0.0:
             target, valid = targets.lookup(batch['user_idx'], device)
             l_distill = distill_loss(pooled_representation(hidden, x), target, valid)
-            loss = combine_losses(l_model, l_distill, alpha, use_beta)
+            # The auxiliary term is rescaled by beta to the size of the main loss, which would give even a single covered
+            # user the full weight of the batch. Scaling alpha by the share of covered users keeps the influence proportional
+            # to coverage: no covered user -> plain recommendation loss; every user covered -> exactly alpha (unchanged).
+            loss = combine_losses(l_model, l_distill, effective_alpha(alpha, valid), use_beta)
             sum_distill += float(l_distill.detach())
         else:
             loss = l_model
