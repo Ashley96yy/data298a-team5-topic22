@@ -51,8 +51,8 @@ def _version(package):
         return None
 
 
-def default_executor(notebook, executed, env, timeout):
-    subprocess.run([sys.executable, '-m', 'nbconvert', '--to', 'notebook', '--execute', str(notebook),
+def default_executor(notebook, executed, env, timeout, *, python_executable=sys.executable):
+    subprocess.run([python_executable, '-m', 'nbconvert', '--to', 'notebook', '--execute', str(notebook),
                     '--output', executed.stem, '--output-dir', str(executed.parent),
                     '--ExecutePreprocessor.kernel_name=python3', f'--ExecutePreprocessor.timeout={timeout}'],
                    env=env, check=True)
