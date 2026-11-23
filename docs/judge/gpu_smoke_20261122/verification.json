@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "scope": "artifact verification of synthetic GPU smoke run; not a ranking or judge-reliability result",
+  "source_archive_sha256": "9339460c98f2184a41dc7b24a249c3cb80391ace7de5116de09a37880773cb7f",
+  "original_server_log_sha256": "5e148f7e69dd1ce9d10695cb4137048f8c933f5ca47fba7a45214298cf365ae8",
+  "checks": {
+    "run_status_pass": true,
+    "synthetic_smoke_only": true,
+    "two_cases_complete": true,
+    "serving_and_scoring_config_match": true,
+    "serving_and_scoring_protocol_match": true,
+    "source_hashes_match_commit": true,
+    "source_hashes_match_current_pr": true,
+    "input_hash_matches_synthetic_fixture": true,
+    "case_ids_match": true,
+    "case_hashes_match": true,
+    "seeds_match": true,
+    "twenty_valid_samples_each": true,
+    "criterion_means_recomputed": true,
+    "vllm_pin_matches": true,
+    "both_scoring_requests_http_200": true,
+    "engine_error_after_shutdown_trigger": true
+  },
+  "gpu": "NVIDIA L4",
+  "gpu_memory_gib": 22.0343017578125,
+  "python": "3.13.16",
+  "torch": "2.14.0+cu130",
+  "cuda": "13.0",
+  "scoring_seconds": 5.804,
+  "shutdown_note": "EngineDeadError and semaphore warning occur during shutdown after both HTTP 200 scoring responses. No assertion of graceful shutdown or long-running stability.",
+  "remaining": [
+    "independent human calibration",
+    "fixed real evaluation cases",
+    "persistent shared endpoint deployment"
+  ]
+}
