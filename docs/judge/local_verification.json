@@ -13,5 +13,6 @@
   "protocol_sha256": {
     "configs/judge/ministral.json": "92b4f19ba29cc77fa70a8e28b8ced3341b20a10a94c0b2f67139547ca3f05648",
     "configs/judge/rubric.txt": "e91b085a2bd919c8c65829b161e26ce5324f70bdeb8879e7c921549a01a6a09f"
-  }
+  },
+  "environment_bootstrap_test": "PASS on local Python 3.11.14: repaired an existing pip-less environment using virtualenv 20.35.4; rerun reused healthy environment. Colab Python 3.13 execution still pending."
 }
