@@ -1,17 +1,6 @@
 {
   "status": "PASS",
-  "started_utc": "2026-11-21T18:28:12.334761+00:00",
-  "provenance": {
-    "git_commit": "a58024314cec57fd173cd6bd8bdc520d3b499377",
-    "working_tree_dirty": false,
-    "source_sha256": {
-      "load.py": "feecc0235049b6fdf2f6c4756d516e5569ba293df12563bc2e7e38d1adc64cfd",
-      "quality_checks.sql": "545870ce57c88514edd7a89fe8c1c7062bfde1448c9db123cbe9941ff6fa5a24"
-    },
-    "python": "3.11.14",
-    "duckdb": "1.4.3",
-    "platform": "macOS-15.6.1-arm64-arm-64bit"
-  },
+  "started_utc": "2026-11-23T00:18:02.841740+00:00",
   "checks": [
     {
       "name": "interactions_row_count",
@@ -729,6 +718,17 @@
       ]
     }
   },
+  "provenance": {
+    "git_commit": "68a5116b2f79899fd21dd7ebf5c5b33dcf10398f",
+    "working_tree_dirty": false,
+    "source_sha256": {
+      "load.py": "387bc826576d14cd052a08ba954ad893a7eb707750d0d6adbfe42faf4b50f4cd",
+      "quality_checks.sql": "545870ce57c88514edd7a89fe8c1c7062bfde1448c9db123cbe9941ff6fa5a24"
+    },
+    "python": "3.11.14",
+    "duckdb": "1.4.3",
+    "platform": "macOS-15.6.1-arm64-arm-64bit"
+  },
   "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
   "verified_inputs": {
     "clients/client_stats.json": {
@@ -874,6 +874,6 @@
     }
   ],
   "database": "warehouse.duckdb",
-  "database_sha256": "2761b50242e22d6dceecdcd7e03b962a71a6eb30e56f0b916248feca75698247",
-  "seconds": 4.738
+  "database_sha256": "e0d9a630cc2b51932af8578babe3e2d08b7772bf2b255cb7ad8f41b37f9e3a7c",
+  "seconds": 4.237
 }
