@@ -1,0 +1,879 @@
+{
+  "status": "PASS",
+  "started_utc": "2026-11-23T00:18:02.841740+00:00",
+  "checks": [
+    {
+      "name": "interactions_row_count",
+      "actual": 501399,
+      "expected": 501399,
+      "passed": true
+    },
+    {
+      "name": "user_map_row_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "item_map_row_count",
+      "actual": 25903,
+      "expected": 25903,
+      "passed": true
+    },
+    {
+      "name": "items_row_count",
+      "actual": 25903,
+      "expected": 25903,
+      "passed": true
+    },
+    {
+      "name": "item_text_row_count",
+      "actual": 25903,
+      "expected": 25903,
+      "passed": true
+    },
+    {
+      "name": "sequences_row_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "clients_row_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "user_groups_row_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "item_groups_row_count",
+      "actual": 25903,
+      "expected": 25903,
+      "passed": true
+    },
+    {
+      "name": "eval_cases_row_count",
+      "actual": 112034,
+      "expected": 112034,
+      "passed": true
+    },
+    {
+      "name": "user_map_id_range",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_map_id_range",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "user_map_user_idx_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "user_map_user_id_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_map_item_idx_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_map_parent_asin_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "sequences_user_idx_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "user_groups_user_idx_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_groups_item_idx_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "clients_client_id_unique_not_null",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "train_count",
+      "actual": 389365,
+      "expected": 389365,
+      "passed": true
+    },
+    {
+      "name": "val_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "test_count",
+      "actual": 56017,
+      "expected": 56017,
+      "passed": true
+    },
+    {
+      "name": "user_idx_kcore",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_idx_kcore",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "interaction_required_fields",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "unique_user_item_pairs",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "unique_source_rows",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "interaction_foreign_keys",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "leave_one_out_split",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "chronological_positions_and_splits",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "sequence_lengths",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "sequence_interaction_agreement",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "evaluation_target_agreement",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_map_catalog_agreement",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_text_catalog_agreement",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_titles_present",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_text_present",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "training_review_provenance",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "user_group_train_counts",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "item_group_train_counts",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "client_train_counts",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    }
+  ],
+  "tables": {
+    "interactions": {
+      "rows": 501399,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "rating",
+          "type": "FLOAT"
+        },
+        {
+          "name": "timestamp",
+          "type": "BIGINT"
+        },
+        {
+          "name": "pos",
+          "type": "INTEGER"
+        },
+        {
+          "name": "split",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "row_id",
+          "type": "BIGINT"
+        }
+      ]
+    },
+    "user_map": {
+      "rows": 56017,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "user_id",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    "item_map": {
+      "rows": 25903,
+      "columns": [
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "parent_asin",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    "items": {
+      "rows": 25903,
+      "columns": [
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "parent_asin",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "brand",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "brand_key",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "main_category",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "categories",
+          "type": "VARCHAR[]"
+        },
+        {
+          "name": "cat_path",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l1",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l2",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l3",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "features",
+          "type": "VARCHAR[]"
+        },
+        {
+          "name": "features_text",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "description_text",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "price_num",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "average_rating",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "rating_number",
+          "type": "BIGINT"
+        },
+        {
+          "name": "details",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "has_title",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "n_interactions",
+          "type": "BIGINT"
+        }
+      ]
+    },
+    "item_text": {
+      "rows": 25903,
+      "columns": [
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "parent_asin",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "brand",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_path",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l1",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l2",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "cat_l3",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "price_num",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "item_text",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "review_snippets",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "n_review_snippets",
+          "type": "BIGINT"
+        },
+        {
+          "name": "item_text_with_reviews",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "text_words",
+          "type": "BIGINT"
+        },
+        {
+          "name": "text_with_reviews_words",
+          "type": "BIGINT"
+        },
+        {
+          "name": "llm_profile",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "llm_profile_model",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    "sequences": {
+      "rows": 56017,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "train_items",
+          "type": "BIGINT[]"
+        },
+        {
+          "name": "train_ts",
+          "type": "BIGINT[]"
+        },
+        {
+          "name": "val_item",
+          "type": "INTEGER"
+        },
+        {
+          "name": "val_ts",
+          "type": "BIGINT"
+        },
+        {
+          "name": "test_item",
+          "type": "INTEGER"
+        },
+        {
+          "name": "test_ts",
+          "type": "BIGINT"
+        },
+        {
+          "name": "n_train",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    "train_reviews": {
+      "rows": 373039,
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "parent_asin",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "timestamp",
+          "type": "BIGINT"
+        },
+        {
+          "name": "rating",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "text",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "helpful_vote",
+          "type": "BIGINT"
+        },
+        {
+          "name": "verified_purchase",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "split",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "match",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    "interaction_side_info": {
+      "rows": 501399,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "item_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "split",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "verified_purchase",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "helpful_vote",
+          "type": "BIGINT"
+        }
+      ]
+    },
+    "eval_cases": {
+      "rows": 112034,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "target",
+          "type": "INTEGER"
+        },
+        {
+          "name": "split",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "user_group",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "target_item_group",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "target_train_count",
+          "type": "BIGINT"
+        }
+      ]
+    },
+    "item_groups": {
+      "rows": 25903,
+      "columns": [
+        {
+          "name": "item_idx",
+          "type": "BIGINT"
+        },
+        {
+          "name": "train_count",
+          "type": "BIGINT"
+        },
+        {
+          "name": "item_group",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    "user_groups": {
+      "rows": 56017,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "n_train",
+          "type": "INTEGER"
+        },
+        {
+          "name": "length_bin",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "user_group",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    "clients": {
+      "rows": 56017,
+      "columns": [
+        {
+          "name": "client_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "n_local_train",
+          "type": "INTEGER"
+        },
+        {
+          "name": "n_local_total",
+          "type": "INTEGER"
+        },
+        {
+          "name": "size_group",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "n_categories",
+          "type": "BIGINT"
+        },
+        {
+          "name": "dominant_category",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "kl_to_global",
+          "type": "DOUBLE"
+        }
+      ]
+    },
+    "cold_sequences": {
+      "rows": 56017,
+      "columns": [
+        {
+          "name": "user_idx",
+          "type": "INTEGER"
+        },
+        {
+          "name": "train_items",
+          "type": "BIGINT[]"
+        },
+        {
+          "name": "val_item",
+          "type": "INTEGER"
+        },
+        {
+          "name": "test_item",
+          "type": "INTEGER"
+        },
+        {
+          "name": "test_is_cold",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "n_train",
+          "type": "BIGINT"
+        },
+        {
+          "name": "usable_for_training",
+          "type": "BOOLEAN"
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "git_commit": "68a5116b2f79899fd21dd7ebf5c5b33dcf10398f",
+    "working_tree_dirty": false,
+    "source_sha256": {
+      "load.py": "387bc826576d14cd052a08ba954ad893a7eb707750d0d6adbfe42faf4b50f4cd",
+      "quality_checks.sql": "545870ce57c88514edd7a89fe8c1c7062bfde1448c9db123cbe9941ff6fa5a24"
+    },
+    "python": "3.11.14",
+    "duckdb": "1.4.3",
+    "platform": "macOS-15.6.1-arm64-arm-64bit"
+  },
+  "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+  "verified_inputs": {
+    "clients/client_stats.json": {
+      "bytes": 484,
+      "sha256": "cc0bce2cefba8465c796c3302dbe6bea94e955f488421d90d9b4a314d81bc655"
+    },
+    "clients/clients.parquet": {
+      "bytes": 588882,
+      "sha256": "0b37d0ee2fcbc212c1313ee206a64e1c54785432cfa65f94af6d3f03575a3099"
+    },
+    "cold_start/cold_items.npy": {
+      "bytes": 5308,
+      "sha256": "ea134b727b62e4b492537010b14d36538cfbd7ed68613a27b2e290269341e7df"
+    },
+    "cold_start/cold_sequences.parquet": {
+      "bytes": 1552009,
+      "sha256": "2fdff9788a397f3d43447cb05c63f4c74a509f39345d18a2d93460f4c8e11ef0"
+    },
+    "cold_start/cold_start_info.json": {
+      "bytes": 252,
+      "sha256": "16a6d8de2b57f5b605f504e1ea905a8396a51591e6a858eed3ffc9354d3e80d1"
+    },
+    "dataset_info.json": {
+      "bytes": 873,
+      "sha256": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878"
+    },
+    "eval/eval_cases.parquet": {
+      "bytes": 916125,
+      "sha256": "cc61b46369f59cf3069c0686d51a8be1b4840d3ded3a1c757db461227fbb4a3e"
+    },
+    "eval/eval_protocol.json": {
+      "bytes": 711,
+      "sha256": "c3111e2664496d1ffae354fce9706f32ee66463683e564aa9fc2315be882c8cf"
+    },
+    "eval/neg_test.npy": {
+      "bytes": 22406928,
+      "sha256": "2245ce867c78122d3c075cbe9a8eb26e006b2c34a6171aec4d897aa677a2c57d"
+    },
+    "eval/neg_val.npy": {
+      "bytes": 22406928,
+      "sha256": "9d0b21f60f5cfa51a5daa2ba90feee842a13062b099518aa5d2867bc03a03e4e"
+    },
+    "groups/item_groups.parquet": {
+      "bytes": 189255,
+      "sha256": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa"
+    },
+    "groups/user_groups.parquet": {
+      "bytes": 408058,
+      "sha256": "6336e8c7ee89f53efe15f318d09942644cea19d4939d6aa71d419a078406f584"
+    },
+    "interaction_side_info.parquet": {
+      "bytes": 2080058,
+      "sha256": "c57e8b6b642a931d9a6b544952304f57f5d0ab482e878ba2ec166b129fada986"
+    },
+    "interactions.parquet": {
+      "bytes": 8191118,
+      "sha256": "298cab581ac90b44504d512b6c706f4616ea93affa8e601be58158a8252c4905"
+    },
+    "item_map.parquet": {
+      "bytes": 423500,
+      "sha256": "f4234bcbb482e9a3a621227cc2f78a45c6015654e7917e4eab4db4e4bcd2959f"
+    },
+    "item_text.parquet": {
+      "bytes": 48307033,
+      "sha256": "39dbd1ac817df3383def7c677fca830aaf36cfe470e1c0612c543486e6b8909d"
+    },
+    "items.parquet": {
+      "bytes": 29542812,
+      "sha256": "dfe0f8baaba3b6f537eb72ea39fe36ba71cb4c27f5dcac91e68fb1d4158e742f"
+    },
+    "leakage_report.json": {
+      "bytes": 808,
+      "sha256": "8a9d88de6d33dd8837927a2127b67a453a3fd5e93d83471d935072f98fbe8c0e"
+    },
+    "rec_eval.py": {
+      "bytes": 7180,
+      "sha256": "9748b9578d3192a5359379499ae7a2958b620b961707e775312bf1b409c83c5c"
+    },
+    "sequences.parquet": {
+      "bytes": 5612892,
+      "sha256": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a"
+    },
+    "train_reviews.parquet": {
+      "bytes": 98661129,
+      "sha256": "a4656ff1e82d20e11313cfe7ceff7d6122ea63777ae1b38bbb6d2a89f9f0e9e1"
+    },
+    "user_map.parquet": {
+      "bytes": 1883701,
+      "sha256": "1ce97379a0abaa6cc1a37c5c63c7a9ab020b13703da4916f587ff182e64f7697"
+    }
+  },
+  "dataset_info": {
+    "dataset": "Amazon Reviews 2023 - Beauty_and_Personal_Care",
+    "n_users": 56017,
+    "n_items": 25903,
+    "n_interactions": 501399,
+    "padding_idx": 0,
+    "item_idx_range": [
+      1,
+      25903
+    ],
+    "max_seq_len": 50,
+    "kcore": 5,
+    "split": "chronological leave-one-out (last = test, second-last = val)",
+    "subset": {
+      "kind": "category",
+      "value": "Skin Care",
+      "seed": 42,
+      "expected_after_kcore": {
+        "users": 56017,
+        "items": 25903,
+        "interactions": 501399
+      },
+      "mean_seq_len": 8.95,
+      "reason": "Sub-category within the user and item targets with the longest average sequence: a coherent catalog gives sharper item semantics for Model 1 while keeping enough users for Models 2 and 4.",
+      "targets": {
+        "min_users": 20000,
+        "max_users": 150000,
+        "min_items": 3000,
+        "max_items": 50000
+      }
+    },
+    "seed": 42
+  },
+  "split_summary": [
+    {
+      "split": "test",
+      "interactions": 56017,
+      "users": 56017,
+      "items": 14843
+    },
+    {
+      "split": "train",
+      "interactions": 389365,
+      "users": 56017,
+      "items": 25857
+    },
+    {
+      "split": "val",
+      "interactions": 56017,
+      "users": 56017,
+      "items": 15230
+    }
+  ],
+  "database": "warehouse.duckdb",
+  "database_sha256": "e0d9a630cc2b51932af8578babe3e2d08b7772bf2b255cb7ad8f41b37f9e3a7c",
+  "seconds": 4.237
+}

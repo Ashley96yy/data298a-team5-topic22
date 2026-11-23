@@ -34,3 +34,6 @@ pipeline_runs/
 !results/issue1_smoke/
 results/issue1_smoke/*
 !results/issue1_smoke/integration_report.json
+
+# Local analytical warehouse snapshots
+data/warehouse/
