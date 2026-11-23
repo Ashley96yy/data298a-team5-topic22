@@ -26,3 +26,7 @@ This repository contains the code, data inspection workflow, documentation, and 
 ```
 
 Project details, setup instructions, and evaluation procedures will be added as the Topic 22 scope is finalized.
+
+## Local Airflow pipeline
+
+See [Docker setup, quality checks and loader paths](orchestration/README.md).

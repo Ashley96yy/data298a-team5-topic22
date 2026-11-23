@@ -1,0 +1,15 @@
+**
+!pipeline/
+!pipeline/**
+!notebooks/
+!notebooks/data_prep/
+!notebooks/data_prep/*.ipynb
+!src/
+!src/serving/
+!src/serving/monitor.py
+!tests/
+!tests/test_pipeline*.py
+!tests/test_airflow_pipeline.py
+!orchestration/
+!orchestration/dags/
+!orchestration/dags/*.py
