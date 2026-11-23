@@ -1,0 +1,17 @@
+{
+  "status": "LOCAL_TESTS_PASS_GPU_PENDING",
+  "unit_tests": 15,
+  "http_transport_test": "PASS, two synthetic cases with 20 mock samples each",
+  "real_model_inference": false,
+  "live_shared_endpoint": false,
+  "human_calibration": "PENDING",
+  "model_id": "mistralai/Ministral-3-8B-Instruct-2512-BF16",
+  "revision": "f6fae9795746f63c9be8344932f01275f3c63734",
+  "implementation_commit": "7ef50d3e9f0fc9a13dda2bc248bffb22e67318bd",
+  "metrics_commitment_commit": "dcd0055",
+  "notebook_validation": "all code cells compiled; not executed on GPU",
+  "protocol_sha256": {
+    "configs/judge/ministral.json": "92b4f19ba29cc77fa70a8e28b8ced3341b20a10a94c0b2f67139547ca3f05648",
+    "configs/judge/rubric.txt": "e91b085a2bd919c8c65829b161e26ce5324f70bdeb8879e7c921549a01a6a09f"
+  }
+}
