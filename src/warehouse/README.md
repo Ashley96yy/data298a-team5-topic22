@@ -32,12 +32,24 @@ manifest and compatible schema.
 | `quality_report.json` | PASS/FAIL, input hashes, row counts, schema, SQL checks, code/environment provenance and runtime |
 | `quality_checks.csv` | Aggregate check results, with LF line endings |
 
-The CLI exits with code 0 for PASS and 1 for a failed build. A failed build leaves
-its report but removes its unpublished database. An existing output directory is
-an error and remains untouched. Consumers must require report status `PASS` and
-can verify the database against `database_sha256` before opening it read-only.
-The database is a materialized copy and remains queryable without the Parquet
-files. Generated snapshots are ignored by Git.
+The database and both reports are built in a private sibling directory on the
+same filesystem. Once all writes succeed, a single directory rename publishes
+the complete bundle at the requested output path. A report-writing or publication
+failure exits nonzero and publishes nothing. Input or quality-check failures
+publish only the completed FAIL reports, without a database. Temporary artifacts
+are removed on handled failures.
+
+The CLI exits with code 0 for PASS and 1 for a failed build. Existing output
+directories are rejected unchanged. An exclusive sibling reservation prevents
+concurrent loader attempts from using the same output path. A force-killed process
+can leave a staging directory and reservation; retries should use a fresh output
+path, and stale artifacts can be removed after confirming the old process stopped.
+This is local-filesystem publication, not an S3 transaction.
+
+Consumers must require report status `PASS` and can verify the database against
+`database_sha256` before opening it read-only. The database is a materialized copy
+and remains queryable without the Parquet files. Generated snapshots are ignored
+by Git.
 
 Reports contain schema, hashes and aggregate counts, not user rows or review text.
 The database itself includes the frozen source identifiers and reviews and belongs
@@ -69,10 +81,13 @@ with duckdb.connect("data/warehouse/my_first_run/warehouse.duckdb", read_only=Tr
 Before loading, the loader compares the local manifest with the trusted manifest
 and verifies every listed file's SHA-256 and byte count. It rechecks inputs before
 publishing. Evaluator code and NumPy artifacts are verified but not executed or
-converted into warehouse tables.
+converted into warehouse tables. Source hashes and environment versions are recorded
+even when Git is absent or repository metadata is unavailable; unavailable Git
+commit and working-tree status values are recorded as `null`.
 
 The 42 SQL checks cover frozen counts, unique/non-null keys, ID ranges and foreign
-keys, user/item k-core counts on the complete dataset, split counts, chronological
+keys, user/item k-core counts from the complete ID maps (including zero-interaction
+entries), split counts, chronological
 positions (including the original row-ID tie-break), sequence/interaction agreement,
 evaluation targets, catalog/text alignment, training-review user/item provenance,
 and training counts in group/client tables. Training-review provenance checks the
@@ -88,6 +103,7 @@ pipeline/evaluator. This module does not claim to revalidate generated LLM profi
 The tests cover successful persistent loading, missing/corrupt files, a replaced
 manifest, unsafe manifest paths, wrong counts, duplicate identities, chronology,
 sequence leakage, held-out review provenance, inputs changing during a build, and
-preservation of an existing output.
+preservation of an existing output, zero-interaction catalog entries, report-writing
+and publication failures, concurrent-writer rejection, and CLI runs without Git.
 
 Reference: [DuckDB 1.4 Parquet loading documentation](https://duckdb.org/docs/1.4/data/parquet/overview).

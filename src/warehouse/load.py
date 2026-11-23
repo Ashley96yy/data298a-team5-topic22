@@ -6,6 +6,7 @@ import json
 import platform
 import re
 import subprocess
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -107,9 +108,10 @@ def quality_checks(con, info):
     for split in ('train', 'val', 'test'):
         expected = info['n_users'] if split != 'train' else info['n_interactions'] - 2 * info['n_users']
         check(f'{split}_count', 'SELECT count(*) FROM interactions WHERE split=?', expected, [split])
-    for key in ('user_idx', 'item_idx'):
-        check(f'{key}_kcore', f'SELECT count(*) FROM (SELECT {key} FROM interactions '
-              f'GROUP BY {key} HAVING count(*) < ?)', params=[info['kcore']])
+    for key, mapping in [('user_idx', 'user_map'), ('item_idx', 'item_map')]:
+        check(f'{key}_kcore', f'SELECT count(*) FROM (SELECT m.{key} FROM {mapping} m '
+              f'LEFT JOIN interactions i ON i.{key}=m.{key} GROUP BY m.{key} '
+              f'HAVING count(i.{key}) < ?)', params=[info['kcore']])
     chunks = re.split(r'^-- check: ([a-z_]+)\s*$', SQL_PATH.read_text(), flags=re.MULTILINE)
     for name, sql in zip(chunks[1::2], chunks[2::2]):
         check(name, sql)
@@ -118,10 +120,15 @@ def quality_checks(con, info):
 
 def code_provenance():
     def git(*args):
-        result = subprocess.run(['git', '-C', str(PROJECT), *args], capture_output=True, text=True)
+        try:
+            result = subprocess.run(['git', '-C', str(PROJECT), *args],
+                                    capture_output=True, text=True, timeout=10)
+        except (OSError, subprocess.SubprocessError):
+            return None
         return result.stdout.strip() if result.returncode == 0 else None
+    status = git('status', '--porcelain')
     return {'git_commit': git('rev-parse', 'HEAD'),
-            'working_tree_dirty': bool(git('status', '--porcelain')),
+            'working_tree_dirty': None if status is None else bool(status),
             'source_sha256': {p.name: digest(p) for p in [Path(__file__), SQL_PATH]},
             'python': platform.python_version(), 'duckdb': duckdb.__version__,
             'platform': platform.platform()}
@@ -135,23 +142,16 @@ def write_report(output, report):
         writer.writerows(report['checks'])
 
 
-def build_warehouse(processed, trusted_manifest, output):
-    """Use a new output directory per run. Never modify an existing warehouse or inputs.
-
-    On failure, preserve an aggregate-only report and remove the unpublished database.
-    Consumers must require quality_report.json status PASS before opening warehouse.duckdb.
-    """
-    processed, output = Path(processed).resolve(), Path(output).resolve()
-    if output == processed or output.is_relative_to(processed):
-        raise ValueError('Output must be outside the frozen processed directory')
-    output.mkdir(parents=True, exist_ok=False)
+def _build_staged(processed, trusted_manifest, output):
+    """Write a complete result bundle inside a private staging directory."""
     started = time.monotonic()
     temporary_db = output / 'building.duckdb'
     final_db = output / 'warehouse.duckdb'
     report = {'status': 'FAIL', 'started_utc': datetime.now(timezone.utc).isoformat(),
-              'provenance': code_provenance(), 'checks': [], 'tables': {}}
+              'checks': [], 'tables': {}}
     con = None
     try:
+        report['provenance'] = code_provenance()
         manifest, manifest_hash, verified = verify_inputs(processed, trusted_manifest)
         report.update(manifest_sha256=manifest_hash, verified_inputs=verified,
                       dataset_info=manifest['dataset_info'])
@@ -206,6 +206,37 @@ def build_warehouse(processed, trusted_manifest, output):
     report['seconds'] = round(time.monotonic() - started, 3)
     write_report(output, report)
     return report
+
+
+def build_warehouse(processed, trusted_manifest, output):
+    """Publish a complete snapshot or failure-report bundle by one directory rename.
+
+    All artifacts are staged on the destination filesystem. If either report cannot
+    be written, nothing is published. Existing outputs are never reused. A sibling
+    reservation prevents two loader processes from publishing to the same run path.
+    """
+    processed, output = Path(processed).resolve(), Path(output).resolve()
+    if output == processed or output.is_relative_to(processed):
+        raise ValueError('Output must be outside the frozen processed directory')
+    if output.exists():
+        raise FileExistsError(f'Output already exists: {output}')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    reservation = output.with_name(f'.{output.name}.lock')
+    # Exclusive creation serializes writers choosing the same destination.
+    with reservation.open('x'):
+        try:
+            if output.exists():
+                raise FileExistsError(f'Output already exists: {output}')
+            with tempfile.TemporaryDirectory(prefix=f'.{output.name}.staging-',
+                                             dir=output.parent) as directory:
+                staging = Path(directory)
+                report = _build_staged(processed, trusted_manifest, staging)
+                if output.exists():
+                    raise FileExistsError(f'Output already exists: {output}')
+                staging.rename(output)
+            return report
+        finally:
+            reservation.unlink(missing_ok=True)
 
 
 def main():

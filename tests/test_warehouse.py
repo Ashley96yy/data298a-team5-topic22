@@ -1,5 +1,8 @@
 """Small relational fixtures test rejection and publication, without frozen data access."""
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -7,7 +10,7 @@ from unittest.mock import patch
 
 import duckdb
 
-from src.warehouse.load import REQUIRED, TABLES, build_warehouse, digest, verify_inputs
+from src.warehouse.load import REQUIRED, TABLES, build_warehouse, digest, verify_inputs, write_report
 
 
 class WarehouseTests(unittest.TestCase):
@@ -158,6 +161,99 @@ class WarehouseTests(unittest.TestCase):
         report = self.build()
         self.assert_failed(report)
         self.assertIn('Unsafe manifest path', report['error'])
+
+
+    def test_zero_interaction_catalog_item_fails_kcore(self):
+        # All other relations remain valid; the map gains one genuinely unused item.
+        self.info['n_items'] = 6
+        self.con.execute("INSERT INTO item_map VALUES (6, 'p6')")
+        self.con.execute("INSERT INTO items VALUES (6, 'p6', 'product6')")
+        self.con.execute("INSERT INTO item_text VALUES (6, 'p6', 'text6')")
+        self.con.execute('INSERT INTO item_groups VALUES (6, 0)')
+        self.export()
+        (self.processed/'dataset_info.json').write_text(json.dumps(self.info))
+        self.freeze()
+        report = self.build()
+        self.assert_failed(report)
+        failed = [c['name'] for c in report['checks'] if not c['passed']]
+        self.assertEqual(failed, ['item_idx_kcore'])
+
+    def test_report_write_failure_never_publishes_database(self):
+        real_open = Path.open
+        # Cover failure at either report, including JSON already written when CSV fails.
+        for name in ['quality_report.json', 'quality_checks.csv']:
+            with self.subTest(file=name):
+                def failing_open(path, *args, **kwargs):
+                    if path.name == name:
+                        self.assertFalse(self.output.exists())
+                        raise OSError('injected report write failure')
+                    return real_open(path, *args, **kwargs)
+                with patch.object(Path, 'open', failing_open):
+                    with self.assertRaises(OSError):
+                        self.build()
+                self.assertFalse(self.output.exists())
+                self.assertEqual(list(self.root.glob('.run.*')), [])
+
+    def test_success_bundle_is_published_only_after_both_reports(self):
+        def observed_write(stage, report):
+            self.assertNotEqual(stage, self.output)
+            self.assertEqual(stage.parent, self.output.parent.resolve())
+            self.assertFalse(self.output.exists())
+            self.assertTrue((stage/'warehouse.duckdb').exists())
+            write_report(stage, report)
+            self.assertFalse(self.output.exists())
+            self.assertTrue((stage/'quality_report.json').exists())
+            self.assertTrue((stage/'quality_checks.csv').exists())
+        with patch('src.warehouse.load.write_report', side_effect=observed_write):
+            self.assertEqual(self.build()['status'], 'PASS')
+        self.assertEqual({p.name for p in self.output.iterdir()},
+                         {'warehouse.duckdb', 'quality_report.json', 'quality_checks.csv'})
+
+    def run_cli_without_git(self):
+        return subprocess.run([sys.executable, '-m', 'src.warehouse.load',
+            '--processed', str(self.processed), '--manifest', str(self.trusted),
+            '--output', str(self.output)], env={**os.environ, 'PATH': ''},
+            capture_output=True, text=True)
+
+    def test_cli_without_git_retains_source_hashes(self):
+        result = self.run_cli_without_git()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads((self.output/'quality_report.json').read_text())
+        self.assertEqual(report['status'], 'PASS')
+        self.assertIsNone(report['provenance']['git_commit'])
+        self.assertIsNone(report['provenance']['working_tree_dirty'])
+        self.assertEqual(set(report['provenance']['source_sha256']), {'load.py', 'quality_checks.sql'})
+        self.assertTrue(all(len(h) == 64 for h in report['provenance']['source_sha256'].values()))
+
+    def test_cli_without_git_still_writes_input_failure_report(self):
+        (self.processed/'eval/neg_test.npy').unlink()
+        result = self.run_cli_without_git()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        report = json.loads((self.output/'quality_report.json').read_text())
+        self.assert_failed(report)
+        self.assertIn('Missing file:', report['error'])
+        self.assertIsNone(report['provenance']['git_commit'])
+        self.assertEqual(len(report['provenance']['source_sha256']), 2)
+    def test_concurrent_writer_cannot_take_reserved_output(self):
+        def observed_write(stage, report):
+            with self.assertRaises(FileExistsError):
+                self.build()
+            write_report(stage, report)
+        with patch('src.warehouse.load.write_report', side_effect=observed_write):
+            self.assertEqual(self.build()['status'], 'PASS')
+        self.assertEqual(list(self.root.glob('.run.*')), [])
+
+    def test_directory_publish_failure_leaves_no_final_output(self):
+        real_rename = Path.rename
+        def failing_rename(path, target):
+            if path.name.startswith('.run.staging-'):
+                raise OSError('injected directory rename failure')
+            return real_rename(path, target)
+        with patch.object(Path, 'rename', failing_rename):
+            with self.assertRaises(OSError):
+                self.build()
+        self.assertFalse(self.output.exists())
+        self.assertEqual(list(self.root.glob('.run.*')), [])
 
 
 if __name__ == '__main__':
