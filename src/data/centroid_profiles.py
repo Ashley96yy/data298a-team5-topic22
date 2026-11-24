@@ -33,6 +33,29 @@ def check_item_embeddings(embeddings, n_items):
     return embeddings
 
 
+def verify_sequences(processed, manifest):
+    """Check sequences.parquet against its entry in the frozen manifest; return the verified SHA-256."""
+    entry = (manifest.get('processed_files') or {}).get('sequences.parquet') or {}
+    expected = entry.get('sha256')
+    if not expected:
+        raise ValueError('the frozen manifest has no checksum for sequences.parquet')
+    actual = file_sha256(Path(processed) / 'sequences.parquet')
+    if actual != expected:
+        raise ValueError('sequences.parquet does not match its checksum in the frozen manifest')
+    return actual
+
+
+def verify_embedding_file(path, meta):
+    """Check the item embedding file against embedding_sha256 in the encoder metadata; return the verified SHA-256."""
+    expected = meta.get('embedding_sha256')
+    if not expected:
+        raise ValueError('the item metadata has no embedding_sha256')
+    actual = file_sha256(path)
+    if actual != expected:
+        raise ValueError('the item embedding file does not match embedding_sha256 in the item metadata')
+    return actual
+
+
 def build_centroid_profiles(sequences, item_embeddings, window=50):
     """Return (user_idx, profiles) with one L2-normalised mean vector per user, from train_items only."""
     n_items = item_embeddings.shape[0] - 1
@@ -72,10 +95,14 @@ def main(argv=None):
     args = ap.parse_args(argv)
     processed = Path(args.processed)
     try:
-        manifest = file_sha256(processed / 'manifest.json')
+        manifest_hash = file_sha256(processed / 'manifest.json')
         meta = json.loads(Path(args.item_metadata).read_text())
-        if meta.get('manifest_sha256') != manifest:
+        if meta.get('manifest_sha256') != manifest_hash:
             raise ValueError('the item embeddings were built from a different frozen dataset (manifest hash differs)')
+        # Verify the real bytes of both inputs BEFORE reading them: a file edited under an unchanged manifest or
+        # unchanged metadata must be refused, not turned into a profile file marked train_items_only.
+        sequences_hash = verify_sequences(processed, json.loads((processed / 'manifest.json').read_text()))
+        embedding_hash = verify_embedding_file(args.item_embeddings, meta)
         sequences = pd.read_parquet(processed / 'sequences.parquet', columns=['user_idx', 'train_items'])
         embeddings = check_item_embeddings(np.load(args.item_embeddings, allow_pickle=False), int(meta['n_items']))
         user_idx, profiles = build_centroid_profiles(sequences, embeddings, args.window)
@@ -90,8 +117,8 @@ def main(argv=None):
     out.with_suffix('.meta.json').write_text(json.dumps({
         'source': source, 'shuffle_seed': args.shuffle_seed, 'train_items_only': True, 'window': args.window, 'normalization': 'mean of unit item vectors, then L2',
         'n_users': int(len(user_idx)), 'dimension': int(profiles.shape[1]), 'item_encoder': meta.get('model_id'),
-        'item_encoder_revision': meta.get('revision'), 'item_embedding_sha256': file_sha256(args.item_embeddings),
-        'manifest_sha256': manifest, 'created_utc': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2))
+        'item_encoder_revision': meta.get('revision'), 'item_embedding_sha256': embedding_hash,
+        'sequences_sha256': sequences_hash, 'manifest_sha256': manifest_hash, 'created_utc': datetime.now(timezone.utc).isoformat(timespec='seconds')}, indent=2))
     print(f'wrote {out} ({len(user_idx)} users, {profiles.shape[1]} numbers each) and {out.with_suffix(".meta.json")}')
 
 

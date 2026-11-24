@@ -73,8 +73,8 @@ class CommandLineTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         root = Path(self.tmp.name)
         self.processed = root / 'processed'; self.processed.mkdir()
-        (self.processed / 'manifest.json').write_text('{"frozen": true}')
         pd.DataFrame({'user_idx': [0, 1, 2], 'train_items': [[1, 2, 3], [2, 3, 4], [5, 1, 2]]}).to_parquet(self.processed / 'sequences.parquet')
+        self.write_manifest({'sequences.parquet': {'sha256': file_sha256(self.processed / 'sequences.parquet')}})
         self.emb = root / 'emb.npy'
         np.save(self.emb, item_embeddings())
         self.meta = root / 'meta.json'
@@ -83,8 +83,17 @@ class CommandLineTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def write_meta(self, manifest):
-        self.meta.write_text(json.dumps({'manifest_sha256': manifest, 'n_items': 5, 'model_id': 'test-encoder', 'revision': 'abc'}))
+    def write_manifest(self, processed_files):
+        (self.processed / 'manifest.json').write_text(json.dumps({'frozen': True, 'processed_files': processed_files}))
+
+    def write_meta(self, manifest, **overrides):
+        meta = {'manifest_sha256': manifest, 'n_items': 5, 'model_id': 'test-encoder', 'revision': 'abc',
+                'embedding_sha256': file_sha256(self.emb)}
+        meta.update(overrides)
+        self.meta.write_text(json.dumps({k: v for k, v in meta.items() if v is not None}))   # None removes the key
+
+    def good_meta(self):
+        self.write_meta(file_sha256(self.processed / 'manifest.json'))
 
     def run_main(self):
         main(['--processed', str(self.processed), '--item-embeddings', str(self.emb), '--item-metadata', str(self.meta), '--output', str(self.out)])
@@ -99,6 +108,7 @@ class CommandLineTests(unittest.TestCase):
         meta = json.loads(self.out.with_suffix('.meta.json').read_text())
         self.assertEqual(meta['item_encoder'], 'test-encoder')
         self.assertEqual(meta['item_embedding_sha256'], file_sha256(self.emb))
+        self.assertEqual(meta['sequences_sha256'], file_sha256(self.processed / 'sequences.parquet'))
 
     def test_shuffle_option_writes_a_file_labelled_as_a_control(self):
         self.write_meta(file_sha256(self.processed / 'manifest.json'))
@@ -114,6 +124,35 @@ class CommandLineTests(unittest.TestCase):
             self.run_main()
         self.assertIn('different frozen dataset', str(ctx.exception))
         self.assertFalse(self.out.exists())
+
+    def refused(self, expected_text):
+        with self.assertRaises(SystemExit) as ctx:
+            self.run_main()
+        self.assertIn(expected_text, str(ctx.exception))
+        self.assertFalse(self.out.exists())                                                # nothing is written on a refusal
+
+    def test_sequences_file_edited_under_an_unchanged_manifest_is_refused(self):
+        self.good_meta()
+        # put a held-out validation item (4) into one training history; manifest and metadata are untouched
+        pd.DataFrame({'user_idx': [0, 1, 2], 'train_items': [[1, 2, 4], [2, 3, 4], [5, 1, 2]]}).to_parquet(self.processed / 'sequences.parquet')
+        self.refused('sequences.parquet does not match its checksum in the frozen manifest')
+
+    def test_item_rows_swapped_under_unchanged_metadata_are_refused(self):
+        self.good_meta()
+        E = np.load(self.emb)
+        E[[1, 2]] = E[[2, 1]]                                                              # still passes shape, padding and value checks
+        check_item_embeddings(E, 5)
+        np.save(self.emb, E)
+        self.refused('does not match embedding_sha256 in the item metadata')
+
+    def test_manifest_without_a_sequences_checksum_is_refused(self):
+        self.write_manifest({})
+        self.good_meta()
+        self.refused('has no checksum for sequences.parquet')
+
+    def test_metadata_without_an_embedding_checksum_is_refused(self):
+        self.write_meta(file_sha256(self.processed / 'manifest.json'), embedding_sha256=None)
+        self.refused('has no embedding_sha256')
 
 
 if __name__ == '__main__':
