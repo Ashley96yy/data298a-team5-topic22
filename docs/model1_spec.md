@@ -1,6 +1,6 @@
 # Model 1 specification: LLM-distilled SASRec student (298A)
 
-Status: draft for team review, Nov 7, 2026 (implementation status in section 9). Owners: distillation loss and training integration (Ruchika); item-text embeddings (Abhinita); user-profile generation (Disha). Every claim about a paper below was read from the paper itself; anything marked **[decision]** is ours, not the paper's.
+Status: updated Nov 23, 2026 for the Qwen3.5-9B teacher and the current repository state (implementation status in section 9). Owners: distillation loss and training integration (Ruchika); item-text embeddings (Abhinita); user-profile generation (Disha). Every claim about a paper below was read from the paper itself; anything marked **[decision]** is ours, not the paper's.
 
 ## 1. What Model 1 is (and is not)
 
@@ -20,7 +20,7 @@ The method we implement is the one in **Severin et al., "Pre-trained LLMs Meet S
 ### 2b. User profiles (Disha)
 - Prompt structure follows Severin et al. (analyze history; identify preferences; separate high-rated from low-rated items; synthesize an overall characterization). Input: titles, categories, and ratings of the user's **training** items only.
 - Output `profiles.parquet`: `user_idx, profile_text, teacher_model, prompt_hash`. Cache every generation.
-- Paper setup for reference: Gemma-2-9B for profiles, multilingual-E5-large (1024-d) as encoder, UMAP to the model's hidden size. **[decision]** Our default reduction is PCA fit on training-user profile embeddings (deterministic, no extra dependency); UMAP is an ablation.
+- Paper setup for reference (Section 3 and footnotes 7 and 8 of the paper): profiles from `UCLA-AGI/Gemma-2-9B-It-SPPO-Iter3`, encoded with `intfloat/multilingual-e5-large` (1024 numbers), reduced with UMAP to the model's hidden size; the profile prompt asks the LLM to separate highly rated from poorly rated items. **[decision]** Our default reduction is PCA fit on training-user profile embeddings (deterministic, no extra dependency); UMAP, the paper's choice, is added as an option and both are compared.
 
 ### 2c. Distillation (Ruchika)
 - Pooled student representation `H(S_u)` = mean over non-padding positions of the **last transformer layer's** hidden states (the paper found the last layer best; exponential recency weighting is its alternative).
@@ -43,23 +43,28 @@ M0 SASRec; +BLaIR item text; +MiniLM item text; +profile distillation only; full
 
 Reference points measured on this dataset (test, full ranking): popularity NDCG@10 0.0131; last-item Markov 0.0274; cosine item-kNN 0.0204. Markov scores 0.0405 on head targets but 0.0072 (mid) and 0.0042 (tail), and 21,000 of 56,017 test cases are mid or tail: that is where text signal has room.
 
+Model 0 (SASRec-style, grid winner hidden 128, dropout 0.5, learning rate 0.0005; three seeds, `docs/project_notes/model0_test_20261108/`, commit `c203d42`): test NDCG@10 0.0381 ± 0.0003, Recall@10 0.0648 ± 0.0006, MRR 0.0350 ± 0.0002 (validation NDCG@10 0.0454 ± 0.0002). On the 1,142 cold-start test cases Model 0 reaches NDCG@10 0.0000 and a mean relative rank of 0.940, worse than chance (0.5) and close to popularity (0.974): a model that only knows item ids cannot place a product it never saw, which is the gap that item text and profile distillation target.
+
 **Expectation setting.** Severin et al. report small effects: on their Beauty data SASRec NDCG@10 0.0106 to 0.0111 (+4.9%, standard deviations 0.0002 to 0.0004) and +2% to +6% relative on the other datasets. Plan for a small gain, test it properly, and report null results honestly. Thin profiles are a risk: median training length here is 4 and 37% of users have exactly 3 items.
 
 ## 5. Budget and compute
 - Profile generation: 56,017 users, plus a regenerated subset for the cold variant. Run a 200-user pilot first; record tokens per second and extrapolate before committing.
 - Fallback if full generation is too slow: distill on a random 25% to 50% of users and report the subset ratio as an ablation. R2END shows distillation data ratios down to 20% still beat its baseline, but that is evidence for its method, not ours.
-- Embeddings and training run on Colab GPU; nothing here needs more than one GPU.
+- Profile generation and training run on the college-assigned GPU (RTX 4090 or 5090, as reported by the team) and on Colab; nothing here needs more than one GPU. Pilot measurement (Qwen3.5-9B, bf16, thinking off, NVIDIA L4): 2.596 s per profile, about 35 hours for all 56,017 users on an L4; the college GPU time is to be measured.
 
 ## 6. Tests (new)
 `tests/test_distill.py`: padding positions excluded from pooling; `beta` carries no gradient; `alpha = 0` reproduces `L_model` exactly; stage switch turns the auxiliary term off; target shapes match hidden size; fixed seed gives identical losses.
 
-## 7. Open decisions
-| Decision | Owner | Needed by |
+## 7. Decisions (updated Nov 11, 2026)
+| Decision | Owner | Status |
 |---|---|---|
-| Teacher LLM and where it runs | Disha | after the pilot |
-| Profile text encoder | Disha, Abhinita | Nov 9 |
-| PCA vs UMAP, alpha grid, E1 | Ruchika | Nov 12 |
-| Trainer hook for the auxiliary loss | Ashley, Ruchika | Nov 9 |
+| Teacher LLM | Disha, Abhinita | **Changed Nov 22-23:** `Qwen/Qwen3.5-9B`, commit `c202236235762e1c871ad0ccb60c8ee5ba337b9a` (Apache 2.0), bf16, thinking off (`enable_thinking=False`), greedy decoding, approved prompt v2 (hash `a18472f1aefb1a5f`). Replaces `Qwen/Qwen2.5-7B-Instruct` (decided Nov 11) because the professor asked for the latest models. The paper used `UCLA-AGI/Gemma-2-9B-It-SPPO-Iter3` (gated). Pilot: 200 users, 0 failures, audit PASS (35 checks), 2.596 s per profile on an L4. Qwen3.6 (Apr 2026) exists, but its open sizes found so far are 27B and 35B-A3B, which need a larger GPU; whether Qwen3.5-9B counts as "latest" is a question for the professor. |
+| Profile text encoder | Disha, Abhinita | **Decided Nov 11:** main encoder `intfloat/multilingual-e5-large` (1024 numbers, as in the paper; input text prefixed with `query: `, mean pooling, L2-normalised), with `sentence-transformers/all-MiniLM-L6-v2` (384 numbers) as the light comparison and for the pilot. Profile text is generated once, independently of the encoder, and embedded with both. Revisions are pinned. |
+| Item-text encoders | Abhinita | Done: MiniLM (`all-MiniLM-L6-v2`, revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`) encoded for all 25,903 items and verified; BLaIR `hyp1231/blair-roberta-base` next, with its commit pinned. |
+| PCA vs UMAP, alpha grid, E1 | Ruchika | PCA is implemented; UMAP (the paper's choice) is added as an option and compared with it. First control run (no LLM; item-text centroids as profiles) fixed in advance, not tuned: alpha 0.6, beta on, E1 = 5, Model 0 winner settings, seed 42. Grid for the real runs afterwards: alpha in {0.4, 0.6, 0.8}, beta on/off, E1 values chosen from the control run. |
+| Trainer hook for the auxiliary loss | Ashley, Ruchika | Done (merged, commit `c368050`). |
+
+Differences from the paper, to be reported: teacher LLM (Qwen3.5-9B instead of Gemma-2-9B-It-SPPO-Iter3); dimensionality reduction (PCA, with UMAP as a comparison); data and split (Amazon Reviews 2023 Skin Care with a per-user leave-one-out split, instead of 2015 Beauty and other datasets with a global temporal split); 3 seeds instead of 5 (5 for the final configurations if time allows). Kept as in the paper: SASRec with a full-catalog cross-entropy loss, mean pooling of the last layer, the two-stage loss with the detached scaling factor, alpha in {0.4, 0.6, 0.8}, about half of the epochs in stage 1, and a profile prompt that includes the user's own star ratings of their training items.
 
 ## 8. References (verified from the papers)
 - Severin et al., arXiv 2604.21536 (ECIR 2026 accepted version).
@@ -67,14 +72,16 @@ Reference points measured on this dataset (test, full ranking): popularity NDCG@
 - Hou et al., "Bridging Language and Items for Retrieval and Recommendation" (BLaIR), arXiv 2403.03952; ACL 2026 benchmark version "...: Benchmarking LLMs as Semantic Encoders".
 - Kang and McAuley, "Self-Attentive Sequential Recommendation", ICDM 2018 (arXiv 1808.09781).
 
-## 9. Implementation status (Nov 7, 2026)
+## 9. Implementation status (Nov 23, 2026)
 | Part | Status |
 |---|---|
 | Distillation module (pooling, loss, schedule, PCA targets, epoch loop, trainer adapter with per-epoch log) | Merged (commit `9e1039c`, PR #7), 19 unit tests |
 | Trainer hook in `fit()`: optional `epoch_fn` and `selection_start_epoch` | Merged (commit `c368050`, PR #11, Ashley). Defaults keep Model 0 unchanged; stage-1 epochs cannot become the best checkpoint or consume patience. |
 | Integration of the module with the real trainer | Merged (`tests/test_model1_integration.py`, 3 tests: stage 1 distils but never selects, stage 2 selects, a stage 1 longer than the epoch budget is rejected) |
-| Reduction of profile embeddings | PCA implemented. UMAP (the paper's choice) is not implemented and stays an ablation. |
-| LLM profile generation | Not started: teacher LLM and pilot pending (Disha) |
-| Item-text embeddings and fusion | Not started (Abhinita) |
-| Training entry point for Model 1 (loads data, SASRec, targets; records the schedule and target hashes in `metadata`) | Not started (Ruchika) |
+| Reduction of profile embeddings | PCA implemented. UMAP (the paper's choice) is to be added as an option (umap-learn) and compared. |
+| LLM profile generation | Pilot done with Qwen3.5-9B (200 users, 0 failures; audit PASS 35/35; PRs #23 and #25, open). Full run on all 56,017 users pending (Disha, college GPU). |
+| Item-text embeddings and fusion | Item-only arm implemented in PR #17 (open, builds on #16): `TextSASRec`, `train_item_text.py`. Combining it with distillation (the full Model 1) is not yet in `train_model1.py` (Ruchika). |
+| Training entry point for Model 1 (loads data, SASRec, targets; records the schedule and target hashes in `metadata`) and the profile file format | Merged (PR #14, commit `0ec1a67`): `src/training/train_model1.py`, `src/data/profile_file.py`. Tested end to end on synthetic data only, including failure and resume; no real profiles and no real Model 1 run yet. (Ruchika) |
 | Ablation runner and slice analysis | Not started (Ashley, Sneha) |
+| Control runs and records | `docs/project_notes/model1_controls_20261111/` and the centroid and shuffled control profiles: PR #18, open. |
+| Partial-coverage fix (distillation weight scaled by the share of covered users per batch) | PR #19, open. |
