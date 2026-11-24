@@ -1,6 +1,6 @@
 # Profile audit: pilot_v2_qwen35_9b
 
-**Verdict: PASS** (0 failed, 0 warnings, 35 passed). 200 profiles, 0 failed users.
+**Verdict: PASS** (0 failed, 0 warnings, 37 passed). 200 profiles, 0 failed users.
 
 | Group | Check | Result | Detail |
 |---|---|---|---|
@@ -15,7 +15,7 @@
 | Format | profiles_e5_large.npz has 1024 dimensions | PASS | 1024 |
 | Format | profiles_e5_large.npz vectors are unit length | PASS | norm 1.0000-1.0000 |
 | Training data only | frozen data files match the manifest | PASS | ok |
-| Training data only | the run read the same frozen files | PASS | {'sequences.parquet': '0a55f2c375c0', 'item_text.parquet': '39dbd1ac817d', 'interactions.parquet': '298cab581ac9'} |
+| Training data only | the run recorded every expected input file with the frozen hash | PASS | {'interactions.parquet': '298cab581ac9', 'sequences.parquet': '0a55f2c375c0', 'item_text.parquet': '39dbd1ac817d'} |
 | Training data only | every profiled user has training rows | PASS | 0 without |
 | Training data only | rebuilt input hash equals the stored input_sha256 for every profile | PASS | 200/200 match |
 | Training data only | n_train_items_used equals the rebuilt count | PASS | 0 differ |
@@ -29,12 +29,14 @@
 | Empty / duplicate | identical profile texts only for users with identical inputs | PASS | 0 users share a text; 0 texts shared across different inputs |
 | Empty / duplicate | near-duplicate vectors (MiniLM cosine >= 0.98) between users with different inputs | PASS | 0 users; median nearest cosine 0.7422 |
 | Text leakage | profiles do not name held-out-only brands more often than chance | PASS | own 0.00% vs baseline 0.00% |
+| Vectors match texts | minilm: encoder record names the pinned model and commit | PASS | sentence-transformers/all-MiniLM-L6-v2@1110a243fdf4 |
 | Vectors match texts | minilm: re-embedded sample matches stored vectors | PASS | {'model': 'sentence-transformers/all-MiniLM-L6-v2', 'revision': '1110a243fdf4706b3f48f1d95db1a4f5529b4d41', 'sample': 100, 'min_cosine': 1.0, 'mean_cosine': 1.0 |
+| Vectors match texts | e5_large: encoder record names the pinned model and commit | PASS | intfloat/multilingual-e5-large@3d7cfbdacd47 |
 | Vectors match texts | e5_large: re-embedded sample matches stored vectors | PASS | {'model': 'intfloat/multilingual-e5-large', 'revision': '3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3', 'sample': 100, 'min_cosine': 1.0, 'mean_cosine': 1.0, 'self_ |
-| Settings | approved prompt (v2) | PASS | a18472f1aefb1a5f |
+| Settings | approved prompt (v2): the stored template itself hashes to the approved hash | PASS | template hashes to a18472f1aefb1a5f, stored a18472f1aefb1a5f, approved a18472f1aefb1a5f |
 | Settings | pinned teacher model and commit | PASS | Qwen/Qwen3.5-9B@c20223623576 |
 | Settings | thinking off | PASS | False |
-| Settings | every profile row names the same teacher | PASS | ['Qwen/Qwen3.5-9B@c202236235762e1c871ad0ccb60c8ee5ba337b9a'] |
+| Settings | every profile row names the approved teacher and commit | PASS | Qwen/Qwen3.5-9B@c202236235762e1c871ad0ccb60c8ee5ba337b9a |
 | Hygiene | no thinking text | PASS | 0 |
 | Hygiene | no reasoning or meta text | PASS | 0 |
 | Hygiene | no profile over 120 words | PASS | 0 |
