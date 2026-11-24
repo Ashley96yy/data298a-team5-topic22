@@ -13,6 +13,7 @@ python -m src.training.train_model1 --config configs/config.json --grid-index 7 
 ## Rules built into the script
 - A real run refuses synthetic profiles and profiles not attested as built from **training items only**.
 - PCA (to the model's hidden size, standardised) is fit on the profile users only, never on validation or test information.
+- Partial coverage is allowed (users without a profile get no distillation term). The distillation weight is scaled by the share of users in each batch that have a profile, so a few covered users cannot dominate a batch: no covered user means the plain Model 0 loss, and full coverage uses alpha unchanged.
 - Stage 1 (`--stage1-epochs`, at least 1, at most epochs minus 1) distils; checkpoint selection and early stopping start after it.
 - The run metadata records the schedule, the profile file's SHA-256, the reduced targets' SHA-256 and the source hashes of
   `distill.py` and `train_model1.py`, next to the usual provenance. Resuming needs the same hook, the same targets and the same schedule.
