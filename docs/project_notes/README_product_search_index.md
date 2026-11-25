@@ -14,8 +14,9 @@ a list of 384 numbers that captures what the product is about. A search turns th
 same way and returns the products whose vectors are closest. On top of that you can filter by price,
 category and brand, and leave out products the shopper already owns.
 
-It runs on an ordinary CPU, so the prototype's EC2 server doesn't need a GPU, and it needs no extra libraries
-beyond numpy, pandas and sentence-transformers.
+It runs on an ordinary CPU, so the prototype's EC2 server doesn't need a GPU. Loading the index and searching
+with a vector needs only numpy, pandas and pyarrow. Searching with words (`search`) also needs
+`sentence-transformers`, which loads the MiniLM model the first time a text query is made.
 
 ## What data it uses
 
@@ -72,10 +73,16 @@ Two behaviours the agents can rely on:
 
 - **If nothing fits, the result is empty.** That's the signal for the "no suitable match" answer.
 - **A misspelled category or brand is rejected, not ignored.** Asking for "Facee" raises an error that suggests
-  "face". Without this, a typo would quietly return nothing and look like "no products exist".
+  "face". This also holds for a path: in "Face > Creams and Moisturizers" every level is checked, so the wrong
+  level is reported with close matches ("creams & moisturizers"), and a path whose levels exist but never in that
+  order is rejected too. Without this, a typo would quietly return nothing and look like "no products exist".
+- **Invalid prices are rejected.** `price_min` and `price_max` must be finite numbers; NaN, infinity, text or
+  true/false raise an error instead of silently matching nothing.
 
 The level-2 categories are Face (12,817 products), Body (8,214), Sunscreens & Tanning Products (2,020),
-Lip Care (1,294), Eyes (1,199), Sets & Kits (247) and Maternity (34).
+Lip Care (1,294), Eyes (1,199), Sets & Kits (247) and Maternity (34). These add up to 25,825: the other 78
+products are filed only under "Skin Care", with no level-2 category. A level-2 filter such as Face never returns
+them; a search without a category filter, or with "Skin Care", still does.
 
 ## How we know it works
 
