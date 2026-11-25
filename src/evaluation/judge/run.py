@@ -165,14 +165,15 @@ class Endpoint:
 
 def run(cases_path, output, endpoint, mode='smoke', config_path=CONFIG, rubric_path=RUBRIC):
     config = load_config(config_path)
-    cases = [json.loads(line) for line in Path(cases_path).read_text().splitlines() if line.strip()]
+    input_bytes = Path(cases_path).read_bytes()
+    cases = [json.loads(line) for line in input_bytes.decode('utf-8').splitlines() if line.strip()]
     validate_cases(cases, config, mode)
     protocol = committed_protocol(config_path, rubric_path)
     rubric = Path(rubric_path).read_text()
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     report = {'status': 'RUNNING', 'mode': mode, 'synthetic_smoke': mode == 'smoke',
-              'judge': config, 'protocol': protocol, 'input_sha256': digest(cases_path),
+              'judge': config, 'protocol': protocol, 'input_sha256': hashlib.sha256(input_bytes).hexdigest(),
               'python': platform.python_version(), 'cases_expected': len(cases), 'cases_completed': 0,
               'endpoint_identity': 'served alias checked; remote weights not independently attested',
               'calibration_status': 'PENDING independent human ratings; not a reliability claim'}

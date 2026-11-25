@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
@@ -130,6 +131,38 @@ class JudgeTests(unittest.TestCase):
                 r = run(self.input, self.root/'out', e)
         self.assertEqual(r['status'], 'FAIL'); self.assertEqual(r['cases_completed'], 0)
         self.assertNotIn('secret-key-and-user-text', (self.root/'out/run_metadata.json').read_text())
+
+    def test_input_hash_and_scores_use_same_snapshot_if_file_changes(self):
+        cases = copy.deepcopy(self.cases)
+        cases[0]['answer'] += ' Café.'
+        original = ('\r\n'.join(json.dumps(c, ensure_ascii=False) for c in cases) + '\r\n').encode('utf-8')
+        self.input.write_bytes(original)
+        changed = copy.deepcopy(cases)
+        changed[0]['answer'] = 'Changed after the cases were read.'
+        replacement = '\n'.join(json.dumps(c) for c in changed).encode('utf-8')
+
+        def change_input(*args):
+            self.input.write_bytes(replacement)
+            return {'commit': 'unit-test-only'}
+
+        endpoint = self.endpoint()
+        with patch('src.evaluation.judge.run.committed_protocol', side_effect=change_input):
+            with patch.object(type(endpoint), '__call__', wraps=endpoint.__call__) as requests:
+                result = run(self.input, self.root/'out', endpoint)
+        self.assertEqual(result['status'], 'PASS')
+        self.assertEqual(self.input.read_bytes(), replacement)
+        self.assertEqual(result['input_sha256'], hashlib.sha256(original).hexdigest())
+        self.assertNotEqual(result['input_sha256'], hashlib.sha256(replacement).hexdigest())
+        expected_cases = sorted(cases, key=lambda c: c['case_id'])
+        sent_answers = [json.loads(call.args[0]['messages'][1]['content'])['answer']
+                        for call in requests.call_args_list]
+        self.assertEqual(sent_answers, [case['answer'] for case in expected_cases])
+        records = [json.loads(line) for line in (self.root/'out/scores.jsonl').read_text().splitlines()]
+        self.assertEqual([r['case_sha256'] for r in records],
+                         [hashlib.sha256(json.dumps(c, sort_keys=True).encode()).hexdigest()
+                          for c in expected_cases])
+        saved = json.loads((self.root/'out/run_metadata.json').read_text())
+        self.assertEqual(saved['input_sha256'], hashlib.sha256(original).hexdigest())
 
     def test_uncommitted_protocol_rejected(self):
         with patch('src.evaluation.judge.run.subprocess.check_output', side_effect=[b'abc', b'wrong bytes']):

@@ -84,6 +84,10 @@ counts and latency. Answers, evidence, authentication keys and raw server errors
 are not copied to these reports. Store real inputs and outputs in controlled data
 storage; only synthetic fixtures belong in Git.
 
+The runner reads the UTF-8 JSONL once. Both parsed cases and `input_sha256`
+come from those same bytes, including original whitespace and line endings.
+Later edits to the source file cannot change the provenance recorded for that run.
+
 ## Human calibration and delivery status
 
 Two people must score the same cases independently and without seeing judge scores.
