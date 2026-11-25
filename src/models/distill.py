@@ -12,7 +12,10 @@ Choices that are ours, not the paper's, are marked [decision] (see docs/model1_s
   * Stage 1 lasts a fixed number of epochs; checkpoint selection and early stopping apply to stage 2 only.
   * Users without a profile (subset ablation) simply contribute no distillation term.
 """
+import csv
+import os
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -120,6 +123,16 @@ def distill_loss(pooled, target, valid):
     return F.mse_loss(pooled[valid], target[valid])
 
 
+def batch_coverage(valid):
+    """Share of the users in a batch that have a profile target (0.0 to 1.0)."""
+    return float(valid.float().mean())
+
+
+def effective_alpha(alpha, valid):
+    """alpha scaled by the batch coverage: 0 when no user in the batch has a profile, alpha when all of them do."""
+    return alpha * batch_coverage(valid)
+
+
 def combine_losses(l_model, l_distill, alpha, use_beta=True, eps=1e-12):
     """L = alpha * beta * L_distill + (1 - alpha) * L_model, with beta = detach(L_model / L_distill).
 
@@ -182,7 +195,10 @@ def train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, target
         if alpha > 0.0:
             target, valid = targets.lookup(batch['user_idx'], device)
             l_distill = distill_loss(pooled_representation(hidden, x), target, valid)
-            loss = combine_losses(l_model, l_distill, alpha, use_beta)
+            # The auxiliary term is rescaled by beta to the size of the main loss, which would give even a single covered
+            # user the full weight of the batch. Scaling alpha by the share of covered users keeps the influence proportional
+            # to coverage: no covered user -> plain recommendation loss; every user covered -> exactly alpha (unchanged).
+            loss = combine_losses(l_model, l_distill, effective_alpha(alpha, valid), use_beta)
             sum_distill += float(l_distill.detach())
         else:
             loss = l_model
@@ -200,14 +216,53 @@ def train_epoch_distill(model, loader, optimizer, device, grad_clip_norm, target
     return sum_model / n_targets, n_targets, (sum_distill / n_batches if alpha > 0.0 else 0.0)
 
 
-def make_epoch_fn(targets, schedule):
+class DistillLog:
+    """Per-epoch auxiliary history (epoch, alpha, recommendation loss, distillation loss), kept on disk.
+
+    Every append rewrites the whole CSV atomically (temporary file, fsync, os.replace), so the file always holds all
+    completed rows, also when a run fails or is interrupted. The trainer's own history cannot carry these values.
+    """
+    FIELDS = ('epoch', 'alpha', 'recommendation_loss', 'distill_loss')
+
+    def __init__(self, path=None, rows=()):
+        self.path = Path(path) if path is not None else None
+        self.rows = [dict(row) for row in rows]
+
+    def append(self, row):
+        self.rows.append({k: row[k] for k in self.FIELDS})
+        self.flush()
+
+    def flush(self):
+        if self.path is None:
+            return
+        temporary = self.path.with_name(self.path.name + '.tmp')
+        with open(temporary, 'w', newline='') as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(self.FIELDS))
+            writer.writeheader()
+            writer.writerows(self.rows)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, self.path)
+
+    @classmethod
+    def read(cls, path):
+        with open(path, newline='') as stream:
+            reader = csv.DictReader(stream)
+            if list(reader.fieldnames or []) != list(cls.FIELDS):
+                raise ValueError(f'{path} is not a distillation log (columns {reader.fieldnames})')
+            return [{'epoch': int(r['epoch']), 'alpha': float(r['alpha']),
+                     'recommendation_loss': float(r['recommendation_loss']),
+                     'distill_loss': float(r['distill_loss'])} for r in reader]
+
+
+def make_epoch_fn(targets, schedule, log=None):
     """Adapter for the trainer's epoch hook: (epoch, model, loader, optimizer, device, grad_clip_norm) -> (loss, n_targets).
 
     The returned loss is the recommendation loss only, so epoch histories stay comparable with Model 0.
-    The distillation loss and the stage are not part of the trainer's history, so they are kept in `epoch_fn.log`
-    (one dict per epoch: epoch, alpha, recommendation_loss, distill_loss); write it next to the run folder after fit().
+    The distillation loss and the stage are not part of the trainer's history, so every epoch is recorded in a DistillLog
+    (written to disk after each epoch when the log has a path). `epoch_fn.log` is the list of rows of that log.
     """
-    log = []
+    log = log if log is not None else DistillLog()
 
     def epoch_fn(epoch, model, loader, optimizer, device, grad_clip_norm):
         alpha = schedule.alpha_for_epoch(epoch)
@@ -216,5 +271,5 @@ def make_epoch_fn(targets, schedule):
         log.append({'epoch': epoch, 'alpha': alpha, 'recommendation_loss': loss, 'distill_loss': distill})
         return loss, n
 
-    epoch_fn.log = log
+    epoch_fn.log = log.rows
     return epoch_fn
