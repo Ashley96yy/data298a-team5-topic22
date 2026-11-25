@@ -26,6 +26,12 @@ Use the Colab notebook `notebooks/model_experiments/15_ministral_judge_colab.ipy
 on an A100, or a dedicated Linux CUDA environment. The serving requirements are
 separate from the recommender's pinned PyTorch environment.
 
+The notebook clones the repository without naming a temporary PR branch, then
+checks out and verifies its exact `CODE_COMMIT`. Keep that commit reachable in
+the repository history when merging. Its pin includes the single-read input
+fix; the previously saved L4 smoke evidence remains tied to its original code
+hashes and is not a GPU validation of this newer runner.
+
 ```bash
 python -m pip install -r src/evaluation/judge/requirements-serving.txt
 python -m src.evaluation.judge.serve --record-dir results/judge_serving_attempt1

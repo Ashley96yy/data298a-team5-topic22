@@ -1,7 +1,10 @@
 # GPU judge smoke verification
 
 The supplied Colab artifacts were verified against implementation commit
-`7ef50d3e9f0fc9a13dda2bc248bffb22e67318bd` and the current PR source hashes.
+`7ef50d3e9f0fc9a13dda2bc248bffb22e67318bd` and the source hashes saved with
+that run. The later input-snapshot and notebook checkout fixes are covered by
+local regression tests, not by this historical GPU run. Its original evidence
+files and recorded hashes remain unchanged.
 The run started on **November 22, 2026 (America/Los_Angeles)**; its folder uses UTC:
 `smoke_20261123T073402_051577Z`.
 
