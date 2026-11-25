@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "mode": "smoke",
+  "synthetic_smoke": true,
+  "judge": {
+    "model_id": "mistralai/Ministral-3-8B-Instruct-2512-BF16",
+    "revision": "f6fae9795746f63c9be8344932f01275f3c63734",
+    "served_model_name": "ministral-judge-f6fae9795746",
+    "judge_family": "mistral",
+    "scoring_method": "mean_20_samples",
+    "samples": 20,
+    "temperature": 0.7,
+    "top_p": 1.0,
+    "seed": 2026,
+    "max_tokens": 128,
+    "max_model_len": 8192,
+    "vllm_version": "0.34.0",
+    "criteria": [
+      "faithfulness",
+      "relevance",
+      "coherence",
+      "fluency"
+    ]
+  },
+  "protocol": {
+    "commit": "7ef50d3e9f0fc9a13dda2bc248bffb22e67318bd",
+    "files_sha256": {
+      "configs/judge/ministral.json": "92b4f19ba29cc77fa70a8e28b8ced3341b20a10a94c0b2f67139547ca3f05648",
+      "configs/judge/rubric.txt": "e91b085a2bd919c8c65829b161e26ce5324f70bdeb8879e7c921549a01a6a09f",
+      "src/evaluation/judge/run.py": "43bd2ab6beb10da5d569459223c941d12a07f136aa4dc8bebb9e8d1e34c30ead",
+      "src/evaluation/judge/serve.py": "5ab6851480429133a71d3d13b79860dd1184137b3acea74454ff778ce3ad0b5a",
+      "src/evaluation/judge/requirements-serving.txt": "020c028e92d76198a3fd6541448c40967694c74448fb7ddfe0299d22c7b724db",
+      "docs/metrics_commitment.md": "0f28a4839f6312ef52e1e13e280743f03b47a055282e525a90f39c498693f106"
+    }
+  },
+  "input_sha256": "7ff91a3ef10813f7e90edde6bdfe3bef8cbf42961c0ce418030f7712adce79bc",
+  "python": "3.13.16",
+  "cases_expected": 2,
+  "cases_completed": 2,
+  "endpoint_identity": "served alias checked; remote weights not independently attested",
+  "calibration_status": "PENDING independent human ratings; not a reliability claim",
+  "seconds": 5.804
+}
