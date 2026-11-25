@@ -39,8 +39,9 @@ Flags against the Qwen2.5-7B pilot, same 200 users (`comparison_with_pilot_v2.cs
 ### Batching consistency (gate failed: 3 of 8 identical, min similarity 0.626, gate 0.8)
 `consistency_check.csv` regenerates 8 users one at a time and compares with their batched profile:
 - 3 identical, and 1 more that differs only in a dash (`10-25` vs `10–25`).
-- In the other 4, the first two sentences match word for word and only the last sentence is worded differently.
-  Both versions are grounded in the same products; neither adds or drops a product, brand or rating.
+- In the other 4, the first sentence always matches word for word. In 3 of them (44188, 35137, 20745) the first two
+  sentences match and only the last is worded differently; in 1 (5449, similarity 0.626) the second and third
+  sentences are both worded differently. In all 4, both versions name the same products, brands and ratings.
 
 This is bf16 rounding drift: once one token differs, greedy decoding continues differently. It is not padding
 corruption, which would produce wrong or garbled content. The 0.8 threshold was set before we knew how large this
