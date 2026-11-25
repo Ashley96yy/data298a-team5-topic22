@@ -1,0 +1,21 @@
+user_idx,n_train_items_used,verdict,invented_brand_or_product,sensitive_inference,note,reviewed_by,review_date
+27470,5,accurate,no,no,"Dove, Aveeno, Pond's, Dickinson's and the Bioré scrub match; oat and witch hazel are in the titles.",Disha,11/22/26
+5449,3,minor slip,no,no,"Calls the Mario Badescu Drying Lotion (3/5) a ""pore cleansing product""; ""strong preference for natural ingredients"" overstated from one organic lip balm.",Disha,11/22/26
+9227,3,accurate,no,no,"St. Ives, L'Oréal and FinchBerry match; ""under $10"" is true for the two priced items.",Disha,11/22/26
+44188,7,accurate,no,no,"Brands and categories match, and it names the 2-star Kiss My Face soap as disliked.",Disha,11/22/26
+38080,5,awkward wording,no,no,"Content accurate (jane iredale 5/5, Mad Hippie 3/5); last sentence (""without evidence of avoiding other types"") echoes the prompt rules.",Disha,11/22/26
+35137,3,accurate,no,no,"Brands match; ""all three in $10-25"" is true for the listed prices.",Disha,11/22/26
+20745,4,accurate,no,no,"Desert Essence, Burt's Bees, Puracy and OZ Naturals match; price sentence is vague but not wrong.",Disha,11/22/26
+47144,4,minor slip,no,no,"Credits the hand soap (Michel Design Works) to Andalou Naturals; ""Meyer leons"" typo.",Disha,11/22/26
+49627,3,accurate,no,no,"Neutrogena, Vichy and the 3/5 L'Oréal moisturizer match; ""fragrance free"" is in the L'Oréal title.",Disha,11/22/26
+13332,4,accurate,no,no,"Brands and products match; ""free from sulfates and parabens"" could not be confirmed from the shortened titles.",Disha,11/22/26
+20458,7,minor slip,no,no,Links the coconut scent to Tanceuticals; it belongs to the Tree Hut body butter.,Disha,11/22/26
+51196,10,accurate,no,no,"Brands, categories and ratings match the 10 products.",Disha,11/22/26
+46088,10,accurate,no,no,"Matches, and it names the 2-star Body Shop toner as disliked.",Disha,11/22/26
+24502,4,accurate,no,no,"Retseliney, rose water and peptide serum match; ""all four 4 or 5 stars"" is true.",Disha,11/22/26
+52355,50,minor slip,no,no,"50 products; brands and ingredients match, but it does not mention the user's lower-rated items (automatic flag).",Disha,11/22/26
+50283,3,accurate,no,no,"Matches; ""ATOPAL"" is the catalog brand field for the Adovia serum.",Disha,11/22/26
+17381,9,minor slip,no,no,Says the Vitamin C products were all rated five stars; the InstaNatural moisturizer was 4/5.,Disha,11/22/26
+42927,4,minor slip,no,no,"Calls the 3/5 Burt's Bees towelettes ""liked""; correctly names the 2/5 Total Block sunscreen as disliked.",Disha,11/22/26
+24887,8,accurate,no,no,"Brands, categories and ratings match the 8 products.",Disha,11/22/26
+20533,3,accurate,no,no,"Brands match; the ""all ... price"" statement is true for the listed prices.",Disha,11/22/26
