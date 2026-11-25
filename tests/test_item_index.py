@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -97,6 +98,28 @@ class ItemIndexTests(unittest.TestCase):
         self.assertEqual(index.levels[5], [])
         self.assertNotIn('nan', set(index.categories().category))
         self.assertNotIn(6, set(index.search_vector(self.emb[0], k=10, categories=['Face']).item_idx))
+
+    def test_multi_level_typo_or_wrong_order_is_rejected(self):
+        with self.assertRaises(ValueError) as e:
+            self.index.search_vector(self.emb[0], categories=['Face > Treatmnts & Masks'])
+        self.assertIn('treatments & masks', str(e.exception))
+        with self.assertRaises(ValueError):                    # both levels exist, but never in this order
+            self.index.search_vector(self.emb[0], categories=['Body > Treatments & Masks'])
+        self.assertEqual(set(self.index.search_vector(self.emb[0], k=10, categories=['Skin Care > Face']).item_idx), {1, 2, 4})
+
+    def test_bad_price_bounds_are_rejected(self):
+        for bad in (dict(price_max=float('nan')), dict(price_min=float('nan')), dict(price_min=float('nan'), price_max=5),
+                    dict(price_max=float('inf')), dict(price_max='25'), dict(price_max=True)):
+            with self.assertRaises(ValueError):
+                self.index.search_vector(self.emb[0], **bad)
+        self.assertEqual(set(self.index.search_vector(self.emb[0], k=10, price_max=np.float32(12)).item_idx), {1, 4, 5})
+        self.assertEqual(set(self.index.search_vector(self.emb[0], k=10, price_max=12).item_idx), {1, 4, 5})
+
+    def test_search_emits_no_runtime_warnings(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', RuntimeWarning)
+            hits = self.index.search_vector(self.emb[2], k=4, price_max=40)
+        self.assertTrue(np.isfinite(hits.score).all())
 
     def test_category_listing(self):
         cats = self.index.categories(level=2)
