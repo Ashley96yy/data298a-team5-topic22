@@ -4,6 +4,9 @@ with price, category and brand filters. CPU only; no extra index library is need
 The index holds only catalog metadata text (title, brand, category, features, description, price band),
 never review or interaction text, so it carries no validation or test information.
 
+Dependencies: numpy, pandas and pyarrow for loading and vector search; sentence-transformers only for
+text queries (search / encode_query), loaded on the first text query.
+
 Usage:
     from src.retrieval.item_index import ItemIndex
     index = ItemIndex.load('<298A>/retrieval_index/item_index_minilm_v1')
@@ -13,6 +16,8 @@ Usage:
 import difflib
 import hashlib
 import json
+import math
+import numbers
 from pathlib import Path
 
 import numpy as np
@@ -109,6 +114,10 @@ class ItemIndex:
         path prefix such as 'Face > Creams & Moisturizers' (case-insensitive). Unknown category or brand names
         raise ValueError with close matches, so a caller never filters on a misspelled name by accident."""
         mask = np.ones(len(self.items), dtype=bool)
+        for label, bound in (('price_min', price_min), ('price_max', price_max)):
+            if bound is not None and (isinstance(bound, bool) or not isinstance(bound, numbers.Real)
+                                      or not math.isfinite(bound)):
+                raise ValueError(f'{label} must be a finite number, got {bound!r}')
         if price_min is not None or price_max is not None:
             if price_min is not None and price_max is not None and price_min > price_max:
                 raise ValueError('price_min is larger than price_max')
@@ -125,9 +134,14 @@ class ItemIndex:
             for w in wanted:
                 if not w:
                     raise ValueError('empty category name')
-                if len(w) == 1 and w[0] not in known:
-                    close = difflib.get_close_matches(w[0], sorted(known), n=5, cutoff=0.5)
-                    raise ValueError(f'unknown category {w[0]!r}; close matches: {close}')
+                for level in w:                                  # every level of a path must exist
+                    if level not in known:
+                        close = difflib.get_close_matches(level, sorted(known), n=5, cutoff=0.5)
+                        raise ValueError(f'unknown category {level!r}; close matches: {close}')
+                if len(w) > 1 and not any(levels[s:s + len(w)] == w for levels in self.levels
+                                          for s in range(len(levels) - len(w) + 1)):
+                    raise ValueError(f'category path {" > ".join(w)!r} does not occur in the catalog '
+                                     '(each level exists, but not in this order)')
             def match(levels):
                 for w in wanted:
                     if len(w) == 1 and w[0] in levels:
@@ -163,7 +177,10 @@ class ItemIndex:
         rows = np.flatnonzero(self.filter_mask(**filters))
         if len(rows) == 0:
             return self._result(rows, np.array([], dtype=np.float32))
-        scores = self.embeddings[rows] @ v
+        with np.errstate(all='ignore'):                 # numpy with Apple Accelerate can warn spuriously here
+            scores = self.embeddings[rows] @ v
+        if not np.isfinite(scores).all():               # so check the result itself instead
+            raise FloatingPointError('non-finite similarity scores')
         top = np.argsort(-scores, kind='stable')[:k]
         rows, scores = rows[top], scores[top]
         if min_score is not None:
