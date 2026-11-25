@@ -1,0 +1,40 @@
+test_artifacts_have_expected_counts (tests.test_recommend.RecommenderTests.test_artifacts_have_expected_counts) ... ok
+test_empty_history_falls_back_to_popularity (tests.test_recommend.RecommenderTests.test_empty_history_falls_back_to_popularity) ... ok
+test_history_items_are_never_recommended (tests.test_recommend.RecommenderTests.test_history_items_are_never_recommended) ... ok
+test_k_is_capped_by_remaining_items (tests.test_recommend.RecommenderTests.test_k_is_capped_by_remaining_items) ... ok
+test_markov_follows_most_frequent_successor (tests.test_recommend.RecommenderTests.test_markov_follows_most_frequent_successor) ... ok
+test_missing_inputs_fail_clearly_and_leave_no_output_folder (tests.test_recommend.RecommenderTests.test_missing_inputs_fail_clearly_and_leave_no_output_folder) ... ok
+test_registered_scorer_is_used (tests.test_recommend.RecommenderTests.test_registered_scorer_is_used) ... ok
+test_rejects_bad_ids_and_methods (tests.test_recommend.RecommenderTests.test_rejects_bad_ids_and_methods) ... ok
+test_search_matches_title_and_brand (tests.test_recommend.RecommenderTests.test_search_matches_title_and_brand) ... ok
+test_automated_status_overrides_the_headline (tests.test_monitor.MonitorTests.test_automated_status_overrides_the_headline) ... ok
+test_falls_back_to_the_committed_manual_record (tests.test_monitor.MonitorTests.test_falls_back_to_the_committed_manual_record) ... ok
+test_format_utc (tests.test_monitor.MonitorTests.test_format_utc) ... ok
+test_missing_files_do_not_crash (tests.test_monitor.MonitorTests.test_missing_files_do_not_crash) ... ok
+test_newest_automated_run_wins_even_if_it_failed (tests.test_monitor.MonitorTests.test_newest_automated_run_wins_even_if_it_failed) ... ok
+test_no_run_gives_none (tests.test_monitor.MonitorTests.test_no_run_gives_none) ... ok
+test_summary_counts_come_from_the_files (tests.test_monitor.MonitorTests.test_summary_counts_come_from_the_files) ... ok
+test_tables (tests.test_monitor.MonitorTests.test_tables) ... ok
+test_adding_a_product_changes_the_recommendations (tests.test_app.AppTests.test_adding_a_product_changes_the_recommendations) ... 2026-11-10 11:47:38.751 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_loading_a_real_example_user_fills_the_history (tests.test_app.AppTests.test_loading_a_real_example_user_fills_the_history) ... 2026-11-10 11:47:38.923 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_starts_without_exceptions_and_shows_cold_start_recommendations (tests.test_app.AppTests.test_starts_without_exceptions_and_shows_cold_start_recommendations) ... 2026-11-10 11:47:39.004 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_monitor_page_renders_real_numbers (tests.test_app.MonitorPageTests.test_monitor_page_renders_real_numbers) ... 2026-11-10 11:47:39.069 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+test_builder_rejects_modified_frozen_input_before_writing_output (tests.test_serving_sasrec.SASRecServingTests.test_builder_rejects_modified_frozen_input_before_writing_output) ... ok
+test_catalog_or_source_mismatch_is_rejected (tests.test_serving_sasrec.SASRecServingTests.test_catalog_or_source_mismatch_is_rejected) ... ok
+test_changed_display_artifact_is_rejected (tests.test_serving_sasrec.SASRecServingTests.test_changed_display_artifact_is_rejected) ... ok
+test_invalid_history_ids_and_nonfinite_weights_are_rejected (tests.test_serving_sasrec.SASRecServingTests.test_invalid_history_ids_and_nonfinite_weights_are_rejected) ... ok
+test_left_padding_truncation_and_scores_match_training_model (tests.test_serving_sasrec.SASRecServingTests.test_left_padding_truncation_and_scores_match_training_model) ... ok
+test_missing_frozen_manifest_is_rejected (tests.test_serving_sasrec.SASRecServingTests.test_missing_frozen_manifest_is_rejected) ... ok
+test_registration_and_seen_item_masking (tests.test_serving_sasrec.SASRecServingTests.test_registration_and_seen_item_masking) ... ok
+test_wrong_checkpoint_hash_is_rejected (tests.test_serving_sasrec.SASRecServingTests.test_wrong_checkpoint_hash_is_rejected) ... ok
+test_live_model_is_selectable_and_serves_a_real_example (tests.test_app_sasrec.SASRecPageTests.test_live_model_is_selectable_and_serves_a_real_example) ... 2026-11-10 11:47:39.864 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 1.461s
+
+OK

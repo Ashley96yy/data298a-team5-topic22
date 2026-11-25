@@ -77,7 +77,8 @@ bash scripts/aws/airflow_status.sh
 bash scripts/aws/airflow_status.sh 'scheduled__2025-01-01T00:00:00+00:00'
 ```
 
-The helper is new in this change; until it is deployed, the equivalent is:
+The helper was merged in PR #28. Until that commit is pulled onto EC2, the
+equivalent is:
 
 ```bash
 sudo docker compose --env-file .env -f orchestration/compose.yaml \
@@ -144,8 +145,15 @@ Pausing prevents new scheduling; it does not stop an active run. Wait for the
 run to finish before shutdown. Finally use EC2 **Instance state > Stop
 instance** and confirm **Stopped**. Closing Session Manager or stopping
 containers alone does not stop EC2 compute usage. EBS and S3 storage remain
-billable. This document does not claim the instance has been stopped after
-the Airflow run.
+billable.
+
+Status update, November 25, 2026 (Pacific time): the operator's DAG listing
+confirmed `is_paused=True` after all nine tasks succeeded, and the operator
+subsequently confirmed that EC2 was stopped. This is operator-reported status,
+not a fresh AWS query. The Airflow refresh archive and verified S3 readback
+remain pending; complete them during the next planned EC2 session. The earlier
+verified `warehouse/aws_run_001/` upload contains separate frozen-warehouse
+outputs and does not establish a backup of this Airflow refresh.
 
 References: [Airflow scheduling](https://airflow.apache.org/docs/apache-airflow/3.1.8/authoring-and-scheduling/cron.html),
 [Airflow CLI](https://airflow.apache.org/docs/apache-airflow/3.1.8/cli-and-env-variables-ref.html),
