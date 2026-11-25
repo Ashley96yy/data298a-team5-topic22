@@ -1,5 +1,9 @@
 # AWS frozen dataset deployment helpers
 
+For the separate Airflow deployment, see the [EC2 Airflow runbook](../../docs/deployment/aws_airflow.md)
+and `airflow_status.sh`. It records the successful nine-task refresh run;
+the frozen dataset and warehouse workflow below remain separate.
+
 Run these scripts from the repository root with Python 3.11+. They use the
 standard library; downloading also requires AWS CLI v2 and an instance role
 with S3 read access. No access keys belong in these files.
