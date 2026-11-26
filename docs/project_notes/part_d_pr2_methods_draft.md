@@ -66,8 +66,8 @@ The separate [Amazon 2023 literature benchmark](../literature/amazon2023_ndcg10_
 records SASRec and comparison-model results from four papers, with table citations
 and protocol limitations. Sampled-negative scores and scores from different
 Amazon subsets are contextual references rather than direct full-catalog targets.
-The final comparison should use the team's same-data baseline table and explain
-these protocol differences.
+The [final comparison](model0_final_comparison/README.md) uses the team's
+same-data baseline table and explains these protocol differences.
 
 ## Full-grid results — contribution to Section 4.6
 
@@ -121,7 +121,9 @@ SASRec Model 0 provides the ID-based sequential reference for the subsequent
 models. Its validation NDCG@10 of 0.045582 exceeds the author-produced same-dataset
 validation scores for popularity (0.013995), last-item Markov (0.031781) and cosine
 item-kNN (0.024794). These values were checked against the baseline JSON in
-PR #6 at commit 2cd58b0, whose provenance matches all nine frozen input hashes. Markov is the strongest of these simple references.
+PR #6 at commit 2cd58b0, whose provenance matches all nine frozen input hashes.
+PR #6 merged on November 11, 2026; the source version used for this comparison
+is unchanged. Markov is the strongest of these simple references.
 Using the unrounded values, the absolute validation difference is
 0.013801, or 43.42% relative improvement. This is a descriptive comparison of the selected
 seed-42 validation checkpoint against author-reported baselines, not a test-set

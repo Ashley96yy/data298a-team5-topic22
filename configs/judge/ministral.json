@@ -1,0 +1,15 @@
+{
+  "model_id": "mistralai/Ministral-3-8B-Instruct-2512-BF16",
+  "revision": "f6fae9795746f63c9be8344932f01275f3c63734",
+  "served_model_name": "ministral-judge-f6fae9795746",
+  "judge_family": "mistral",
+  "scoring_method": "mean_20_samples",
+  "samples": 20,
+  "temperature": 0.7,
+  "top_p": 1.0,
+  "seed": 2026,
+  "max_tokens": 128,
+  "max_model_len": 8192,
+  "vllm_version": "0.34.0",
+  "criteria": ["faithfulness", "relevance", "coherence", "fluency"]
+}

@@ -60,7 +60,7 @@ The verification recomputed all 24 aggregate full-catalog and sampled metrics fr
 
 The experiments retain their actual environments: SASRec records Python 3.13.16 / PyTorch 2.14.1+cu130, while the baseline provenance records Python 3.11.18 / NumPy 2.2.6 / pandas 2.3.2 / SciPy 1.17.1. No cross-environment bitwise reproducibility is claimed.
 
-- [Baseline source at 2cd58b0](https://github.com/Ashley96yy/data298a-team5-topic22/blob/2cd58b099bc34ae1c8730b3801a1d63c3fdbf0d5/docs/baselines/baselines.json) and [local evidence snapshot](reference_baselines.json). PR #6 remained open at this review; the versioned results are cited explicitly.
+- [Baseline source at 2cd58b0](https://github.com/Ashley96yy/data298a-team5-topic22/blob/2cd58b099bc34ae1c8730b3801a1d63c3fdbf0d5/docs/baselines/baselines.json) and [local evidence snapshot](reference_baselines.json). [PR #6](https://github.com/Ashley96yy/data298a-team5-topic22/pull/6) merged on November 11, 2026 (status checked November 25). The comparison retains the exact source version and saved evidence; no benchmark inference was rerun for this status update.
 - [Sneha’s committed test results](../model0_test_20261108/README.md), added in commit c203d42.
 - [Original validation handoff](../model0_full_grid_20261107/issue3_1_validation_summary.json).
 - [Machine-readable verification and source hashes](verification.json).

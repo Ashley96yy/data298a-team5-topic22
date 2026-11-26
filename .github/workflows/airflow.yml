@@ -1,0 +1,44 @@
+name: airflow-checks
+
+on:
+  pull_request:
+    paths:
+      - "orchestration/**"
+      - "pipeline/**"
+      - "notebooks/data_prep/**"
+      - "tests/test_*pipeline*.py"
+      - "src/serving/monitor.py"
+      - ".github/workflows/airflow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build and check the Airflow image
+        run: |
+          docker build -t topic22-airflow:ci -f orchestration/Dockerfile .
+          docker run --rm --entrypoint python topic22-airflow:ci -c '
+          from airflow.models.dagbag import DagBag
+          dagbag = DagBag(dag_folder="/opt/airflow/dags", include_examples=False)
+          assert not dagbag.import_errors, dagbag.import_errors
+          dag = dagbag.dags["recsys_data_pipeline"]
+          from pipeline.run_pipeline import NOTEBOOKS
+          expected = [*NOTEBOOKS, "quality_gate", "publish_run_record"]
+          assert set(dag.task_ids) == set(expected)
+          for i, name in enumerate(expected):
+              task = dag.get_task(name)
+              assert task.retries == 2 and task.on_failure_callback
+              assert task.upstream_task_ids == set(expected[max(0, i-1):i])
+          '
+      - name: Test notebook execution and the quality gate with local fixtures
+        run: |
+          docker run --rm --entrypoint /home/airflow/pipeline-venv/bin/python \
+            topic22-airflow:ci -m unittest discover -s tests -p 'test_*pipeline*.py'
