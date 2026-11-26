@@ -1,7 +1,6 @@
 # Model 1 user profiles: the full run (all 56,017 users)
 
-Written by Disha, Nov 25, 2026. Notebook: `notebooks/model_experiments/16_model1_profiles_full_qwen35.ipynb`
-(Ashley's executed copy). Audit: `audit_summary_full.md` in this folder.
+Written by Disha, Nov 25, 2026. Notebook: `notebooks/model_experiments/16_model1_profiles_fullrun_qwen35.ipynb`. Audit: `audit_summary_full.md` in this folder.
 
 ## What this is
 
