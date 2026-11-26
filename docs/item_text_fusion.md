@@ -2,12 +2,17 @@
 
 Written by: Abhinita Sanabada
 
-This implements the item-text component in Section 2a of the proposed Model 1
-specification (PR #8). It is usable independently of user-profile generation.
-The exact encoder choices still need team confirmation. The code accepts model
-IDs and immutable Hugging Face revisions explicitly; the Colab notebook shows
-candidate defaults and records the resolved revision. No full-catalog embedding
-or Model 1 research result is claimed by this change.
+Status updated November 26, 2026. This implements the item-text component in
+Section 2a of the merged [Model 1 specification](model1_spec.md) (PR #8).
+It is usable independently of user-profile generation. The notebook pins the
+source commit, encoder revisions and frozen manifest instead of following a
+temporary PR branch or resolving the latest model revision at runtime.
+
+The full MiniLM catalog encoding is already recorded in the merged specification
+and used by the [product retrieval index](project_notes/README_product_search_index.md)
+(PR #24). That separate encoding run does not establish a trained `TextSASRec`
+result. BLaIR full encoding and the trained item-only ablations remain pending;
+this PR supplies their implementation and smoke checks, not research results.
 
 ## Encoding
 
@@ -18,17 +23,25 @@ Authentication uses the signed-in account's existing access. After a successful
 smoke check, full encoding produces one float32 matrix with shape
 `(n_items + 1, d_text)`, row zero reserved for padding and rows indexed by item ID.
 
-Candidate encoders and their documented representations:
+Encoder families from the specification and their documented representations:
 
-| Family | Candidate model ID | Dimension | Pooling | Token limit |
+| Family | Model ID | Dimension | Pooling | Token limit |
 |---|---|---:|---|---:|
 | BLaIR | `hyp1231/blair-roberta-base` | 768 | First token (CLS), L2 normalized | 512 |
 | MiniLM | `sentence-transformers/all-MiniLM-L6-v2` | 384 | Attention-masked mean, L2 normalized | 256 |
 
 Sources: [BLaIR model card](https://huggingface.co/hyp1231/blair-roberta-base)
 and [MiniLM model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2).
-These are supported candidate variants, not a claim that the team has selected them.
+Notebook revisions are MiniLM `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`
+and BLaIR `88adfe2b621cb202dee9aabb19b59de8f622844c`, matching the saved
+November 11 encoder smoke evidence. The manifest is pinned to
+`e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5`.
 Different dimensions/pooling require adapting the family specification and tests.
+
+The source clone does not require the feature branch to survive. It checks out
+the exact `CODE_COMMIT` and rejects an existing checkout at another commit or
+with tracked edits. Use a fresh `PROJECT` directory when changing source pins.
+Preserve the pinned source commit in repository history when merging this PR.
 
 `src.data.item_embeddings` verifies `dataset_info.json` and `item_text.parquet`
 against `manifest.json`, rejects missing/duplicate item IDs and empty text, and
@@ -83,12 +96,14 @@ The fused class exposes the same `hidden`, `training_logits` and
 existing distillation hook through the real trainer, including stage-2-only
 checkpoint selection and an exact checkpoint prediction round trip.
 
-PR #14's real-data entry point still constructs plain SASRec. Once that work is
-merged, its model construction can use `TextSASRec` with a verified embedding
-artifact and record `model_class`, `text_architecture` and artifact provenance as
-the item-only entry point does. This change does not edit another open PR or
-provide real profiles. The full combined experiment still needs Disha's profile
-file and the team's encoder/distillation choices.
+PR #14 is merged; its real-data entry point, `src.training.train_model1`, still
+constructs plain SASRec. Section 9 of the merged specification assigns the
+combined arm to Ruchika as a follow-up after this PR: add an optional
+`--item-text-embeddings` argument, share the input-verification logic with the
+item-only entry point, construct `TextSASRec`, and record `model_class`,
+`text_architecture` and artifact provenance. The combined arm is not implemented
+by this PR. Full profiles are submitted in PR #29, pending review; no real-profile
+training or full Model 1 result is claimed here.
 
 Existing Part E and demo loaders assume plain SASRec checkpoints. Do not send a
 fused checkpoint to them or label it Model 0. Their model-factory integration,
@@ -96,12 +111,20 @@ final multi-seed evaluation and hosted Model 1 adapter remain separate follow-up
 
 ## Validation scope
 
+The November 26 refresh was tested against current `main`: 32 targeted tests
+passed, including four tests that execute the notebook's source-checkout cell
+against local Git repositories. The full suite ran 257 tests: 256 passed and
+one existing notebook-pipeline execution test was skipped because its optional
+dependencies were unavailable. The real Model 0 checkpoint UI test passed.
+See the [current verification record](project_notes/item_text_readiness_20261126/verification.json).
+No GPU encoding, research training or full Colab session was run for this refresh.
+
 `python -m unittest tests.test_item_text -v` checks input tampering, item alignment,
 pooling, partial output rejection, finite vectors, frozen text, learnable fusion,
 causality, padding, distillation compatibility and checkpoint restoration. Small
-real-encoder smoke checks use synthetic product phrases, not Amazon benchmark
-results. Full encoding and trained item-text ablations remain pending the team
-choices and a deliberate Colab execution.
+real-encoder smoke checks are not Amazon benchmark results. BLaIR full encoding
+and trained item-text ablations still need deliberate GPU runs. The separately
+completed MiniLM encoding is described above.
 
 The November 11 verification ran 148 repository tests: 147 passed and one existing
 notebook-pipeline execution test was skipped because its separate dependencies
