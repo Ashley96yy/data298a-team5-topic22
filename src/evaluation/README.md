@@ -123,10 +123,40 @@ products that never appear as a target are pushed down. Profile distillation
 does not change this, because those ID embeddings are still never trained. The
 item-text embedding variant of Model 1 is the one meant to close the gap.
 
+## Significance tests
+
+`significance.py` implements the significance row of `docs/metrics_commitment.md`
+(amendment of 2026-11-22). The unit is per-user NDCG@10 on the full-catalog test
+split, averaged over seeds 42, 43 and 44 for a trained model. The test is a
+two-sided paired randomization (sign-flip) test with 10,000 permutations, with a
+paired bootstrap 95% interval (10,000 resamples), random seed 2026, and Holm
+correction across the comparisons in one table. Recall@10 and MRR are reported
+with an interval only. Most users score 0 under both models (91% for Model 0),
+which is why the Wilcoxon signed-rank test, which drops tied pairs, is not used.
+
+No model is retrained or rescored. Model ranks come from each seed's saved
+`test_ranks.npz`, which must reproduce the NDCG@10 in its `test_evaluation.json`.
+The untrained baselines are rescored once and must reproduce
+`docs/baselines/baselines.json`.
+
+```sh
+python -B -m src.evaluation.significance baselines --processed data/processed \
+  --output results/significance/baseline_ranks
+python -B -m src.evaluation.significance compare \
+  --model "Model 0=<seed_42 dir>,<seed_43 dir>,<seed_44 dir>" \
+  --baseline-ranks results/significance/baseline_ranks \
+  --output results/significance/model0_vs_baselines
+```
+
+Add `--model "Model 1=..."` once its three seeds are evaluated; the command runs
+every committed comparison the inputs allow and lists the ones still missing.
+Results: `docs/project_notes/significance_20261122`.
+
 ## Tests
 
 ```sh
 python -B -m unittest tests.test_evaluation -v
+python -B -m unittest tests.test_significance -v
 ```
 
 Run in the pinned Python 3.11 / PyTorch 2.8.0 environment with
