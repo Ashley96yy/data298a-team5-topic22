@@ -17,6 +17,18 @@ from src.models.distill import DistillSchedule, ProfileTargets, make_epoch_fn
 from src.training.trainer import TrainingSettings, fit, seed_everything
 
 
+def artifact_metadata(meta, encoder='minilm'):
+    specs = {
+        'minilm': {'model_id': 'sentence-transformers/all-MiniLM-L6-v2',
+                   'revision': '1110a243fdf4706b3f48f1d95db1a4f5529b4d41',
+                   'dimension': 384, 'pooling': 'mean', 'max_length': 256},
+        'blair': {'model_id': 'hyp1231/blair-roberta-base',
+                  'revision': '88adfe2b621cb202dee9aabb19b59de8f622844c',
+                  'dimension': 768, 'pooling': 'cls', 'max_length': 512}}
+    return {**meta, **specs[encoder], 'encoder': encoder, 'normalize': True,
+            'encoded_items': meta['n_items'], 'complete_catalog': True}
+
+
 class EmbeddingTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -41,7 +53,8 @@ class EmbeddingTests(unittest.TestCase):
         self.assertEqual(count, 3)
         np.testing.assert_array_equal(matrix[:, 0], [0, 1, 2, 3])
         output = self.root / 'out'
-        save_embeddings(output, 'minilm', matrix, {**meta, 'complete_catalog': True})
+        matrix = np.pad(matrix, ((0, 0), (0, 382)))
+        save_embeddings(output, 'minilm', matrix, artifact_metadata(meta))
         loaded, _ = load_embeddings(output, manifest_sha256=meta['manifest_sha256'], n_items=3)
         np.testing.assert_array_equal(loaded, matrix)
         with self.assertRaises(FileExistsError):
@@ -82,7 +95,7 @@ class EmbeddingTests(unittest.TestCase):
     def test_tampered_embedding_rejected(self):
         _, meta = read_items(self.root)
         out = self.root / 'out'
-        path = save_embeddings(out, 'blair', np.ones((4, 2), dtype='float32'), {**meta, 'complete_catalog': True})
+        path = save_embeddings(out, 'blair', np.ones((4, 768), dtype='float32'), artifact_metadata(meta, 'blair'))
         path.write_bytes(b'corrupt')
         with self.assertRaisesRegex(ValueError, 'checksum'):
             load_embeddings(out, manifest_sha256=meta['manifest_sha256'], n_items=3)
@@ -97,6 +110,73 @@ class EmbeddingTests(unittest.TestCase):
     def test_unpinned_revision_rejected_before_network(self):
         with self.assertRaisesRegex(ValueError, 'immutable'):
             HFEncoder('example/model', 'main', 'minilm', 'cpu', None)
+
+
+    def complete_artifact(self, name='valid', dimension=384):
+        _, meta = read_items(self.root)
+        matrix = np.zeros((4, dimension), dtype='float32')
+        matrix[1:, 0] = [1, 2, 3]
+        out = self.root / name
+        save_embeddings(out, 'minilm', matrix, artifact_metadata(meta))
+        return out, meta, matrix
+
+    def test_unapproved_artifact_configuration_rejected(self):
+        out, meta, _ = self.complete_artifact()
+        metadata_path = out / 'metadata.json'
+        original = json.loads(metadata_path.read_text())
+        for key, bad in [('encoder', 'unknown'), ('encoder', 'blair'),
+                         ('model_id', 'another/model'), ('revision', 'main'),
+                         ('revision', 'a' * 40), ('dimension', 2),
+                         ('pooling', 'cls'), ('max_length', 512),
+                         ('normalize', False), ('encoded_items', 2)]:
+            with self.subTest(key=key, value=bad):
+                metadata_path.write_text(json.dumps({**original, key: bad}))
+                with self.assertRaises(ValueError):
+                    load_embeddings(out, manifest_sha256=meta['manifest_sha256'], n_items=3)
+        for key in ['encoder', 'model_id', 'revision', 'dimension']:
+            with self.subTest(missing=key):
+                changed = dict(original); changed.pop(key)
+                metadata_path.write_text(json.dumps(changed))
+                with self.assertRaises(ValueError):
+                    load_embeddings(out, manifest_sha256=meta['manifest_sha256'], n_items=3)
+
+    def test_actual_dimension_must_match_approved_encoder(self):
+        out, meta, _ = self.complete_artifact(dimension=2)
+        with self.assertRaises(ValueError):
+            load_embeddings(out, manifest_sha256=meta['manifest_sha256'], n_items=3)
+
+    def test_embedding_replaced_at_parse_time_uses_verified_snapshot(self):
+        out, meta, original = self.complete_artifact()
+        path = out / 'item_text_emb_minilm.npy'
+        before_hash = digest(path)
+        real_load = np.load
+        def replace_then_load(source, *args, **kwargs):
+            np.save(path, original[[0, 2, 1, 3]], allow_pickle=False)
+            return real_load(source, *args, **kwargs)
+        with patch('src.data.item_embeddings.np.load', side_effect=replace_then_load):
+            loaded, recorded = load_embeddings(out, manifest_sha256=meta['manifest_sha256'], n_items=3)
+        np.testing.assert_array_equal(loaded, original)
+        self.assertEqual(recorded['embedding_sha256'], before_hash)
+        self.assertNotEqual(digest(path), before_hash)
+
+    def test_parquet_replaced_at_parse_time_uses_verified_snapshot(self):
+        path = self.root / 'item_text.parquet'
+        before_hash = digest(path)
+        manifest_hash = digest(self.root / 'manifest.json')
+        original = self.items.sort_values('item_idx').reset_index(drop=True)
+        real_read = pd.read_parquet
+        def replace_then_read(source, *args, **kwargs):
+            changed = self.items.copy()
+            changed['item_text'] = ['replaced'] * len(changed)
+            changed.to_parquet(path)
+            (self.root / 'manifest.json').write_text('{}')
+            return real_read(source, *args, **kwargs)
+        with patch('src.data.item_embeddings.pd.read_parquet', side_effect=replace_then_read):
+            loaded, recorded = read_items(self.root)
+        pd.testing.assert_frame_equal(loaded, original)
+        self.assertEqual(recorded['verified_files']['item_text.parquet'], before_hash)
+        self.assertEqual(recorded['manifest_sha256'], manifest_hash)
+        self.assertNotEqual(digest(path), before_hash)
 
 
 class FusionTests(unittest.TestCase):
@@ -184,7 +264,7 @@ class FusionTests(unittest.TestCase):
             (tmp/'manifest.json').write_text(json.dumps({'processed_files':{n:{'sha256':h} for n,h in hashes.items()}}))
             meta = {'n_items':8,'manifest_sha256':digest(tmp/'manifest.json'),
                     'verified_files':hashes,'complete_catalog':True}
-            save_embeddings(tmp/'vectors','minilm',self.text,meta)
+            save_embeddings(tmp/'vectors','minilm',np.pad(self.text, ((0,0),(0,378))),artifact_metadata(meta))
             with patch('src.training.train_item_text.load_verified_data',return_value=(object(),data,hashes)), \
                  patch('src.training.train_item_text.make_shared_validator',return_value=lambda m:{'NDCG@10':0.2}) as validator:
                 summary = run(str(tmp/'config.json'),7,42,tmp/'vectors',tmp/'run',smoke=True)

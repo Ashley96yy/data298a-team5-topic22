@@ -6,6 +6,7 @@ Exact model ID and immutable Hugging Face revision are supplied by the caller.
 import argparse
 import hashlib
 import importlib.metadata
+import io
 import json
 import platform
 from pathlib import Path
@@ -17,8 +18,13 @@ import pandas as pd
 import torch
 from torch.nn import functional as F
 
-ENCODERS = {'blair': {'pooling': 'cls', 'dimension': 768, 'max_length': 512},
-            'minilm': {'pooling': 'mean', 'dimension': 384, 'max_length': 256}}
+ENCODERS = {
+    'blair': {'model_id': 'hyp1231/blair-roberta-base',
+              'revision': '88adfe2b621cb202dee9aabb19b59de8f622844c',
+              'pooling': 'cls', 'dimension': 768, 'max_length': 512},
+    'minilm': {'model_id': 'sentence-transformers/all-MiniLM-L6-v2',
+               'revision': '1110a243fdf4706b3f48f1d95db1a4f5529b4d41',
+               'pooling': 'mean', 'dimension': 384, 'max_length': 256}}
 
 
 def digest(path):
@@ -31,23 +37,26 @@ def digest(path):
 
 def read_items(processed):
     processed = Path(processed)
-    manifest = json.loads((processed / 'manifest.json').read_text())
+    manifest_bytes = (processed / 'manifest.json').read_bytes()
+    manifest = json.loads(manifest_bytes)
     hashes = {}
+    snapshots = {}
     for name in ['dataset_info.json', 'item_text.parquet']:
-        hashes[name] = digest(processed / name)
+        snapshots[name] = (processed / name).read_bytes()
+        hashes[name] = hashlib.sha256(snapshots[name]).hexdigest()
         if hashes[name] != manifest['processed_files'][name]['sha256']:
             raise ValueError('Frozen input checksum mismatch: ' + name)
-    info = json.loads((processed / 'dataset_info.json').read_text())
+    info = json.loads(snapshots['dataset_info.json'])
     n_items = info['n_items']
     # Metadata-only text avoids the need to regenerate review snippets for the
     # separately retrained cold-start variant. Do not concatenate other fields.
-    items = pd.read_parquet(processed / 'item_text.parquet', columns=['item_idx', 'item_text'])
+    items = pd.read_parquet(io.BytesIO(snapshots['item_text.parquet']), columns=['item_idx', 'item_text'])
     items = items.sort_values('item_idx').reset_index(drop=True)
     if not np.array_equal(items.item_idx.to_numpy(), np.arange(1, n_items + 1)):
         raise ValueError('Item IDs must cover 1..n_items exactly once')
     if not items.item_text.map(lambda x: isinstance(x, str) and bool(x.strip())).all():
         raise ValueError('Every item must have nonempty item_text')
-    return items, {'n_items': n_items, 'manifest_sha256': digest(processed / 'manifest.json'),
+    return items, {'n_items': n_items, 'manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(),
                    'verified_files': hashes, 'text_column': 'item_text'}
 
 
@@ -68,6 +77,9 @@ class HFEncoder:
             raise ValueError('revision must be an immutable 40-character Hugging Face commit SHA')
         if not model_id or encoder not in ENCODERS:
             raise ValueError('Specify the agreed model ID and encoder family')
+        if (model_id != ENCODERS[encoder]['model_id']
+                or revision != ENCODERS[encoder]['revision']):
+            raise ValueError('Model ID and revision must match the approved encoder configuration')
         from transformers import AutoModel, AutoTokenizer
         self.spec = ENCODERS[encoder]
         self.device = device
@@ -120,14 +132,26 @@ def load_embeddings(directory, *, manifest_sha256, n_items):
         raise ValueError('Training requires a complete, versioned catalog embedding artifact')
     if metadata.get('manifest_sha256') != manifest_sha256 or metadata.get('n_items') != n_items:
         raise ValueError('Embedding artifact belongs to a different frozen dataset')
-    name = metadata['file']
-    if name not in ('item_text_emb_blair.npy', 'item_text_emb_minilm.npy'):
+    encoder = metadata.get('encoder')
+    if not isinstance(encoder, str) or encoder not in ENCODERS:
+        raise ValueError('Unapproved encoder family')
+    spec = ENCODERS[encoder]
+    for key, expected in spec.items():
+        if metadata.get(key) != expected:
+            raise ValueError('Embedding metadata differs from approved encoder configuration: ' + key)
+    if metadata.get('normalize') is not True or metadata.get('encoded_items') != n_items:
+        raise ValueError('Embedding metadata must record normalized vectors for every item')
+    name = metadata.get('file')
+    if name != f'item_text_emb_{encoder}.npy':
         raise ValueError('Invalid embedding filename')
-    if digest(directory / name) != metadata['embedding_sha256']:
+    # Parse precisely the bytes whose checksum was verified, even if another
+    # process replaces the path between verification and deserialization.
+    embedding_bytes = (directory / name).read_bytes()
+    if hashlib.sha256(embedding_bytes).hexdigest() != metadata['embedding_sha256']:
         raise ValueError('Embedding checksum mismatch')
-    matrix = np.load(directory / name, allow_pickle=False)
+    matrix = np.load(io.BytesIO(embedding_bytes), allow_pickle=False)
     if (matrix.dtype != np.float32 or list(matrix.shape) != metadata['shape'] or matrix.ndim != 2
-            or matrix.shape[0] != n_items + 1 or matrix.shape[1] < 1
+            or matrix.shape != (n_items + 1, spec['dimension'])
             or not np.isfinite(matrix).all() or np.count_nonzero(matrix[0])
             or np.any(np.linalg.norm(matrix[1:], axis=1) == 0)):
         raise ValueError('Invalid embedding shape, dtype, padding or values')
