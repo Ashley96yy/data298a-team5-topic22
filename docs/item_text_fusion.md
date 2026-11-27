@@ -37,6 +37,10 @@ and BLaIR `88adfe2b621cb202dee9aabb19b59de8f622844c`, matching the saved
 November 11 encoder smoke evidence. The manifest is pinned to
 `e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5`.
 Different dimensions/pooling require adapting the family specification and tests.
+The encoder and artifact loader enforce these exact model IDs, revisions,
+dimensions, pooling methods and token limits. A different 40-character model
+revision is not accepted merely because it is immutable. An approved protocol
+change must update `ENCODERS` and its tests explicitly.
 
 The source clone does not require the feature branch to survive. It checks out
 the exact `CODE_COMMIT` and rejects an existing checkout at another commit or
@@ -56,6 +60,9 @@ Outputs in a new directory are `item_text_emb_blair.npy` or
 revision, pooling, token limit, dimension, runtime versions and encoding duration.
 Partial smoke artifacts cannot be loaded for training. Existing output directories
 are never overwritten. Model downloads use the ignored `results/encoder_cache/`.
+Source JSON/Parquet and embedding arrays are hashed and parsed from the same
+in-memory byte snapshots, so replacing a file between verification and parsing
+cannot silently change the data returned with the recorded checksum.
 
 ## Fusion and training
 
@@ -110,6 +117,15 @@ fused checkpoint to them or label it Model 0. Their model-factory integration,
 final multi-seed evaluation and hosted Model 1 adapter remain separate follow-ups.
 
 ## Validation scope
+
+Ashley’s November 26 review identified missing encoder-configuration checks and
+a race between file hashing and loading. Both are fixed. Regression cases for
+unapproved/missing metadata, incorrect actual dimensions, replaced embedding
+arrays and replaced Parquet files fail against the pre-fix loader and pass with
+the snapshot-based loader. The notebook source pin includes these fixes.
+After the fixes, all 21 item-text/notebook tests passed; the repository suite ran
+261 tests, with 260 passing and the same optional notebook-execution test skipped.
+See the [review-fix verification](project_notes/item_text_readiness_20261126/review_fixes.json).
 
 The November 26 refresh was tested against current `main`: 32 targeted tests
 passed, including four tests that execute the notebook's source-checkout cell

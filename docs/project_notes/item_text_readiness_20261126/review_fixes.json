@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-26",
+  "reviewed_head": "f36222d616ed1c83d97f1642d37710e88e50a2b5",
+  "loader_fix_commit": "259d776f4f84bb21745ce57dbe1696cadcd0510e",
+  "status": "PASS_WITH_ONE_UNRELATED_SKIP",
+  "scope": "CPU regression and repository tests; no GPU encoding or research training",
+  "regression_before_fix": "4 added regression methods fail against the prior loader (17 failed assertions including metadata subtests)",
+  "regression_after_fix": "All 17 item-text tests and 4 notebook tests pass",
+  "repository_tests": {
+    "run": 261,
+    "passed": 260,
+    "skipped": 1,
+    "skip": "test_pipeline_execution.NotebookExecutionTests.test_seven_notebooks_execute_and_the_monitor_finds_the_record: needs pipeline/requirements.txt"
+  },
+  "real_model0_checkpoint_ui_test": "passed",
+  "sha256": {
+    "src/data/item_embeddings.py": "4eb5ec2b1c04ddcfa26d80bb705b707bff1fd45ea8ddea40c5a8754846684765",
+    "tests/test_item_text.py": "065900460fba51a97d24290dd77cbc2ea2595a504701d881dd1f50c75c616a76",
+    "tests/test_item_text_notebook.py": "a6cf5e18fd66e1bcf3a98cdf9550f28cc3c98550166cd7f83998ba2ffdaa5a35",
+    "notebooks/model_experiments/13_item_text_embeddings_colab.ipynb": "5be2facd9387fc2c99c8e31f88b4f486ce2ec4ccb0e04455f742938e7f271444"
+  }
+}
