@@ -3,7 +3,7 @@
 A profile file is a NumPy .npz written with write_profile_file():
     user_idx          int64 (n,)     unique user ids, 0 <= user_idx < n_users
     embeddings        float (n, d)   one text embedding per user, finite
-    source            str            'llm_profile' | 'item_text_centroid' | 'synthetic'
+    source            str            'llm_profile' | 'item_text_centroid' | 'shuffled_control' | 'synthetic'
     train_items_only  bool           the producer attests that every profile was built from TRAINING items only
                                      (no validation or test item, no review written after the user's cut-off)
 Users without a row simply have no distillation term (subset ablation). NumPy only, so it is easy to produce on Colab.
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-SOURCES = ('llm_profile', 'item_text_centroid', 'synthetic')
+SOURCES = ('llm_profile', 'item_text_centroid', 'shuffled_control', 'synthetic')
 
 
 def file_sha256(path):
