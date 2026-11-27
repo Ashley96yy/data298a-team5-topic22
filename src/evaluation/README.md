@@ -146,6 +146,28 @@ python -B -m src.evaluation.multi_seed evaluate --device cuda \
 Run it once per ablation arm, then pass the arm's run directories to
 `significance compare --model "Model 1=..."`.
 
+## Failure study
+
+`failure_study.py` implements the failure-taxonomy row of `docs/metrics_commitment.md`.
+A failure is a test case whose true item is outside the top 10 in every seed. A fixed
+random sample of failures (100 by default, never fewer than 50, seed 2026) gets one
+category each, by the first rule that applies: near miss (rank 11 to 20 in some
+seed), unpopular target (item group mid or tail), new brand, category switch from the
+most recent item, a gap of more than 180 days, or other. The rules were chosen after
+looking at the Model 0 failures and are applied unchanged to later models. The study
+also reports how common each condition is among all failures and among cases that
+are hits in every seed. `cases_for_review.csv` (titles and recent histories of the
+sampled users, with empty `manual_category` and `notes` columns) is for manual review
+and stays out of Git.
+
+```sh
+python -B -m src.evaluation.failure_study --processed data/processed \
+  --model "Model 0=<seed_42 dir>,<seed_43 dir>,<seed_44 dir>" \
+  --output results/failure_study/model0
+```
+
+Model 0 results: `docs/project_notes/failure_study_model0_20261126`.
+
 ## Significance tests
 
 `significance.py` implements the significance row of `docs/metrics_commitment.md`

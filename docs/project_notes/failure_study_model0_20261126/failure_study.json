@@ -1,0 +1,142 @@
+{
+  "model": "Model 0",
+  "definition": "true item outside the top 10 in every seed",
+  "n_users": 56017,
+  "n_failures": 51005,
+  "n_hits_all_seeds": 2455,
+  "sample_size": 100,
+  "sample_seed": 2026,
+  "rules_in_order": [
+    "near_miss",
+    "unpopular_target",
+    "new_brand",
+    "category_switch",
+    "long_gap",
+    "other"
+  ],
+  "thresholds": {
+    "k": 10,
+    "near_miss_rank": 20,
+    "long_gap_days": 180
+  },
+  "taxonomy_sample": [
+    {
+      "category": "near_miss",
+      "description": "True item ranked 11 to 20 in at least one seed",
+      "count": 2,
+      "share": 0.02,
+      "example_case": 87
+    },
+    {
+      "category": "unpopular_target",
+      "description": "True item outside the head of training popularity (mid or tail)",
+      "count": 34,
+      "share": 0.34,
+      "example_case": 1
+    },
+    {
+      "category": "new_brand",
+      "description": "True item's brand not in the user's history",
+      "count": 52,
+      "share": 0.52,
+      "example_case": 3
+    },
+    {
+      "category": "category_switch",
+      "description": "True item's category differs from the user's most recent item",
+      "count": 8,
+      "share": 0.08,
+      "example_case": 2
+    },
+    {
+      "category": "long_gap",
+      "description": "More than 180 days since the last known interaction",
+      "count": 0,
+      "share": 0.0,
+      "example_case": null
+    },
+    {
+      "category": "other",
+      "description": "Popular item of a familiar brand and category, bought soon after",
+      "count": 4,
+      "share": 0.04,
+      "example_case": 8
+    }
+  ],
+  "taxonomy_all_failures": {
+    "near_miss": 0.038741299872561516,
+    "unpopular_target": 0.39631408685423,
+    "new_brand": 0.46836584648563867,
+    "category_switch": 0.047995294578962844,
+    "long_gap": 0.013841780217625723,
+    "other": 0.034741691990981274
+  },
+  "prevalence": [
+    {
+      "condition": "near_miss",
+      "description": "True item ranked 11 to 20 in at least one seed",
+      "share_of_failures": 0.038741299872561516,
+      "share_of_hits": null
+    },
+    {
+      "condition": "unpopular_target",
+      "description": "True item outside the head of training popularity (mid or tail)",
+      "share_of_failures": 0.39956866973826094,
+      "share_of_hits": 0.090020366598778
+    },
+    {
+      "condition": "new_brand",
+      "description": "True item's brand not in the user's history",
+      "share_of_failures": 0.8276639545142633,
+      "share_of_hits": 0.2729124236252546
+    },
+    {
+      "condition": "category_switch",
+      "description": "True item's category differs from the user's most recent item",
+      "share_of_failures": 0.5552788942260563,
+      "share_of_hits": 0.2639511201629328
+    },
+    {
+      "condition": "long_gap",
+      "description": "More than 180 days since the last known interaction",
+      "share_of_failures": 0.4213704538770709,
+      "share_of_hits": 0.164969450101833
+    },
+    {
+      "condition": "short_history",
+      "description": "3 or 4 training interactions",
+      "share_of_failures": 0.5669444172139986,
+      "share_of_hits": 0.6794297352342159
+    }
+  ],
+  "sources": {
+    "ranks": {
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "files": {
+        "42": {
+          "ranks_sha256": "7e8d46d7e67c729c92ea17f2b58eb9c7eade89d9af36f03133769706b5a24dd8",
+          "record_sha256": "041c7fcd1162d27bc12a65881a5db5b61030d6a06814f66b28da90c84c5c6902"
+        },
+        "43": {
+          "ranks_sha256": "9f82a22709f945b6c4c212029855ea65d45f88d5fa00f0cc93fd40093b75e7f8",
+          "record_sha256": "9db4238f45d1916fd058f6e4a07f07111e2712f48e7bd5eefad3ca6a17c8af8b"
+        },
+        "44": {
+          "ranks_sha256": "33a6826316bacd72381e8ec3f9041f0a18217980a4cb5e93ed96b2fde0ced822",
+          "record_sha256": "1266bbbef51c5ebc0b193d94409e33a7359c0eb8d491329156b8b5a2fe038d10"
+        }
+      }
+    },
+    "verified_inputs": {
+      "sequences.parquet": "0a55f2c375c06594b322d1e23dcd49d975ac7f8e1f7db12e4cc8bea59128186a",
+      "items.parquet": "dfe0f8baaba3b6f537eb72ea39fe36ba71cb4c27f5dcac91e68fb1d4158e742f",
+      "groups/item_groups.parquet": "6d941959f92b14c319d5c7ec4088df1bd26d74624d3a43f8a444d6c8210bf8fa"
+    }
+  },
+  "code_sha256": "d7c294243f6efde3ec9d17f7516c443bea8a52bcec7be2c4119cadbc2178ece4",
+  "created_utc": "2026-11-27T07:08:38+00:00"
+}
