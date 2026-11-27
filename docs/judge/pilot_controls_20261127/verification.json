@@ -1,0 +1,103 @@
+{
+  "verification": "PASS: saved control-run evidence is consistent",
+  "source_zip_sha256": "7e4854a352c70a5106092f7c0a524858cc45fda99a985f2cbbfa81857a4b8e06",
+  "code_commit": "3fa4046cad6718fe449c300eb6f6c3410c436da8",
+  "gpu": "NVIDIA L4",
+  "gpu_memory_gib": 22.0343017578125,
+  "case_count": 6,
+  "score_vectors": 120,
+  "criterion_means_recomputed": 24,
+  "protocol_files_verified": 6,
+  "fixture_hashes_verified": 2,
+  "case_hashes_and_seeds_verified": 6,
+  "scoring_seconds_excluding_startup": 16.012,
+  "successful_http_requests": 6,
+  "case_means": [
+    {
+      "set": "positive",
+      "case_id": "synthetic_explanation_01",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 4.9,
+        "relevance": 5.0,
+        "coherence": 5.0,
+        "fluency": 5.0
+      }
+    },
+    {
+      "set": "positive",
+      "case_id": "synthetic_profile_01",
+      "task": "profile",
+      "means": {
+        "faithfulness": 4.6,
+        "relevance": 4.0,
+        "coherence": 4.95,
+        "fluency": 4.95
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_explanation_off_topic",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.0,
+        "coherence": 3.65,
+        "fluency": 4.3
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_explanation_unsupported",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.2,
+        "coherence": 3.8,
+        "fluency": 4.2
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_profile_off_topic",
+      "task": "profile",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.0,
+        "coherence": 4.5,
+        "fluency": 4.3
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_profile_unsupported",
+      "task": "profile",
+      "means": {
+        "faithfulness": 1.2,
+        "relevance": 1.05,
+        "coherence": 3.4,
+        "fluency": 4.3
+      }
+    }
+  ],
+  "behavior_assessment": "All four negative controls receive low means on the intended criteria. Qualitative observation; no precommitted numerical acceptance threshold. Positive cases are not matched controls.",
+  "correlation_assessment": "Undefined as expected: each task has one positive or two negative cases. Real-cohort correlations and independent human calibration remain pending.",
+  "shutdown": "EngineDeadError and force-kill warnings after all six successful HTTP requests and intentional shutdown trigger; not a scoring failure, no graceful-shutdown claim.",
+  "limitations": [
+    "Recorded configuration/provenance checked; remote weights not independently attested.",
+    "Synthetic controls do not establish real-evaluation reliability."
+  ],
+  "server_log_sha256": "1a248f7ddff93404fa9df14a97bfbf897fc6c713568f0187982ce06135e2274e",
+  "evidence_files_sha256": {
+    "package_provenance.json": "49931e773773c5be3bf773a335f70a921a259707737255f33a6cce00994c0c8a",
+    "control_summary.json": "4a9d5a3cc7345ac30aa511bf40cecb3934e6adea54f88df0131b7e47c15198c2",
+    "positive/scores.jsonl": "4aaaa529277198544f2ca885505f7a330e7def2c9e38c594b9f7602b5aadcf07",
+    "positive/run_metadata.json": "e44576dac1b64a816be78a23f8658aec14c177317a5a349510d1d76a1ade513e",
+    "positive/criterion_correlations.json": "7bfe127c804d3e76a32aae88ffbd7e8b2365082fc4761f34b2341c610cc49c4b",
+    "negative/scores.jsonl": "9af0f0b0cef794c1c0bb02073eff1a3698088036834b6eb93eb8573cec2486a9",
+    "negative/run_metadata.json": "7a89d419957569980e93bfc1bade5a653a33329b5865181a58bb1122c6fc00ed",
+    "negative/criterion_correlations.json": "68808497b8b186b84d4ecf411aee7259385c62ea5fb1c383f20fd6463418bc83",
+    "serving/serving_metadata.json": "ed701dd58f7c575b00fc92ddeeece59d533962c44a0ab91e483497d5498a19e2",
+    "serving/environment.txt": "aebadfe44375dcb49fd46b539ef2a1aeebc6bb7967db850f010bc5d153057fc3"
+  }
+}

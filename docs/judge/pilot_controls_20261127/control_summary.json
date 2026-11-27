@@ -1,0 +1,72 @@
+{
+  "scoring_status": "COMPLETE",
+  "behavior_review": "PENDING inspection; no automatic control acceptance threshold",
+  "cases": [
+    {
+      "set": "positive",
+      "case_id": "synthetic_explanation_01",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 4.9,
+        "relevance": 5.0,
+        "coherence": 5.0,
+        "fluency": 5.0
+      }
+    },
+    {
+      "set": "positive",
+      "case_id": "synthetic_profile_01",
+      "task": "profile",
+      "means": {
+        "faithfulness": 4.6,
+        "relevance": 4.0,
+        "coherence": 4.95,
+        "fluency": 4.95
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_explanation_off_topic",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.0,
+        "coherence": 3.65,
+        "fluency": 4.3
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_explanation_unsupported",
+      "task": "explanation",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.2,
+        "coherence": 3.8,
+        "fluency": 4.2
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_profile_off_topic",
+      "task": "profile",
+      "means": {
+        "faithfulness": 1.0,
+        "relevance": 1.0,
+        "coherence": 4.5,
+        "fluency": 4.3
+      }
+    },
+    {
+      "set": "negative",
+      "case_id": "negative_profile_unsupported",
+      "task": "profile",
+      "means": {
+        "faithfulness": 1.2,
+        "relevance": 1.05,
+        "coherence": 3.4,
+        "fluency": 4.3
+      }
+    }
+  ]
+}

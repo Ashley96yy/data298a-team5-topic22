@@ -168,3 +168,11 @@ Leave `RUN_MODE="smoke"`. Use a fresh output folder; the notebook writes the
 correlation diagnostic after scoring. For real cases, set `RUN_MODE="evaluation"`
 and `REAL_CASES` to the frozen JSONL instead. Before running, use the notebook
 whose `CODE_COMMIT` includes these changes and is reachable on GitHub.
+
+## Recorded pilot-control result
+
+The November 27 L4 run completed all six synthetic controls (120 score vectors).
+The intended faithfulness/relevance scores were low on the negative examples.
+See [results and verification](../../../docs/judge/pilot_controls_20261127/README.md).
+This validates the recorded control run, not real-case reliability. Real-cohort
+correlations and independent human calibration remain pending.
