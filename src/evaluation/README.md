@@ -123,10 +123,85 @@ products that never appear as a target are pushed down. Profile distillation
 does not change this, because those ID embeddings are still never trained. The
 item-text embedding variant of Model 1 is the one meant to close the gap.
 
+## Model 1 test evaluation
+
+`multi_seed evaluate` also scores the Model 1 runs. It reads each run's recorded
+`model_class`: profile-distillation runs (`src.training.train_model1`) are plain
+SASRec at inference, and the item-text arms (`src.training.train_item_text`) are
+`TextSASRec`, loaded with `load_text_checkpoint` together with their frozen text
+buffer. The checks are the same as for Model 0: every run must match the team
+configuration and each other except for seed and device, partial runs are refused,
+the reloaded checkpoint must reproduce its validation NDCG@10, and test is scored
+once per run (a second call reuses `test_evaluation.json`). Each record states the
+model class and what identifies it (text-embedding hash and encoder, or profile file
+and target hashes), and `test_ranks.npz` has the format `significance.py` reads.
+
+```sh
+python -B -m src.evaluation.multi_seed evaluate --device cuda \
+  --config configs/config.json --grid-index 7 --label "Model 1 (<arm>)" \
+  --run-dirs <seed_42 dir> <seed_43 dir> <seed_44 dir> \
+  --output-dir results/model1_<arm>_test_3seeds
+```
+
+Run it once per ablation arm, then pass the arm's run directories to
+`significance compare --model "Model 1=..."`.
+
+## Failure study
+
+`failure_study.py` implements the failure-taxonomy row of `docs/metrics_commitment.md`.
+A failure is a test case whose true item is outside the top 10 in every seed. A fixed
+random sample of failures (100 by default, never fewer than 50, seed 2026) gets one
+category each, by the first rule that applies: near miss (rank 11 to 20 in some
+seed), unpopular target (item group mid or tail), new brand, category switch from the
+most recent item, a gap of more than 180 days, or other. The rules were chosen after
+looking at the Model 0 failures and are applied unchanged to later models. The study
+also reports how common each condition is among all failures and among cases that
+are hits in every seed. `cases_for_review.csv` (titles and recent histories of the
+sampled users, with empty `manual_category` and `notes` columns) is for manual review
+and stays out of Git.
+
+```sh
+python -B -m src.evaluation.failure_study --processed data/processed \
+  --model "Model 0=<seed_42 dir>,<seed_43 dir>,<seed_44 dir>" \
+  --output results/failure_study/model0
+```
+
+Model 0 results: `docs/project_notes/failure_study_model0_20261126`.
+
+## Significance tests
+
+`significance.py` implements the significance row of `docs/metrics_commitment.md`
+(amendment of 2026-11-22). The unit is per-user NDCG@10 on the full-catalog test
+split, averaged over seeds 42, 43 and 44 for a trained model. The test is a
+two-sided paired randomization (sign-flip) test with 10,000 permutations, with a
+paired bootstrap 95% interval (10,000 resamples), random seed 2026, and Holm
+correction across the comparisons in one table. Recall@10 and MRR are reported
+with an interval only. Most users score 0 under both models (91% for Model 0),
+which is why the Wilcoxon signed-rank test, which drops tied pairs, is not used.
+
+No model is retrained or rescored. Model ranks come from each seed's saved
+`test_ranks.npz`, which must reproduce the NDCG@10 in its `test_evaluation.json`.
+The untrained baselines are rescored once and must reproduce
+`docs/baselines/baselines.json`.
+
+```sh
+python -B -m src.evaluation.significance baselines --processed data/processed \
+  --output results/significance/baseline_ranks
+python -B -m src.evaluation.significance compare \
+  --model "Model 0=<seed_42 dir>,<seed_43 dir>,<seed_44 dir>" \
+  --baseline-ranks results/significance/baseline_ranks \
+  --output results/significance/model0_vs_baselines
+```
+
+Add `--model "Model 1=..."` once its three seeds are evaluated; the command runs
+every committed comparison the inputs allow and lists the ones still missing.
+Results: `docs/project_notes/significance_20261122`.
+
 ## Tests
 
 ```sh
 python -B -m unittest tests.test_evaluation -v
+python -B -m unittest tests.test_significance -v
 ```
 
 Run in the pinned Python 3.11 / PyTorch 2.8.0 environment with
