@@ -77,9 +77,12 @@ class JudgeNotebookTests(unittest.TestCase):
                    if isinstance(node, ast.Assign)
                    and any(isinstance(t, ast.Name) and t.id == 'CODE_COMMIT' for t in node.targets))
         self.assertRegex(pin, r'^[a-f0-9]{40}$')
-        runner = 'src/evaluation/judge/run.py'
-        pinned = subprocess.check_output(['git', '-C', str(ROOT), 'show', f'{pin}:{runner}'])
-        self.assertEqual(pinned, (ROOT / runner).read_bytes())
+        for path in ('src/evaluation/judge/run.py', 'configs/judge/rubric.txt',
+                     'src/evaluation/judge/analyze_pilot.py',
+                     'tests/fixtures/judge/pilot_negative_cases.jsonl'):
+            with self.subTest(path=path):
+                pinned = subprocess.check_output(['git', '-C', str(ROOT), 'show', f'{pin}:{path}'])
+                self.assertEqual(pinned, (ROOT / path).read_bytes())
 
 
 if __name__ == '__main__':

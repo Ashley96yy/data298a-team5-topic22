@@ -1,0 +1,128 @@
+{
+  "analysis": "pairwise_spearman_of_per_case_20_sample_means",
+  "mode": "smoke",
+  "synthetic_smoke": true,
+  "scores_sha256": "4aaaa529277198544f2ca885505f7a330e7def2c9e38c594b9f7602b5aadcf07",
+  "run_metadata_sha256": "e44576dac1b64a816be78a23f8658aec14c177317a5a349510d1d76a1ade513e",
+  "groups": {
+    "explanation": {
+      "n_cases": 1,
+      "pairs": [
+        {
+          "criteria": [
+            "faithfulness",
+            "relevance"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "faithfulness",
+            "coherence"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "faithfulness",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "relevance",
+            "coherence"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "relevance",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "coherence",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        }
+      ]
+    },
+    "profile": {
+      "n_cases": 1,
+      "pairs": [
+        {
+          "criteria": [
+            "faithfulness",
+            "relevance"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "faithfulness",
+            "coherence"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "faithfulness",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "relevance",
+            "coherence"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "relevance",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        },
+        {
+          "criteria": [
+            "coherence",
+            "fluency"
+          ],
+          "n_cases": 1,
+          "rho": null,
+          "undefined_reason": "fewer_than_3_cases"
+        }
+      ]
+    }
+  },
+  "interpretation": "Descriptive diagnostic only; no acceptance threshold or p-values. Correlations do not prove prompt-induced coupling or independence. Synthetic checks do not establish real-cohort behavior. Independent human calibration remains required."
+}

@@ -1,0 +1,5 @@
+{
+  "code_commit": "3fa4046cad6718fe449c300eb6f6c3410c436da8",
+  "bundle_sha256": "b33e6ef08af4042aa934cb2463f85ec527b09fcb8e90247ceb4de132196b43d5",
+  "scope": "2 positive plus 4 negative synthetic cases; not real evaluation"
+}

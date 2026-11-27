@@ -110,3 +110,69 @@ References:
 - https://aclanthology.org/2023.emnlp-main.153/
 - https://huggingface.co/mistralai/Ministral-3-8B-Instruct-2512-BF16
 - https://docs.vllm.ai/en/latest/features/structured_outputs/
+
+## Pilot checks before real evaluation
+
+The rubric now explicitly defines profile relevance using training-history likes
+and dislikes, including low-rated items. Keep the four criteria in one request
+and examine their pairwise correlations in the pilot. This is a diagnostic choice,
+not evidence that the criteria are independent. Commit the changed rubric before
+scoring; the historical GPU smoke folder remains evidence for its original rubric.
+
+Run the existing positive smoke fixtures and the new negative controls into separate,
+new output directories using the same updated committed protocol. The negative file
+contains four human-authored synthetic cases: an unsupported/contradictory answer
+and an off-topic answer for each task. Case IDs and control labels are not sent to
+the judge. The unsupported explanation should receive low faithfulness; the
+contradictory profile should receive low faithfulness and relevance; the off-topic
+answers should receive low relevance. Fluency and coherence need not be low.
+Inspect and record the observed means rather than claiming the controls passed
+merely because scoring completed. No numeric control acceptance cutoff is committed.
+
+```bash
+python -m src.evaluation.judge.run \
+  --cases tests/fixtures/judge/pilot_negative_cases.jsonl \
+  --output results/judge_negative_attempt1 --mode smoke
+```
+
+These controls are separate from the frozen 50 explanations and 50 profiles;
+do not append synthetic examples to that cohort. The runner has no separate pilot
+mode: real cases use `--mode evaluation` and its existing 50+50 requirement.
+Freeze selection and get independent blinded human ratings as described above.
+
+After a complete run, analyze the saved criterion means without another GPU call:
+
+```bash
+python -m src.evaluation.judge.analyze_pilot \
+  --scores results/judge_final_attempt1/scores.jsonl \
+  --output results/judge_final_attempt1/criterion_correlations.json
+```
+
+The standard-library-only analysis requires a matching adjacent PASS
+`run_metadata.json`, recomputes each mean from all 20 score vectors, and reports
+all six Spearman pairs separately for explanations and profiles. Each case is one
+observation; the 20 samples are not treated as 20 independent cases. Ties use average
+ranks. Constant criteria and cohorts with fewer than three cases produce null rho
+with an explicit reason. Thus the four negative controls alone cannot establish
+cross-criterion behavior. Input hashes and cohort mode are included in the report.
+Output files cannot be overwritten. Keep real scores in controlled storage.
+
+Interpret correlations alongside examples and independent human calibration.
+High correlation alone does not prove prompt-induced coupling; low correlation
+alone does not establish reliability. This diagnostic has no acceptance threshold
+or p-values and does not replace the committed human rho/p-value rule.
+
+In Colab, set `SMOKE_CASES` to
+`tests/fixtures/judge/pilot_negative_cases.jsonl` for the negative-control run.
+Leave `RUN_MODE="smoke"`. Use a fresh output folder; the notebook writes the
+correlation diagnostic after scoring. For real cases, set `RUN_MODE="evaluation"`
+and `REAL_CASES` to the frozen JSONL instead. Before running, use the notebook
+whose `CODE_COMMIT` includes these changes and is reachable on GitHub.
+
+## Recorded pilot-control result
+
+The November 27 L4 run completed all six synthetic controls (120 score vectors).
+The intended faithfulness/relevance scores were low on the negative examples.
+See [results and verification](../../../docs/judge/pilot_controls_20261127/README.md).
+This validates the recorded control run, not real-case reliability. Real-cohort
+correlations and independent human calibration remain pending.
