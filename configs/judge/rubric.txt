@@ -25,6 +25,9 @@ imprecision; 5 = all material claims and product references supported by evidenc
 Relevance: 1 = unrelated or violates the central request; 2 = misses major needs;
 3 = partly addresses the request; 4 = addresses most needs with minor omissions;
 5 = directly addresses the request and applicable constraints without irrelevant claims.
+For shopper profiles, relevance means capturing the main preferences and dislikes
+supported by the supplied training history, including low-rated items, without
+adding unsupported preferences.
 Coherence: 1 = incoherent or contradictory; 2 = major logical/structural problems;
 3 = understandable with noticeable gaps; 4 = clear with minor organizational problems;
 5 = logical, internally consistent and well organized.
