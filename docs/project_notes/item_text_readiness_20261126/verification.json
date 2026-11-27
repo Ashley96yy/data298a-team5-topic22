@@ -1,0 +1,41 @@
+{
+  "status": "PASS_WITH_ONE_UNRELATED_SKIP",
+  "date": "2026-11-26",
+  "scope": "PR 17 readiness on merged main; CPU tests only; no GPU encoding or research training",
+  "main_commit": "617796170b729200c94f64bd62936cbd0c327745",
+  "notebook_source_commit": "0732b7a4b5c997ca211583cce74f299fc880808b",
+  "targeted_tests": {
+    "run": 32,
+    "passed": 32,
+    "skipped": 0
+  },
+  "repository_tests": {
+    "run": 257,
+    "passed": 256,
+    "skipped": 1,
+    "skipped_test": "test_pipeline_execution.NotebookExecutionTests.test_seven_notebooks_execute_and_the_monitor_finds_the_record",
+    "skip_reason": "needs pipeline/requirements.txt (nbformat/nbconvert unavailable in this environment)"
+  },
+  "real_model0_checkpoint_ui_test": "passed with existing verified local checkpoint and serving artifacts",
+  "notebook_checks": [
+    "all code cells parse",
+    "exact source pin loads after feature branch deletion and main advancement",
+    "existing wrong or edited checkout rejected",
+    "pinned encoding, model, training and distillation sources match checkout"
+  ],
+  "versions": {
+    "python": "3.11.14",
+    "torch": "2.8.0",
+    "numpy": "2.2.6",
+    "pandas": "2.3.2"
+  },
+  "sha256": {
+    "docs/item_text_fusion.md": "8d040ef6ea2d33541fdba345159e8302c39d479df972d64fdbf2c9a218e8a8af",
+    "notebooks/model_experiments/13_item_text_embeddings_colab.ipynb": "99e0c88611565652f28173373ea6dd5d40f7176071956abe2be828f3d405715d",
+    "src/data/item_embeddings.py": "c7e4a67d9ee68214719d8b965544fda143fe55b009236fc29a1709d5d1fe9239",
+    "src/models/text_sasrec.py": "b4609aa0ede402011a5525ae6e5592a42d44a9cf183dd0821f02430c333f4f5a",
+    "src/training/train_item_text.py": "2a01748a60ce05990b9eb3dd441b7c1e347e0202bb1068d77e5e977f5c5c8001",
+    "tests/test_item_text.py": "fb74cc7fdc10ca0b533b36d570aabd2f9945da8743ad9f18c014e05d4fb1fd1c",
+    "tests/test_item_text_notebook.py": "a6cf5e18fd66e1bcf3a98cdf9550f28cc3c98550166cd7f83998ba2ffdaa5a35"
+  }
+}

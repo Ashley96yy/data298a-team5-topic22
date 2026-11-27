@@ -1,0 +1,82 @@
+{
+  "minilm": {
+    "n_items": 25903,
+    "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "verified_files": {
+      "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "item_text.parquet": "39dbd1ac817df3383def7c677fca830aaf36cfe470e1c0612c543486e6b8909d"
+    },
+    "text_column": "item_text",
+    "pooling": "mean",
+    "dimension": 384,
+    "max_length": 256,
+    "encoder": "minilm",
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "normalize": true,
+    "encoded_items": 16,
+    "complete_catalog": false,
+    "batch_size": 32,
+    "device": "cpu",
+    "seconds_encoding": 0.9103426670044428,
+    "source_sha256": "c7e4a67d9ee68214719d8b965544fda143fe55b009236fc29a1709d5d1fe9239",
+    "versions": {
+      "python": "3.11.14",
+      "torch": "2.8.0",
+      "transformers": "4.57.1",
+      "huggingface-hub": "0.36.0",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2",
+      "pyarrow": "21.0.0"
+    },
+    "schema_version": 1,
+    "file": "item_text_emb_minilm.npy",
+    "embedding_sha256": "6e755500097ca6894586eede003c26a4f51e346cb509fe32cd174e3328581bb7",
+    "shape": [
+      25904,
+      384
+    ],
+    "dtype": "float32",
+    "padding_idx": 0
+  },
+  "blair": {
+    "n_items": 25903,
+    "manifest_sha256": "e4b7801c0d9ea27d0b39a6af253ac154d6f4a7181d8a7c1dc31d651a050af0e5",
+    "verified_files": {
+      "dataset_info.json": "1362796b6f1f4dc38da210aa9a485815fc1bb6f612edc7b120138ec4d8ac9878",
+      "item_text.parquet": "39dbd1ac817df3383def7c677fca830aaf36cfe470e1c0612c543486e6b8909d"
+    },
+    "text_column": "item_text",
+    "pooling": "cls",
+    "dimension": 768,
+    "max_length": 512,
+    "encoder": "blair",
+    "model_id": "hyp1231/blair-roberta-base",
+    "revision": "88adfe2b621cb202dee9aabb19b59de8f622844c",
+    "normalize": true,
+    "encoded_items": 16,
+    "complete_catalog": false,
+    "batch_size": 32,
+    "device": "cpu",
+    "seconds_encoding": 3.7740029170017806,
+    "source_sha256": "c7e4a67d9ee68214719d8b965544fda143fe55b009236fc29a1709d5d1fe9239",
+    "versions": {
+      "python": "3.11.14",
+      "torch": "2.8.0",
+      "transformers": "4.57.1",
+      "huggingface-hub": "0.36.0",
+      "numpy": "2.2.6",
+      "pandas": "2.3.2",
+      "pyarrow": "21.0.0"
+    },
+    "schema_version": 1,
+    "file": "item_text_emb_blair.npy",
+    "embedding_sha256": "8d8db2e1e2f3ee0939c5894c3079809a50a46ddce33e871d6e2525cee0643ce5",
+    "shape": [
+      25904,
+      768
+    ],
+    "dtype": "float32",
+    "padding_idx": 0
+  }
+}
