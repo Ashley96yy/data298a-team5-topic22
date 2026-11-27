@@ -1,10 +1,5 @@
 """Part E: repeat ONE selected configuration over several seeds, then score test once per seed.
 
-Also scores the Model 1 runs: profile distillation (src.training.train_model1, a plain SASRec at inference) and the
-item-text arms (src.training.train_item_text, TextSASRec). load_checkpoint_model picks the loader from the run's
-recorded model_class; everything else (configuration checks, the validation reload check, scoring test once and the
-test_ranks.npz format read by src.evaluation.significance) is the same for every model.
-
 `train` runs Part C (src.training.train) unchanged, one subprocess per seed.
 `evaluate` first checks every run matches the team configuration and used all
 users. It then reloads each best.pt, checks it reproduces its own validation
@@ -71,53 +66,6 @@ def build_model(metadata, n_items):
                   num_layers=metadata['model_layers'])
 
 
-# Item-text runs (src.training.train_item_text) validate with batch size 128 and do not record eval_batch_size.
-DEFAULT_VALIDATION_BATCH_SIZE = 128
-MODEL_CLASSES = ('SASRec', 'TextSASRec')
-
-
-def load_checkpoint_model(run_dir, metadata, summary, n_items, device):
-    """Rebuild a run's model from its best.pt, with the loader that matches its recorded model_class.
-
-    SASRec: Model 0 and the profile-distillation arm (no model_class recorded). TextSASRec: the item-text arms, loaded
-    with load_text_checkpoint because the checkpoint also holds the frozen text buffer. Either way the checkpoint must
-    carry exactly the run's metadata and its best epoch.
-    """
-    path = Path(run_dir) / 'best.pt'
-    model_class = metadata.get('model_class', 'SASRec')
-    if model_class not in MODEL_CLASSES:
-        raise ValueError(f'{run_dir}: unknown model_class {model_class!r}')
-    if model_class == 'TextSASRec':
-        from src.models.text_sasrec import load_text_checkpoint
-        model, checkpoint = load_text_checkpoint(path, device=device)
-        hyper, architecture = metadata['model_hyperparameters'], metadata['text_architecture']
-        expected = {'n_items': n_items, 'max_len': metadata['max_seq_len'], 'hidden_size': hyper['hidden_size'],
-                    'num_heads': metadata['model_heads'], 'num_layers': metadata['model_layers'],
-                    'dropout': hyper['dropout']}
-        different = sorted(name for name, value in expected.items() if architecture.get(name) != value)
-        if different:
-            raise ValueError(f'{run_dir}: text architecture differs from the run settings ({", ".join(different)})')
-    else:
-        model = build_model(metadata, n_items)
-        checkpoint = load_best(model, path, device=device)
-    if checkpoint['metadata'] != metadata or checkpoint['epoch'] != summary['best_epoch']:
-        raise ValueError(f'{run_dir}/best.pt does not belong to this run')
-    return model, model_class
-
-
-def model_provenance(metadata, model_class):
-    """What identifies the model beyond its weights: text embeddings for TextSASRec, profile targets if distilled."""
-    out = {'model_class': model_class}
-    if model_class == 'TextSASRec':
-        artifact = metadata.get('embedding_artifact', {})
-        out['text_embedding_sha256'] = artifact.get('embedding_sha256')
-        out['text_encoder'] = artifact.get('model_id')
-    if 'profile_file_sha256' in metadata:
-        out.update({key: metadata.get(key) for key in ('profile_file_sha256', 'profile_source', 'reduced_targets_sha256',
-                                                        'users_with_target', 'distill_schedule')})
-    return out
-
-
 def scorer(model, n_items, device):
     """score_fn in the rec_eval contract: (inputs, users) -> (batch, n_items + 1) NumPy."""
     @torch.no_grad()
@@ -179,13 +127,15 @@ def evaluate_run(run_dir, run, evaluator, data, item_cat, device, batch_size):
         return record
     if ranks_path.exists():
         raise FileExistsError(f'{ranks_path} exists without test_evaluation.json; inspect it first')
-    model, model_class = load_checkpoint_model(run_dir, metadata, summary, data['n_items'], device)
+    model = build_model(metadata, data['n_items'])
+    checkpoint = load_best(model, run_dir / 'best.pt', device=device)
+    if checkpoint['metadata'] != metadata or checkpoint['epoch'] != summary['best_epoch']:
+        raise ValueError(f'{run_dir}/best.pt does not belong to this run')
     score_fn = scorer(model, data['n_items'], device)
     # Same validation users and batch size as during training, then compare scores.
     users = data['sequences'].user_idx.iloc[:metadata['validation_users']].to_numpy()
     val = evaluator.evaluate(score_fn, data, split='val', sampled=False, users=users,
-                             batch_size=metadata.get('eval_batch_size', DEFAULT_VALIDATION_BATCH_SIZE),
-                             return_topk=False)
+                             batch_size=metadata['eval_batch_size'], return_topk=False)
     gap = abs(val['metrics']['NDCG@10'] - summary['best_validation_NDCG@10'])
     if gap > VALIDATION_TOLERANCE:
         raise ValueError(f'{run_dir}: reloaded validation NDCG@10 differs by {gap:.2e}')
@@ -197,7 +147,6 @@ def evaluate_run(run_dir, run, evaluator, data, item_cat, device, batch_size):
     np.savez_compressed(ranks_path, user_idx=test['user_idx'], ranks=test['ranks'], topk=test['topk'])
     record = {'seed': training['seed'], 'run_dir': str(run_dir), 'checkpoint_sha256': checkpoint_sha256,
               'best_epoch': summary['best_epoch'], 'purpose': metadata['purpose'],
-              'model': model_provenance(metadata, model_class),
               'legacy_tie_policy_unresolved': metadata.get('legacy_tie_policy_unresolved'),
               'tie_policy': metadata.get('tie_policy'),
               'validation_check': {'saved_NDCG@10': summary['best_validation_NDCG@10'],

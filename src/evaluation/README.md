@@ -123,29 +123,6 @@ products that never appear as a target are pushed down. Profile distillation
 does not change this, because those ID embeddings are still never trained. The
 item-text embedding variant of Model 1 is the one meant to close the gap.
 
-## Model 1 test evaluation
-
-`multi_seed evaluate` also scores the Model 1 runs. It reads each run's recorded
-`model_class`: profile-distillation runs (`src.training.train_model1`) are plain
-SASRec at inference, and the item-text arms (`src.training.train_item_text`) are
-`TextSASRec`, loaded with `load_text_checkpoint` together with their frozen text
-buffer. The checks are the same as for Model 0: every run must match the team
-configuration and each other except for seed and device, partial runs are refused,
-the reloaded checkpoint must reproduce its validation NDCG@10, and test is scored
-once per run (a second call reuses `test_evaluation.json`). Each record states the
-model class and what identifies it (text-embedding hash and encoder, or profile file
-and target hashes), and `test_ranks.npz` has the format `significance.py` reads.
-
-```sh
-python -B -m src.evaluation.multi_seed evaluate --device cuda \
-  --config configs/config.json --grid-index 7 --label "Model 1 (<arm>)" \
-  --run-dirs <seed_42 dir> <seed_43 dir> <seed_44 dir> \
-  --output-dir results/model1_<arm>_test_3seeds
-```
-
-Run it once per ablation arm, then pass the arm's run directories to
-`significance compare --model "Model 1=..."`.
-
 ## Significance tests
 
 `significance.py` implements the significance row of `docs/metrics_commitment.md`
